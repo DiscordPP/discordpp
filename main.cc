@@ -4,6 +4,7 @@
 #include <ctime>
 #include <boost/asio.hpp>
 #include <boost/asio/steady_timer.hpp>
+#include <boost/filesystem.hpp>
 
 #include "discordpp.hh"
 //#include ""
@@ -22,10 +23,11 @@ class DiscordClient {
     using client = websocketpp::client<websocketpp::config::asio_tls_client>;
     using message_ptr = websocketpp::config::asio_client::message_type::ptr;
 public:
-    DiscordClient(asio::io_service& asio_ios, const std::string& token)
+    DiscordClient(asio::io_service& asio_ios, const std::string& token, std::map <std::string, std::string> soft_responses = {})
             : asio_ios_(asio_ios)
             , token_(token)
             , keepalive_timer_(asio_ios)
+            , soft_responses_(soft_responses)
     {
         client_.set_access_channels(websocketpp::log::alevel::all);
         client_.clear_access_channels(websocketpp::log::alevel::frame_payload);
@@ -70,14 +72,24 @@ private:
             for(auto& val : jmessage["d"]["mentions"]){
                 if(val["id"] == ready_["d"]["user"]["id"]){
                     std::string message = jmessage["d"]["content"].get<std::string>();
+                    message = message.substr(ready_["d"]["user"]["id"].get<std::string>().length() + 4, message.length());
+                    //Echo
+                    /*
+                    //std::string message = jmessage["d"]["content"].get<std::string>();
                     std::string target = ready_["d"]["user"]["username"].get<std::string>();
                     std::string targetID = jmessage["d"]["author"]["id"].get<std::string>();
 
-                    message =message.substr(ready_["d"]["user"]["id"].get<std::string>().length() + 4, message.length()); // "<@" + targetID + "> " +
+                    //message =message.substr(ready_["d"]["user"]["id"].get<std::string>().length() + 4, message.length()); // "<@" + targetID + "> " +
 
                     std::cout << "Sending message " << jmessage["d"]["content"] << " to user " << jmessage["d"]["author"]["username"] << "\n";
 
                     discordpp::channels::messages::sendMessage(jmessage["d"]["channel_id"],  message);//, {targetID}
+                    */
+                    if(soft_responses_[message].empty()){
+                        discordpp::channels::messages::sendMessage(jmessage["d"]["channel_id"], "`" + message + "` is not a command.");
+                    } else {
+                        discordpp::channels::messages::sendMessage(jmessage["d"]["channel_id"], soft_responses_[message]);
+                    }
                 }
             }
         } else if(jmessage["t"] == "MESSAGE_UPDATE"){
@@ -90,11 +102,11 @@ private:
 
         } else if(jmessage["t"] == "VOICE_STATE_UPDATE"){
 
-        }// else {
+        } else {
             std::cout << "on_message called with hdl: " << hdl.lock().get()
             << " and message: " << jmessage.dump(3)
             << "\n";
-        //}
+        }
     }
 
     void keepalive(uint32_t ms){
@@ -143,6 +155,7 @@ private:
     client::connection_ptr connection_;
     asio::steady_timer keepalive_timer_;
     json ready_;
+    std::map <std::string, std::string> soft_responses_;
 };
 
 int main() {
@@ -157,10 +170,10 @@ int main() {
     std::string password;
 
     if (authfile.is_open()) {
-        authfile >> username;
-        authfile >> password;
+        std::getline(authfile, username);
+        std::getline(authfile, password);
     } else {
-        std::cerr << "There is no login.dat file. Copy the example to make one.\n";
+        std::cerr << "CRITICAL: There is no login.dat file. Copy the example to make one.\n";
         exit(1);
     }
     authfile.close();
@@ -172,6 +185,47 @@ int main() {
     json myInfo = discordpp::users::fetchInfo("@me");
     std::cout << "I am " << myInfo.at("username").get<std::string>() << ", my ID number is " << myInfo.at("id").get<std::string>() << ".\n\n";
 
+    std::ifstream softfile;
+    softfile.open("softcommands.dat");
+
+    std::map<std::string, std::string> soft_commands;
+
+    if (softfile.is_open()) {
+        while(!softfile.eof()){
+            std::string command;
+            std::getline(softfile, command);
+            std::string blurb; // Currently unused.
+            std::getline(softfile, blurb);
+            std::string output;
+            std::getline(softfile, output);
+            if(output == "{"){
+                output = "";
+                std::string nextline;
+                std::getline(softfile, nextline);
+                while(nextline != "}"){
+                    output += nextline;
+                    std::getline(softfile, nextline);
+                    if(nextline != "}"){
+                        output += "\n";
+                    }
+                }
+            }
+            soft_commands[command] = output;
+        }
+    } else {
+        std::cerr << "Warning: There is no softcommands.dat file. Copy the example to make one.\n";
+    }
+    softfile.close();
+
+    std::cout << "soft commands\n";
+
+    for(auto elem : soft_commands)
+    {
+        std::cout << elem.first << "\n" << elem.second << "\n\n";
+    }
+
+    //This is unneeded, as it is retuned by READY.
+    /*
     std::vector<json> myTextChannels;
     std::cout << "Getting guild and channel lists...\n";
     json myGuilds = discordpp::users::fetchGuilds();
@@ -188,6 +242,7 @@ int main() {
         }
     }
     std::cout << "\n\n";
+     */
 
     asio::io_service asio_ios;
     
@@ -206,7 +261,7 @@ int main() {
         }
     });
 
-    DiscordClient discordClient(asio_ios, token);
+    DiscordClient discordClient(asio_ios, token, soft_commands);
 
     asio_ios.run();
 

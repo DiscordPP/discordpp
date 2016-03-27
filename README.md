@@ -4,7 +4,24 @@ A Discord API written in C++.
 
 Functionality <sup>(Not much)</sup>
 ---
-Logs in. Echoes when you mention it. Echo is broken if the mention of the bot is not the first thing in the row.
+Can respond to soft commands `@mention command` that are listed in `softcommands.dat`.
+
+`Softcommands.dat` Format:
+```
+command 1
+help blurb 1 (unused)
+response 1
+command 2
+help blurb 2 (unused)
+response 2
+multi-line command
+help blurb for multi-line commands
+{
+multi-line
+command
+}
+```
+
 
 Requirements <sup>(You need these)</sup>
 ---
