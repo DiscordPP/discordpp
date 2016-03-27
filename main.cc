@@ -128,7 +128,7 @@ private:
                                                      {"$referrer",""},
                                                      {"$referring_domain",""}
                                              }},
-                              {"large_threshold", 100}
+                              {"large_threshold", 250}
                       }}
         };
         std::cout << connect.dump(1) << "\n";
