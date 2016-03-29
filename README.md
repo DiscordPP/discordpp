@@ -2,6 +2,8 @@ DiscordPP <sup>(it's cool)</sup>
 ===
 A Discord API written in C++.
 
+[Discord Server](https://discord.gg/0usP6xmT4sRkB0Vl)
+
 Functionality <sup>(Not much)</sup>
 ---
 Can respond to soft commands `@mention command` that are listed in `softcommands.dat`.
