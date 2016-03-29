@@ -70,7 +70,7 @@ private:
             keepalive(ms);
         } else if(jmessage["t"] == "MESSAGE_CREATE"){
             for(auto& val : jmessage["d"]["mentions"]){
-                if(val["id"] == ready_["d"]["user"]["id"] && ready_["d"]["user"]["id"].get<std::string>().length() > 23){
+                if(val["id"] == ready_["d"]["user"]["id"] && jmessage["d"]["content"].get<std::string>().length() > 23){
                     std::string message = jmessage["d"]["content"].get<std::string>();
                     message = message.substr(ready_["d"]["user"]["id"].get<std::string>().length() + 4, message.length());
                     //Echo
