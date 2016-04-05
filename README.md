@@ -2,7 +2,9 @@ DiscordPP <sup>(it's cool)</sup>
 ===
 A Discord API written in C++.
 
-[Discord Server](https://discord.gg/0usP6xmT4sRkB0Vl)
+Links:
+* [Discord Server](https://discord.gg/0usP6xmT4sRkB0Vl)
+* [Trello Board](trello.com/b/3CU2iRSo)
 
 Functionality <sup>(Not much)</sup>
 ---
@@ -37,8 +39,8 @@ Included <sup>(Git submodules)</sup>
 * [nlohmann::json](https://github.com/nlohmann/json)
 * [Websocket++](https://github.com/zaphoyd/websocketpp)
 
-Building <sup>(Hell on Earth)</sup>
+Building <sup>(Almost Hell on Earth)</sup>
 ---
-Build CMake targets `discorpp` and `curlpp`. Build Websocket++ separately and modify the `INCLUDE_DIRECTORIES` in `CMakeLists.txt` to reference it.
+Build CMake targets `discorpp` and `curlpp`. Build Websocket++ separately and modify the `INCLUDE_DIRECTORIES` in `CMakeLists.txt` to reference it. (I think you should also be able to install it through APT or Cygwin)
 
 Make a copy of `login.dat.example` and rename it `login.dat`. Replace the login information with your bots. Bot account support is planned, but not currently implemented.
