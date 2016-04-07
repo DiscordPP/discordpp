@@ -32,15 +32,15 @@ Requirements <sup>(You need these)</sup>
 * [Boost](http://www.boost.org/)
 * [OpenSSL](https://www.openssl.org/)
 * [Crypto++](https://www.cryptopp.com/)
+* [Websocket++](http://www.zaphoyd.com/websocketpp)
 
 Included <sup>(Git submodules)</sup>
 ---
 * [cURLpp](https://github.com/jpbarrette/curlpp)
 * [nlohmann::json](https://github.com/nlohmann/json)
-* [Websocket++](https://github.com/zaphoyd/websocketpp)
 
 Building <sup>(Almost Hell on Earth)</sup>
 ---
-Build CMake targets `discorpp` and `curlpp`. Build Websocket++ separately and modify the `INCLUDE_DIRECTORIES` in `CMakeLists.txt` to reference it. (I think you should also be able to install it through APT or Cygwin)
+Build CMake targets `discorpp` and `curlpp`.
 
 Make a copy of `login.dat.example` and rename it `login.dat`. Replace the login information with your bots. Bot account support is planned, but not currently implemented.
