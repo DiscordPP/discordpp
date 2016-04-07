@@ -5,6 +5,3 @@
 	path = lib/curlpp
 	url = https://github.com/Aidoboy/curlpp.git
 	branch = experimental
-[submodule "lib/websocketpp"]
-	path = lib/websocketpp
-	url = https://github.com/zaphoyd/websocketpp.git
