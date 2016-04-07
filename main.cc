@@ -81,26 +81,6 @@ int main() {
         std::cout << elem.first << "\n" << elem.second << "\n\n";
     }
 
-    //This is unneeded, as it is retuned by READY.
-    /*
-    std::vector<json> myTextChannels;
-    std::cout << "Getting guild and channel lists...\n";
-    json myGuilds = discordpp::users::fetchGuilds();
-    for (json guild : myGuilds) {
-        std::cout << "Found the guild \"" << guild.at("name").get<std::string>() << "\". Its ID number is " << guild.at("id").get<std::string>() << ".\n";
-        json guildChannels = discordpp::guilds::fetchChannels(guild.at("id").get<std::string>());
-        for (json channel : guildChannels) {
-            std::cout << "     Found channel #" << channel.at("name").get<std::string>() << ". ";
-            std::cout << "Its ID number is " << channel.at("id").get<std::string>() << ". ";
-            std::cout << "It is a " << channel.at("type").get<std::string>() << " channel.\n";
-            if(channel.at("type").get<std::string>() == "text"){
-                myTextChannels.push_back(channel);
-            }
-        }
-    }
-    std::cout << "\n\n";
-     */
-
     asio::io_service asio_ios;
     
 
@@ -121,52 +101,6 @@ int main() {
     discordpp::Client discordClient(asio_ios, token, soft_commands);
 
     asio_ios.run();
-
-    //Old code using POST messages instead of WebSockets
-    /*
-    std::map<std::string, std::string> channelLastRead;
-    std::cout << "Establishing most recent messages...\n";
-    for(json channel : myTextChannels){
-        std::string lastMessageID;
-        try {
-            lastMessageID = channel.at("last_message_id").get<std::string>();
-            std::cout << "The last message in #" << channel.at("name").get<std::string>() << " was message " << lastMessageID << ".\n";
-        } catch (std::domain_error) {
-            lastMessageID = "0";
-            std::cout << "#" << channel.at("name").get<std::string>() << " has no messages.\n";
-        }
-        channelLastRead[channel.at("id").get<std::string>()] = lastMessageID;
-    }
-    std::cout << "\n";
-     */
-    /*
-    time_t startTime = std::time(nullptr);
-    std::cout << "Starting loop, the time is " << startTime << ".\n";
-    for (int i = 0; startTime + 60 > std::time(nullptr); i++) {
-        for(auto item: channelLastRead){
-            //std::cout << "Checking #" << item.first.at("name").get<std::string>() << " for new messages.\n";
-            try {
-                json message;
-                message = discordpp::channels::messages::nextMessage(item.first, item.second)[0];
-                channelLastRead[item.first] = message.at("id").get<std::string>();
-                json channel = discordpp::channels::fetchInfo(item.first);
-                json guild = discordpp::guilds::fetchInfo(channel.at("guild_id").get<std::string>());
-                std::cout << guild.at("name").get<std::string>() << "#" << discordpp::channels::fetchInfo(item.first).at("name").get<std::string>() << " " << message.at("author").at("username").get<std::string>() << ": " << message.at("content").get<std::string>() << "\n";
-                std::vector<std::string> messageMentions = message.at("mentions").get<std::vector<std::string>>();
-
-                bool mentionsMe = true;// vectorContains(messageMentions, myInfo.at("id").get<std::string>());
-                bool isTesting = channel.at("name").get<std::string>() == "testing";
-                bool rightChannel = guild.at("name").get<std::string>() == "Brotherhood of Seel" || guild.at("name").get<std::string>() == "Discord API" || guild.at("name").get<std::string>() == "Discord Bots";
-                if (mentionsMe && isTesting  && rightChannel) {
-                    discordpp::channels::messages::sendMessage(channel.at("id").get<std::string>(), message.at("content"), {message.at("author").at("id").get<std::string>()});
-                }
-            } catch (std::domain_error & e){
-                std::cout << e.what() << "\n";
-            }
-        }
-    }
-    std::cout << "Loop done.\n";
-    */
 
     return 0;
 }
