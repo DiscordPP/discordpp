@@ -22,6 +22,7 @@ namespace discordpp{
     using json = nlohmann::json;
     namespace asio = boost::asio;
     using boost::system::error_code;
+    using snowflake = uint64_t;
 
     namespace data{
         inline bool& debug(){
@@ -35,7 +36,8 @@ namespace discordpp{
     };
 
     namespace DiscordAPI {
-        inline json call(std::string targetURL, std::string token, json attachJSON = nullptr){
+        inline json call(std::string targetURL, std::string token, json attachJSON = nullptr, std::string requestType = nullptr){
+            data::lastToken() = token;
             try
             {
                 std::stringstream outstream;
@@ -47,6 +49,8 @@ namespace discordpp{
                 request.setOpt(ws);
                 request.setOpt<curlpp::options::Url>("https://discordapp.com/api" + targetURL);
                 request.setOpt(curlpp::options::Verbose(false));
+
+                request.setOpt(curlpp::options::CustomRequest(requestType));
 
                 std::list<std::string> header;
                 header.push_back("Content-Type: application/json");
@@ -89,17 +93,122 @@ namespace discordpp{
 
             return nullptr;
         }
-        /*
-        inline std::string call(std::string targetURL, std::string token){
-            return call(targetURL, NULL, token);
+    };
+
+    namespace channels{
+        inline json get(snowflake channelID, std::string token = data::lastToken()){
+            return DiscordAPI::call("/channels/" + channelID, token, "GET");
         }
-        inline std::string call(std::string targetURL, json attachJSON){
-            return call(targetURL, attachJSON, data::lastToken());
+        //Patch and Put do the same thing.
+        inline json patch(snowflake channelID, json newParams, std::string token = data::lastToken()){
+            return DiscordAPI::call("/channels/" + channelID, token, newParams, "PATCH");
         }
-        inline std::string call(std::string targetURL){
-            return call(targetURL, NULL, data::lastToken());
+        inline json put(snowflake channelID, json newParams, std::string token = data::lastToken()){
+            return DiscordAPI::call("/channels/" + channelID, token, newParams, "PUT");
         }
-         */
+        //Can't use delete as a function, I'm guessing because of C++
+        inline json close(snowflake channelID, std::string token = data::lastToken()){
+            return DiscordAPI::call("/channels/" + channelID, token, "DELETE");
+        }
+        namespace messages{
+            inline json get(snowflake channelID, snowflake before = nullptr, snowflake after = nullptr, int limit = 50, std::string token = data::lastToken()){
+                json toSend;
+                if(before != nullptr){
+                    toSend["before"] = before;
+                }
+                if(after != nullptr){
+                    toSend["after"] = after;
+                }
+                toSend["limit"] = limit;
+                return DiscordAPI::call("/channels/" + std::to_string(channelID) + "/messages", token, toSend, "GET");
+            }
+            inline json create(snowflake channelID, std::string message, std::string nonce = nullptr, bool isTTS = false, std::string token = data::lastToken()) {
+                std::string callURL = "/channels/" + std::to_string(channelID) + "/messages";
+
+                json toSend;
+                toSend["content"] = message;
+                if(nonce != nullptr){
+                    toSend["nonce"] = nonce;
+                }
+                toSend["tts"] = isTTS;
+
+                return DiscordAPI::call(callURL, token, toSend);
+            }
+            inline json edit(snowflake channelID, snowflake messageID, std::string message, std::string token = data::lastToken()) {
+                std::string callURL = "/channels/" + std::to_string(channelID) + "/messages/" + std::to_string(messageID);
+
+                json toSend;
+                toSend["content"] = message;
+
+                return DiscordAPI::call(callURL, token, toSend, "PATCH");
+            }
+            inline json remove(snowflake channelID, snowflake messageID, std::string token = data::lastToken()) {
+                std::string callURL = "/channels/" + std::to_string(channelID) + "/messages/" + std::to_string(messageID);
+                return DiscordAPI::call(callURL, token, "DELETE");
+            }
+            inline json acknowledge(snowflake channelID, snowflake messageID, std::string token = data::lastToken()){
+                std::string callURL = "/channels/" + std::to_string(channelID) + "/messages/" + std::to_string(messageID) + "/ack";
+                return DiscordAPI::call(callURL, token);
+            }
+            //I'm not sure hw to handle the permissions. https://discordapp.com/developers/docs/resources/channel#edit-channel-permissions
+            namespace invites{
+                inline json get(snowflake channelID, std::string token = data::lastToken()){
+                    return DiscordAPI::call("/channels/" + std::to_string(channelID) + "/invites", token, "GET");
+                }
+                inline json create(snowflake channelID, int max_age = nullptr, int max_uses = nullptr, bool temporary = nullptr, bool xkcdpass = nullptr, std::string token = data::lastToken()) {
+                    std::string callURL = "/channels/" + std::to_string(channelID) + "/invites";
+
+                    json toSend;
+                    if(max_age != nullptr)
+                        toSend["max_age"] = max_age;
+                    if(max_uses != nullptr)
+                        toSend["max_uses"] = max_uses;
+                    if(temporary != nullptr)
+                        toSend["temporary"] = temporary;
+                    if(xkcdpass != nullptr)
+                        toSend["xkcdpass"] = xkcdpass;
+
+                    return DiscordAPI::call(callURL, token, toSend, "POST");
+                }
+            }
+            inline json typing(snowflake channelID, std::string token = data::lastToken()){
+                return DiscordAPI::call("/channels/" + std::to_string(channelID) + "/typing", token, "POST");
+            }
+        }
+
+
+
+        /* Old API
+        inline json fetchInfo(snowflake channelID, std::string token = data::lastToken()){
+            return DiscordAPI::call("/channels/" + channelID, token);
+        }
+        namespace messages {
+                inline json nextMessage(snowflake channelID, std::string lastMessageID = 0, std::string token = data::lastToken()){
+                std::string callURL = "/channels/" + channelID + "/messages?limit=1&after=" + lastMessageID;
+                return DiscordAPI::call(callURL, data::lastToken());
+            }
+            inline json create(snowflake channelID, std::string message, std::vector<std::string> mentions = {}, bool isTTS = false, std::string token = data::lastToken()) {
+                std::string callURL = "/channels/" + channelID + "/messages";
+
+                json toSend;
+                toSend["content"] = message;
+                toSend["mentions"] = mentions;
+                toSend["tts"] = isTTS;
+
+                return DiscordAPI::call(callURL, token, toSend);
+            }
+        };
+        namespace manage{
+            inline json create(std::string guildID, std::string name, enum type{text, voice} = text, std::string token = data::lastToken()){
+                std::string types [] = {"text", "voice"};
+                json toSend;
+                toSend["name"] = name;
+                toSend["type"] = types[type];
+
+                return DiscordAPI::call("/guilds/:guild_id/channels");
+            }
+        }
+        */
     };
 
     namespace auth {
@@ -139,28 +248,6 @@ namespace discordpp{
             return DiscordAPI::call("/guilds/" + guildID, token);
         }
     }
-
-    namespace channels{
-        inline json fetchInfo(std::string channelID, std::string token = data::lastToken()){
-            return DiscordAPI::call("/channels/" + channelID, token);
-        }
-        namespace messages {
-            inline json nextMessage(std::string channelID, std::string lastMessageID = 0, std::string token = data::lastToken()){
-                std::string callURL = "/channels/" + channelID + "/messages?limit=1&after=" + lastMessageID;
-                return DiscordAPI::call(callURL, data::lastToken());
-            }
-            inline json sendMessage(std::string channelID, std::string message, std::vector<std::string> mentions = {}, bool isTTS = false, std::string token = data::lastToken()) {
-                std::string callURL = "/channels/" + channelID + "/messages";
-
-                json toSend;
-                toSend["content"] = message;
-                toSend["mentions"] = mentions;
-                toSend["tts"] = isTTS;
-
-                return DiscordAPI::call(callURL, token, toSend);
-            }
-        };
-    };
 
     namespace gateway{
         inline std::string fetchURL(std::string token = data::lastToken()){
@@ -232,12 +319,13 @@ namespace discordpp{
 
                         std::cout << "Sending message " << jmessage["d"]["content"] << " to user " << jmessage["d"]["author"]["username"] << "\n";
 
-                        discordpp::channels::messages::sendMessage(jmessage["d"]["channel_id"],  message);//, {targetID}
+                        discordpp::channels::messages::create(jmessage["d"]["channel_id"],  message);//, {targetID}
                         */
                         if(soft_responses_[message].empty()){
-                            discordpp::channels::messages::sendMessage(jmessage["d"]["channel_id"], "`" + message + "` is not a command.");
+                            discordpp::channels::messages::create(jmessage["d"]["channel_id"],
+                                                                  "`" + message + "` is not a command.");
                         } else {
-                            discordpp::channels::messages::sendMessage(jmessage["d"]["channel_id"], soft_responses_[message]);
+                            discordpp::channels::messages::create(jmessage["d"]["channel_id"], soft_responses_[message]);
                         }
                     }
                 }
