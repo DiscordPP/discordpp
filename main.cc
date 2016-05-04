@@ -17,8 +17,16 @@ std::string login();
 std::map<std::string, std::string> loadSoftCommands(std::string softFilePath);
 
 int main() {
+    std::cout << "Starting bot...\n\n";
     //Login and load sodt commands from their respective files.
-    std::string token = login("login.dat");
+    if(boost::filesystem::exists("token.dat")){
+
+    } else if(boost::filesystem::exists("login.dat")){
+        std::string token = login("login.dat");
+    } else {
+        std::cerr << "CRITICAL: There is no valid way for Discord++ to obtain a token! Copy the example login.dat or token.dat to make one.\n";
+        exit(1);
+    }
     std::map<std::string, std::string> soft_commands = loadSoftCommands("softcommands.dat");
 
     //Print user info.
@@ -60,8 +68,6 @@ int main() {
 }
 
 std::string login(std::string authFilePath){
-    std::cout << "Starting bot...\n\n";
-
     std::cout << "Logging in...\n";
 
     std::ifstream authFile;
@@ -119,4 +125,22 @@ std::map<std::string, std::string> loadSoftCommands(std::string softFilePath){
     softfile.close();
 
     return soft_commands;
+}
+
+std::string readTokenFile(std::string tokenFilePath){
+    std::ifstream tokenFile;
+    tokenFile.open(tokenFilePath);
+
+    std::string token;
+
+    if (tokenFile.is_open()) {
+        std::getline(tokenFile, token);
+    } else {
+        std::cerr << "CRITICAL: There is no such file as " + tokenFilePath + "! Copy the example login.dat to make one.\n";
+        exit(1);
+    }
+    tokenFile.close();
+    std::cout << "Retrieved token.\n\n";
+
+    return token;
 }
