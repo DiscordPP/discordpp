@@ -520,17 +520,19 @@ namespace discordpp{
             json connect = {
                     {"op", 2},
                     {"d", {
-                                   {"token", token_},
-                                   {"v", 3},
-                                   {"properties", {
-                                                          {"$os", ""},
-                                                          {"$browser", ""},
-                                                          {"$device", ""},
-                                                          {"$referrer",""},
-                                                          {"$referring_domain",""}
-                                                  }},
-                                   {"large_threshold", 250}
-                           }}
+                                  {"token", token_},
+                                  {"v", 3},
+                                  {"properties", {
+                                                         {"$os", "linux"},
+                                                         {"$browser", "discordpp"},
+                                                         {"$device", "discordpp"},
+                                                         {"$referrer",""}, {"$referring_domain",""}
+                                                 }
+                                  },
+                                  {"compress", false},
+                                  {"large_threshold", 250}
+                          }
+                    }
             };
             std::cout << connect.dump(1) << "\n";
             client_.send(hdl, connect.dump(), websocketpp::frame::opcode::text);
