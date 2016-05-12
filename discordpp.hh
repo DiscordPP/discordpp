@@ -5,13 +5,14 @@
 #ifndef DISCORDPP_DISCORDPP_HH
 #define DISCORDPP_DISCORDPP_HH
 
-#include <string>
 #include <vector>
 
 #include "lib/curlpp/include/curlpp/cURLpp.hpp"
 #include "lib/curlpp/include/curlpp/Easy.hpp"
 #include "lib/curlpp/include/curlpp/Options.hpp"
 #include "lib/curlpp/include/curlpp/Exception.hpp"
+#define STDC_HEADERS 1
+#include <string>
 
 #include "lib/nlohmannjson/src/json.hpp"
 
@@ -23,8 +24,6 @@ namespace discordpp{
     namespace asio = boost::asio;
     using boost::system::error_code;
     using snowflake = uint64_t;
-
-    enum ChannelType {text, voice};
 
     namespace data{
         inline bool& debug(){
@@ -38,7 +37,7 @@ namespace discordpp{
     };
 
     namespace DiscordAPI {
-        inline json call(std::string targetURL, std::string token, json attachJSON = nullptr, std::string requestType = nullptr){
+        inline json call(std::string targetURL, std::string token, json attachJSON = {}, std::string requestType = ""){
             data::lastToken() = token;
             try
             {
@@ -52,7 +51,9 @@ namespace discordpp{
                 request.setOpt<curlpp::options::Url>("https://discordapp.com/api" + targetURL);
                 request.setOpt(curlpp::options::Verbose(false));
 
-                request.setOpt(curlpp::options::CustomRequest(requestType));
+                if(!requestType.empty()) {
+                    request.setOpt(curlpp::options::CustomRequest(requestType));
+                }
 
                 std::list<std::string> header;
                 header.push_back("Content-Type: application/json");
@@ -61,7 +62,7 @@ namespace discordpp{
                 }
                 request.setOpt(curlpp::options::HttpHeader(header));
 
-                if(attachJSON != nullptr) {
+                if(!attachJSON.empty()) {
                     //std::cout << attachJSON.dump() << std::endl;
                     request.setOpt(curlpp::options::PostFields(attachJSON.dump()));
                     request.setOpt(curlpp::options::PostFieldSize(attachJSON.dump().length()));
@@ -93,39 +94,39 @@ namespace discordpp{
                 std::cout << "runtime " << e.what() << std::endl;
             }
 
-            return nullptr;
+            return {};
         }
     };
 
     namespace channels{
         inline json get(snowflake channelID, std::string token = data::lastToken()){
-            return DiscordAPI::call("/channels/" + channelID, token, "GET");
+            return DiscordAPI::call("/channels/" + std::to_string(channelID), token, "GET");
         }
         inline json modify(snowflake channelID, json newParams, std::string token = data::lastToken()){
-            return DiscordAPI::call("/channels/" + channelID, token, newParams, "PATCH");
+            return DiscordAPI::call("/channels/" + std::to_string(channelID), token, newParams, "PATCH");
         }
         //Can't use delete as a function, I'm guessing because of C++
         inline json close(snowflake channelID, std::string token = data::lastToken()){
-            return DiscordAPI::call("/channels/" + channelID, token, "DELETE");
+            return DiscordAPI::call("/channels/" + std::to_string(channelID), token, "DELETE");
         }
         namespace messages{
-            inline json get(snowflake channelID, snowflake before = nullptr, snowflake after = nullptr, int limit = 50, std::string token = data::lastToken()){
+            inline json get(snowflake channelID, snowflake before = 0, snowflake after = 0, int limit = 50, std::string token = data::lastToken()){
                 json toSend;
-                if(before != nullptr){
+                if(before != 0){
                     toSend["before"] = before;
                 }
-                if(after != nullptr){
+                if(after != 0){
                     toSend["after"] = after;
                 }
                 toSend["limit"] = limit;
                 return DiscordAPI::call("/channels/" + std::to_string(channelID) + "/messages", token, toSend, "GET");
             }
-            inline json create(snowflake channelID, std::string message, std::string nonce = nullptr, bool isTTS = false, std::string token = data::lastToken()) {
+            inline json create(snowflake channelID, std::string message, std::string nonce = "", bool isTTS = false, std::string token = data::lastToken()) {
                 std::string callURL = "/channels/" + std::to_string(channelID) + "/messages";
 
                 json toSend;
                 toSend["content"] = message;
-                if(nonce != nullptr){
+                if(nonce != ""){
                     toSend["nonce"] = nonce;
                 }
                 toSend["tts"] = isTTS;
@@ -153,18 +154,16 @@ namespace discordpp{
                 inline json get(snowflake channelID, std::string token = data::lastToken()){
                     return DiscordAPI::call("/channels/" + std::to_string(channelID) + "/invites", token, "GET");
                 }
-                inline json create(snowflake channelID, int max_age = nullptr, int max_uses = nullptr, bool temporary = nullptr, bool xkcdpass = nullptr, std::string token = data::lastToken()) {
+                inline json create(snowflake channelID, int max_age = 0, int max_uses = 0, bool temporary = true, bool xkcdpass = false, std::string token = data::lastToken()) {
                     std::string callURL = "/channels/" + std::to_string(channelID) + "/invites";
 
                     json toSend;
-                    if(max_age != nullptr)
+                    if(max_age != 0)
                         toSend["max_age"] = max_age;
-                    if(max_uses != nullptr)
+                    if(max_uses != 0)
                         toSend["max_uses"] = max_uses;
-                    if(temporary != nullptr)
-                        toSend["temporary"] = temporary;
-                    if(xkcdpass != nullptr)
-                        toSend["xkcdpass"] = xkcdpass;
+                    toSend["temporary"] = temporary;
+                    toSend["xkcdpass"] = xkcdpass;
 
                     return DiscordAPI::call(callURL, token, toSend, "POST");
                 }
@@ -219,18 +218,27 @@ namespace discordpp{
             return DiscordAPI::call(callURL, token, toSend, "POST");
         }
         inline json get(snowflake guildID, std::string token = data::lastToken()){
-            return DiscordAPI::call("/guilds/" + guildID, token, "GET");
+            return DiscordAPI::call("/guilds/" + std::to_string(guildID), token, "GET");
         }
         inline json modify(snowflake guildID, json newParams, std::string token = data::lastToken()){
-            return DiscordAPI::call("/guilds/" + guildID, token, newParams, "PATCH");
+            return DiscordAPI::call("/guilds/" + std::to_string(guildID), token, newParams, "PATCH");
         }
         namespace channels{
-            inline json create(snowflake guildID, std::string name, ChannelType type = text, int bitrate, std::string token = data::lastToken()){
+            inline json createText(snowflake guildID, std::string name, std::string token = data::lastToken()){
                 std::string callURL = "/guilds/" + std::to_string(guildID) + "/channels";
 
                 json toSend;
                 toSend["name"] = name;
-                toSend["type"] = type ? "voice" : "text";
+                toSend["type"] = "text";
+
+                return DiscordAPI::call(callURL, token, toSend, "POST");
+            }
+            inline json createVoice(snowflake guildID, std::string name, int bitrate, std::string token = data::lastToken()){
+                std::string callURL = "/guilds/" + std::to_string(guildID) + "/channels";
+
+                json toSend;
+                toSend["name"] = name;
+                toSend["type"] = "voice";
                 toSend["bitrate"] = bitrate;
 
                 return DiscordAPI::call(callURL, token, toSend, "POST");
@@ -266,8 +274,8 @@ namespace discordpp{
             inline json get(snowflake guildID, std::string token = data::lastToken()){
                 return DiscordAPI::call("/guilds/" + std::to_string(guildID) + "/bans", token, "GET");
             }
-            inline json create(snowflake guildID, int deleteMessageDays = 1, std::string token = data::lastToken()){
-                std::string callURL = /guilds/" + std::to_string(guildID) + "/bans/" + std::to_string(userID)";
+            inline json create(snowflake guildID, snowflake userID, int deleteMessageDays = 1, std::string token = data::lastToken()){
+                std::string callURL = "/guilds/" + std::to_string(guildID) + "/bans/" + std::to_string(userID);
 
                 json toSend;
                 toSend["delete-message-days"] = deleteMessageDays;
@@ -393,29 +401,29 @@ namespace discordpp{
     };
 
     namespace users{
-        inline json fetchInfo(std::string userID = "@me", std::string token = data::lastToken()){
-            return DiscordAPI::call("/users/" + userID, token);
+        inline json fetchInfo(std::string userID = std::string("@me"), std::string token = data::lastToken()){
+            auto url = std::string("/users/");
+            url += userID;
+            return DiscordAPI::call(url, token);
         };
         inline json fetchGuilds(std::string userID = "@me", std::string token = data::lastToken()){
             return DiscordAPI::call("/users/" + userID + "/guilds", token);
         };
     };
 
-    namespace gateway{
-        inline std::string fetchURL(std::string token = data::lastToken()){
-            return DiscordAPI::call("/gateway", token).at("url");
-        }
+    inline std::string fetchGateway(std::string token = data::lastToken()){
+        return DiscordAPI::call("/gateway", token).at("url");
     }
 
     class Client {
         using client = websocketpp::client<websocketpp::config::asio_tls_client>;
         using message_ptr = websocketpp::config::asio_client::message_type::ptr;
     public:
-        Client(asio::io_service& asio_ios, const std::string& token, std::map <std::string, std::string> soft_responses = {})
+        Client(asio::io_service& asio_ios, const std::string& token, std::map<std::string, std::function<void(json)>> eventResponses)//std::map <std::string, std::string> soft_responses = {})
                 : asio_ios_(asio_ios)
                 , token_(token)
                 , keepalive_timer_(asio_ios)
-                , soft_responses_(soft_responses)
+                , eventResponses_(eventResponses)
         {
             client_.set_access_channels(websocketpp::log::alevel::all);
             client_.clear_access_channels(websocketpp::log::alevel::frame_payload);
@@ -432,12 +440,12 @@ namespace discordpp{
                                                std::placeholders::_1));
 
             websocketpp::lib::error_code ec;
-            std::string uri = discordpp::gateway::fetchURL();
-            std::cout << uri << "\n";
+            std::string uri = discordpp::fetchGateway(token);
+            std::cout << "Connecting to gateway at " << uri << "\n";
             connection_ = client_.get_connection(uri, ec);
             if (ec) {
                 std::cout << "could not create connection because: " << ec.message() << std::endl;
-                //TBD: throw something
+                //TODO TBD: throw something
             } else {
                 // Note that connect here only requests a connection. No network messages are
                 // exchanged until the event loop starts running in the next line.
@@ -447,59 +455,31 @@ namespace discordpp{
         ~Client() =default;
         Client(const Client&) =delete;
         Client& operator=(const Client&) =delete;
+        std::map<std::string, std::function<void(json)>> eventResponses_;
 
     private:
         void on_message(websocketpp::connection_hdl hdl, message_ptr msg) {
-            auto jmessage = json::parse(msg->get_payload());
-            if(jmessage["t"] == "READY"){
-                ready_ = jmessage;
-                uint32_t ms = jmessage["d"]["heartbeat_interval"];
-                ms *= .9;
-                keepalive(ms);
-            } else if(jmessage["t"] == "MESSAGE_CREATE"){
-                for(auto& val : jmessage["d"]["mentions"]){
-                    if(val["id"] == ready_["d"]["user"]["id"] && jmessage["d"]["content"].get<std::string>().length() > 23){
-                        std::string message = jmessage["d"]["content"].get<std::string>();
-                        message = message.substr(ready_["d"]["user"]["id"].get<std::string>().length() + 4, message.length());
-                        //Echo
-                        /*
-                        //std::string message = jmessage["d"]["content"].get<std::string>();
-                        std::string target = ready_["d"]["user"]["username"].get<std::string>();
-                        std::string targetID = jmessage["d"]["author"]["id"].get<std::string>();
-
-                        //message =message.substr(ready_["d"]["user"]["id"].get<std::string>().length() + 4, message.length()); // "<@" + targetID + "> " +
-
-                        std::cout << "Sending message " << jmessage["d"]["content"] << " to user " << jmessage["d"]["author"]["username"] << "\n";
-
-                        discordpp::channels::messages::create(jmessage["d"]["channel_id"],  message);//, {targetID}
-                        */
-                        if(soft_responses_[message].empty()){
-                            discordpp::channels::messages::create(jmessage["d"]["channel_id"],
-                                                                  "`" + message + "` is not a command.");
-                        } else {
-                            discordpp::channels::messages::create(jmessage["d"]["channel_id"], soft_responses_[message]);
-                        }
-                    }
+            json jmessage = json::parse(msg->get_payload());
+            if(jmessage["op"].get<int>() == 0){ //Dispatch
+                std::map<std::string, std::function<void(json)>>::iterator it = eventResponses_.find(jmessage["t"]);
+                if(it != eventResponses_.end()){
+                    asio_ios_.post(std::bind(it->second, jmessage));
+                } else {
+                    std::cout << "There is no function for the event " << jmessage["t"] << ".\n";
                 }
-            } else if(jmessage["t"] == "MESSAGE_UPDATE"){
-
-            } else if(jmessage["t"] == "TYPING_START"){
-
-            } else if(jmessage["t"] == "PRESENCE_UPDATE"){
-
-            } else if(jmessage["t"] == "TYPING_START"){
-
-            } else if(jmessage["t"] == "VOICE_STATE_UPDATE"){
-
-            } else {
-                std::cout << "on_message called with hdl: " << hdl.lock().get()
-                << " and message: " << jmessage.dump(3)
-                << "\n";
+                if(jmessage["t"] == "READY") {
+                    uint32_t ms = jmessage["d"]["heartbeat_interval"];
+                    ms *= .9;
+                    keepalive(ms);
+                }
+            } else if(jmessage["op"].get<int>() == 1){ //Heartbeat (This isn't implemented yet, still using periodic heartbeats for now.)
+                //client_.send(hdl, jmessage.dump(), websocketpp::frame::opcode::text);
+            } else { //Wat
+                std::cout << "Unexpected opcode received:\n\n" << jmessage.dump(4) << "\n\n\n";
             }
         }
 
         void keepalive(uint32_t ms){
-            //send message
             auto now = std::chrono::system_clock::now();
             auto duration = now.time_since_epoch();
             auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
@@ -507,11 +487,11 @@ namespace discordpp{
                     {"op", 1},
                     {"d", millis}
             };
+            std::cout << "Sending Heartbeat:\n";
             client_.send(connection_, message.dump(), websocketpp::frame::opcode::text);
             //reset timer
             keepalive_timer_.expires_from_now(std::chrono::milliseconds(ms));
             keepalive_timer_.async_wait(std::bind(&Client::keepalive, this, ms));
-            std::cout << "Ran keepalive\n";
         }
 
         void on_open(websocketpp::connection_hdl hdl) {
@@ -521,7 +501,7 @@ namespace discordpp{
                     {"op", 2},
                     {"d", {
                                   {"token", token_},
-                                  {"v", 3},
+                                  {"v", 4},
                                   {"properties", {
                                                          {"$os", "linux"},
                                                          {"$browser", "discordpp"},
@@ -534,7 +514,7 @@ namespace discordpp{
                           }
                     }
             };
-            std::cout << connect.dump(1) << "\n";
+            std::cout << "Client Handshake:\n" << connect.dump(1) << "\n";
             client_.send(hdl, connect.dump(), websocketpp::frame::opcode::text);
         }
 
@@ -545,8 +525,6 @@ namespace discordpp{
         websocketpp::uri_ptr uri_ptr_;
         client::connection_ptr connection_;
         asio::steady_timer keepalive_timer_;
-        json ready_;
-        std::map <std::string, std::string> soft_responses_;
     };
 }
 

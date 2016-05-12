@@ -2,27 +2,32 @@
 #include <fstream>
 #include <vector>
 #include <ctime>
+
 #include <boost/asio.hpp>
 #include <boost/asio/steady_timer.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include "discordpp.hh"
+#include "resource.hh"
 
 using json = nlohmann::json;
 namespace asio = boost::asio;
 using boost::system::error_code;
 
 
-std::string login();
+std::string login(std::string authFilePath);
 std::map<std::string, std::string> loadSoftCommands(std::string softFilePath);
+std::string readTokenFile(std::string tokenFilePath);
 
 int main() {
     std::cout << "Starting bot...\n\n";
-    //Login and load sodt commands from their respective files.
+    //Login and load soft commands from their respective files.
+    std::string token;
     if(boost::filesystem::exists("token.dat")){
-
+        token = readTokenFile("token.dat");
     } else if(boost::filesystem::exists("login.dat")){
-        std::string token = login("login.dat");
+        token = login("login.dat");
     } else {
         std::cerr << "CRITICAL: There is no valid way for Discord++ to obtain a token! Copy the example login.dat or token.dat to make one.\n";
         exit(1);
@@ -31,7 +36,7 @@ int main() {
 
     //Print user info.
     std::cout << "Getting user info...\n";
-    json myInfo = discordpp::users::fetchInfo("@me");
+    json myInfo = discordpp::users::fetchInfo("@me", token);
     std::cout << "I am " << myInfo.at("username").get<std::string>() << ", my ID number is " << myInfo.at("id").get<std::string>() << ".\n\n";
 
     //Print out all soft commands
@@ -58,8 +63,42 @@ int main() {
         }
     });
 
+    std::map<std::string, std::function<void(json)>> eventResponses;
+    eventResponses["READY"] = [](json jmessage) {
+        std::cout << "Recieved READY payload.\n";
+        std::cout << jmessage.dump(4) << "\n\n\n";
+        resource::discord::gatewayVersion() = jmessage["d"]["v"];
+        resource::discord::me() = jmessage["d"]["user"];
+        resource::discord::privateChannels() = jmessage["d"]["private_channels"];
+        resource::discord::guilds() = jmessage["d"]["guilds"];
+        resource::discord::readState() = jmessage["d"]["read_state"];
+        resource::discord::sessionID() = jmessage["d"]["session_id"];
+    };
+    eventResponses["MESSAGE_CREATE"] = [soft_commands](json jmessage){
+        for(auto& val : jmessage["d"]["mentions"]){
+            if(val["id"] == resource::discord::me()["id"] && jmessage["d"]["content"].get<std::string>().length() > 23){
+                std::string message = jmessage["d"]["content"].get<std::string>();
+                message = message.substr(resource::discord::me()["id"].get<std::string>().length() + 4, message.length());
+                auto it = soft_commands.find(message);
+                std::string sid = jmessage["d"]["channel_id"];
+                auto id = boost::lexical_cast<discordpp::snowflake>(sid);
+                if(it == soft_commands.end()){
+                    discordpp::channels::messages::create(id, "`" + message + "` is not a command.");
+                } else {
+                    discordpp::channels::messages::create(id, it->second);
+                }
+            }
+        }
+    };
+    eventResponses["PRESENCE_UPDATE"] = [](json jmessage){
+        //ignore
+    };
+    eventResponses["TYPING_START"] = [](json jmessage){
+        //ignore
+    };
+
     //Pass the loop to the a websocket client, which adds its functions to the loop.
-    discordpp::Client discordClient(asio_ios, token, soft_commands);
+    discordpp::Client discordClient(asio_ios, token, eventResponses);
 
     //run the loop.
     asio_ios.run();
