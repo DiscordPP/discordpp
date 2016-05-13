@@ -12,8 +12,8 @@ add_subdirectory(lib/curlpp)
 
 find_package(Boost REQUIRED system filesystem)
 
-INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS}) # ${JSONC_INCLUDE_DIRS}
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${Boost_LIBRARIES} curlpp pthread ssl crypto) # ${JSONC_LIBRARIES}
+INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${Boost_LIBRARIES} curlpp pthread ssl crypto)
 
 foreach(DATFILE login.dat softcommands.dat token.dat)
     if(EXISTS ${CMAKE_SOURCE_DIR}/${DATFILE})
