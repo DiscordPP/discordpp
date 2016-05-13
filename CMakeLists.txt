@@ -16,11 +16,18 @@ INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${Boost_LIBRARIES} curlpp pthread ssl crypto)
 
 foreach(DATFILE login.dat softcommands.dat token.dat)
-    if(EXISTS ${CMAKE_SOURCE_DIR}/${DATFILE})
-        add_custom_command(TARGET discordpp PRE_BUILD
-                COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                ${CMAKE_SOURCE_DIR}/${DATFILE} $<TARGET_FILE_DIR:discordpp>)
-    elseif(EXISTS $<TARGET_FILE_DIR:discordpp>/${DATFILE})
-        file(REMOVE $<TARGET_FILE_DIR:discordpp>/${DATFILE})
+    #file(REMOVE ${CMAKE_BINARY_DIR}/${DATFILE})
+    ##if(EXISTS $<TARGET_FILE_DIR:discordpp>/${DATFILE})
+    ##    file(REMOVE $<TARGET_FILE_DIR:discordpp>/${DATFILE})
+    ##endif()
+    #if(EXISTS ${CMAKE_SOURCE_DIR}/${DATFILE})
+    #    add_custom_command(TARGET discordpp PRE_BUILD
+    #            COMMAND ${CMAKE_COMMAND} -E copy
+    #            ${CMAKE_SOURCE_DIR}/${DATFILE} ${CMAKE_BINARY_DIR})
+    #endif()
+    if(EXISTS ${DATFILE})
+        configure_file(${DATFILE} ${DATFILE} COPYONLY)
+    else()
+        file(REMOVE ${CMAKE_BINARY_DIR}/${DATFILE})
     endif()
 endforeach()
