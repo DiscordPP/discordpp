@@ -172,38 +172,6 @@ namespace discordpp{
                 return DiscordAPI::call("/channels/" + std::to_string(channelID) + "/typing", token, "POST");
             }
         }
-
-        /* Old API
-        inline json fetchInfo(snowflake channelID, std::string token = data::lastToken()){
-            return DiscordAPI::call("/channels/" + channelID, token);
-        }
-        namespace messages {
-                inline json nextMessage(snowflake channelID, std::string lastMessageID = 0, std::string token = data::lastToken()){
-                std::string callURL = "/channels/" + channelID + "/messages?limit=1&after=" + lastMessageID;
-                return DiscordAPI::call(callURL, data::lastToken());
-            }
-            inline json create(snowflake channelID, std::string message, std::vector<std::string> mentions = {}, bool isTTS = false, std::string token = data::lastToken()) {
-                std::string callURL = "/channels/" + channelID + "/messages";
-
-                json toSend;
-                toSend["content"] = message;
-                toSend["mentions"] = mentions;
-                toSend["tts"] = isTTS;
-
-                return DiscordAPI::call(callURL, token, toSend);
-            }
-        };
-        namespace manage{
-            inline json create(std::string guildID, std::string name, enum type{text, voice} = text, std::string token = data::lastToken()){
-                std::string types [] = {"text", "voice"};
-                json toSend;
-                toSend["name"] = name;
-                toSend["type"] = types[type];
-
-                return DiscordAPI::call("/guilds/:guild_id/channels");
-            }
-        }
-        */
     };
 
     namespace guilds{
@@ -369,15 +337,6 @@ namespace discordpp{
                 return DiscordAPI::call("/guilds/" + std::to_string(guildID) + "/embed", token, newParams, "PATCH");
             }
         }
-
-        /*
-        inline json fetchChannels(std::string guildID, std::string token = data::lastToken()){
-            return DiscordAPI::call("/guilds/" + guildID + "/channels", token);
-        }
-        inline json fetchInfo(std::string guildID, std::string token = data::lastToken()){
-            return DiscordAPI::call("/guilds/" + guildID, token);
-        }
-         */
     }
 
     namespace auth {
