@@ -10,15 +10,7 @@ add_executable(discordpp ${SOURCE_FILES})
 
 add_subdirectory(lib/curlpp)
 
-#find_library(CURLPP REQUIRED curlpp)
-#find_library(BOOST REQUIRED boost)
 find_package(Boost REQUIRED system filesystem)
-
-#INCLUDE(FindPkgConfig)
-
-##PKG_SEARCH_MODULE(CURLPP REQUIRED curlpp)
-#PKG_SEARCH_MODULE(BOOST REQUIRED libboost)
-##PKG_SEARCH_MODULE(JSONC REQUIRED json-c)
 
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS}) # ${JSONC_INCLUDE_DIRS}
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${Boost_LIBRARIES} curlpp pthread ssl crypto) # ${JSONC_LIBRARIES}
