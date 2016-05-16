@@ -360,14 +360,44 @@ namespace discordpp{
     };
 
     namespace users{
-        inline json fetchInfo(std::string userID = std::string("@me"), std::string token = data::lastToken()){
-            auto url = std::string("/users/");
-            url += userID;
-            return DiscordAPI::call(url, token);
-        };
-        inline json fetchGuilds(std::string userID = "@me", std::string token = data::lastToken()){
-            return DiscordAPI::call("/users/" + userID + "/guilds", token);
-        };
+        inline json queryUsers(int limit = 25, std::string username = "", std::string token = data::lastToken()){
+            std::string callURL = "/users";
+
+            json toSend;
+            if(!username.empty()) {
+                toSend["q"] = username;
+            }
+            toSend["limit"] = limit;
+
+            return DiscordAPI::call(callURL, token, toSend, "POST");
+        }
+        inline json getUser(snowflake userID, std::string token = data::lastToken()){
+            return DiscordAPI::call("/users/" + std::to_string(userID), token, "GET");
+        }
+        namespace self{
+            inline json get(std::string token = data::lastToken()){
+                return DiscordAPI::call("/users/@me", token, "GET");
+            }
+            inline json modify(std::string username, std::string token = data::lastToken()){
+                //TODO Handle avatar data
+                return DiscordAPI::call("/users/@me", token, {{"username", username}}, "POST");
+            }
+            inline json getGuilds(std::string token = data::lastToken()){
+                return DiscordAPI::call("/users/@me/guilds", token, "GET");
+            }
+            inline json leaveGuild(snowflake guildID, std::string token = data::lastToken()){
+                return DiscordAPI::call("/users/@me" + std::to_string(guildID), token, "DELETE");
+            }
+            inline json getDMs(std::string token = data::lastToken()){
+                return DiscordAPI::call("/users/@me/channels", token, "GET");
+            }
+            inline json createDM(snowflake recipientID, std::string token = data::lastToken()){
+                return DiscordAPI::call("/users/@me/channels", token, {{"recipient_id", recipientID}}, "POST");
+            }
+            inline json getConnections(std::string token = data::lastToken()){
+                return DiscordAPI::call("/users/@me/connections", token, "GET");
+            }
+        }
     };
 
     inline std::string fetchGateway(std::string token = data::lastToken()){
