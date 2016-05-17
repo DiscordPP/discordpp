@@ -400,6 +400,18 @@ namespace discordpp{
         }
     };
 
+    namespace invites {
+        inline json get(snowflake inviteID, std::string token = data::lastToken()){
+            return DiscordAPI::call("/invites/" + std::to_string(inviteID), token, "GET");
+        }
+        inline json remove(snowflake inviteID, std::string token = data::lastToken()){
+            return DiscordAPI::call("/invites/" + std::to_string(inviteID), token, "DELETE");
+        }
+        inline json accept(snowflake inviteID, std::string token = data::lastToken()){
+            return DiscordAPI::call("/invites/" + std::to_string(inviteID), token, "POST");
+        }
+    }
+
     inline std::string fetchGateway(std::string token = data::lastToken()){
         return DiscordAPI::call("/gateway", token).at("url");
     }
