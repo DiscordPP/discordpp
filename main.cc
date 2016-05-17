@@ -36,7 +36,7 @@ int main() {
 
     //Print user info.
     std::cout << "Getting user info...\n";
-    json myInfo = discordpp::users::fetchInfo("@me", token);
+    json myInfo = discordpp::DiscordAPI::users::self::get(token);
     std::cout << "I am " << myInfo.at("username").get<std::string>() << ", my ID number is " << myInfo.at("id").get<std::string>() << ".\n\n";
 
     //Print out all soft commands
@@ -57,7 +57,7 @@ int main() {
         if (!error) {
             std::cerr << "User terminated program.\n";
             std::cerr << "Logging out...\n";
-            discordpp::auth::logout();
+            discordpp::DiscordAPI::auth::logout();
             std::cerr << "Logged out.\n";
             asio_ios.stop();
         }
@@ -83,9 +83,9 @@ int main() {
                 std::string sid = jmessage["d"]["channel_id"];
                 auto id = boost::lexical_cast<discordpp::snowflake>(sid);
                 if(it == soft_commands.end()){
-                    discordpp::channels::messages::create(id, "`" + message + "` is not a command.");
+                    discordpp::DiscordAPI::channels::messages::create(id, "`" + message + "` is not a command.");
                 } else {
-                    discordpp::channels::messages::create(id, it->second);
+                    discordpp::DiscordAPI::channels::messages::create(id, it->second);
                 }
             }
         }
@@ -123,7 +123,7 @@ std::string login(std::string authFilePath){
         exit(1);
     }
     authFile.close();
-    std::string token = discordpp::auth::login(username, password);
+    std::string token = discordpp::DiscordAPI::auth::login(username, password);
     //std::cout << "Retrieved token: " << token << "\n\n";
     std::cout << "Retrieved token.\n\n";
 
