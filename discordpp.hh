@@ -338,6 +338,7 @@ namespace discordpp{
             }
         }
 
+        /* USING THIS MAY RESULT IN A BAN
         namespace auth {
             inline std::string login(std::string email, std::string password) {
                 json loginInfo;
@@ -357,6 +358,7 @@ namespace discordpp{
                 DiscordAPI::call("/auth/logout", token);
             };
         };
+        */
 
         namespace users{
             inline json queryUsers(int limit = 25, std::string username = "", std::string token = data::lastToken()){

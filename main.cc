@@ -26,8 +26,10 @@ int main() {
     std::string token;
     if(boost::filesystem::exists("token.dat")){
         token = readTokenFile("token.dat");
+    /* USING THIS MAY RESULT IN A BAN
     } else if(boost::filesystem::exists("login.dat")){
         token = login("login.dat");
+    */
     } else {
         std::cerr << "CRITICAL: There is no valid way for Discord++ to obtain a token! Copy the example login.dat or token.dat to make one.\n";
         exit(1);
@@ -57,7 +59,7 @@ int main() {
         if (!error) {
             std::cerr << "User terminated program.\n";
             std::cerr << "Logging out...\n";
-            discordpp::DiscordAPI::auth::logout();
+            //discordpp::DiscordAPI::auth::logout();
             std::cerr << "Logged out.\n";
             asio_ios.stop();
         }
@@ -106,6 +108,7 @@ int main() {
     return 0;
 }
 
+/* USING THIS MAY RESULT IN A BAN
 std::string login(std::string authFilePath){
     std::cout << "Logging in...\n";
 
@@ -129,6 +132,7 @@ std::string login(std::string authFilePath){
 
     return token;
 }
+*/
 
 std::map<std::string, std::string> loadSoftCommands(std::string softFilePath){
     std::ifstream softfile;

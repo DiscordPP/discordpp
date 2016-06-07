@@ -15,7 +15,7 @@ find_package(Boost REQUIRED system filesystem)
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${Boost_LIBRARIES} curlpp pthread ssl crypto)
 
-foreach(DATFILE login.dat softcommands.dat token.dat)
+foreach(DATFILE softcommands.dat token.dat) #login.dat
     #file(REMOVE ${CMAKE_BINARY_DIR}/${DATFILE})
     ##if(EXISTS $<TARGET_FILE_DIR:discordpp>/${DATFILE})
     ##    file(REMOVE $<TARGET_FILE_DIR:discordpp>/${DATFILE})
