@@ -4,7 +4,7 @@ A Discord API written in C++.
 
 Links:
 * [Discord Server](https://discord.gg/0usP6xmT4sRkB0Vl)
-* [Trello Board](https://trello.com/b/3CU2iRSo)
+* [Trello Board](trello.com/b/3CU2iRSo)
 
 Functionality <sup>(Not much)</sup>
 ---

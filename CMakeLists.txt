@@ -5,7 +5,7 @@ project(discordpp)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
-set(SOURCE_FILES main.cc discordpp.hh resource.hh)
+set(SOURCE_FILES main.cc discordpp.hh Bot.cpp Bot.h)
 add_executable(discordpp ${SOURCE_FILES})
 
 add_subdirectory(lib/curlpp)

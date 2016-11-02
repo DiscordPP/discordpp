@@ -3,16 +3,12 @@
 #include <vector>
 #include <ctime>
 
-#include <boost/asio.hpp>
-#include <boost/asio/steady_timer.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include "discordpp.hh"
-#include "resource.hh"
+#include "Bot.h"
 
 using json = nlohmann::json;
-namespace asio = boost::asio;
 using boost::system::error_code;
 
 
@@ -36,10 +32,10 @@ int main() {
     }
     std::map<std::string, std::string> soft_commands = loadSoftCommands("softcommands.dat");
 
-    //Print user info.
-    std::cout << "Getting user info...\n";
-    json myInfo = discordpp::DiscordAPI::users::self::get(token);
-    std::cout << "I am " << myInfo.at("username").get<std::string>() << ", my ID number is " << myInfo.at("id").get<std::string>() << ".\n\n";
+    //Print user info. (depreaceated?)
+    //std::cout << "Getting user info...\n";
+    //json myInfo = discordpp::DiscordAPI::users::self::get(token);
+    //std::cout << "I am " << myInfo.at("username").get<std::string>() << ", my ID number is " << myInfo.at("id").get<std::string>() << ".\n\n";
 
     //Print out all soft commands
     std::cout << "soft commands\n";
@@ -48,39 +44,13 @@ int main() {
         std::cout << elem.first << "\n" << elem.second << "\n\n";
     }
 
-    //Create an asio asychronous loop for websocketpp.
-    asio::io_service asio_ios;
+    discordpp::Bot* bot = new discordpp::Bot(token);
 
-    // Construct a signal set registered for process termination.
-    boost::asio::signal_set signals(asio_ios, SIGINT, SIGTERM);
-
-    // Start an asynchronous wait for one of the signals to occur.
-    signals.async_wait([&asio_ios](const error_code& error, int signal_number){
-        if (!error) {
-            std::cerr << "User terminated program.\n";
-            std::cerr << "Logging out...\n";
-            //discordpp::DiscordAPI::auth::logout();
-            std::cerr << "Logged out.\n";
-            asio_ios.stop();
-        }
-    });
-
-    std::map<std::string, std::function<void(json)>> eventResponses;
-    eventResponses["READY"] = [](json jmessage) {
-        std::cout << "Recieved READY payload.\n";
-        std::cout << jmessage.dump(4) << "\n\n\n";
-        resource::discord::gatewayVersion() = jmessage["d"]["v"];
-        resource::discord::me() = jmessage["d"]["user"];
-        resource::discord::privateChannels() = jmessage["d"]["private_channels"];
-        resource::discord::guilds() = jmessage["d"]["guilds"];
-        resource::discord::readState() = jmessage["d"]["read_state"];
-        resource::discord::sessionID() = jmessage["d"]["session_id"];
-    };
-    eventResponses["MESSAGE_CREATE"] = [soft_commands](json jmessage){
+    bot->setResponse("MESSAGE_CREATE", [soft_commands](discordpp::Bot* bot, json jmessage){
         for(auto& val : jmessage["d"]["mentions"]){
-            if(val["id"] == resource::discord::me()["id"] && jmessage["d"]["content"].get<std::string>().length() > 23){
+            if(val["id"] == bot->me["id"] && jmessage["d"]["content"].get<std::string>().length() > 23){
                 std::string message = jmessage["d"]["content"].get<std::string>();
-                message = message.substr(resource::discord::me()["id"].get<std::string>().length() + 4, message.length());
+                message = message.substr(bot->me["id"].get<std::string>().length() + 4, message.length());
                 auto it = soft_commands.find(message);
                 std::string sid = jmessage["d"]["channel_id"];
                 auto id = boost::lexical_cast<discordpp::snowflake>(sid);
@@ -91,19 +61,15 @@ int main() {
                 }
             }
         }
-    };
-    eventResponses["PRESENCE_UPDATE"] = [](json jmessage){
+    });
+    bot->setResponse("PRESENCE_UPDATE", [](discordpp::Bot* bot, json jmessage){
         //ignore
-    };
-    eventResponses["TYPING_START"] = [](json jmessage){
+    });
+    bot->setResponse("TYPING_START", [](discordpp::Bot* bot, json jmessage){
         //ignore
-    };
+    });
 
-    //Pass the loop to the a websocket client, which adds its functions to the loop.
-    discordpp::Client discordClient(asio_ios, token, eventResponses);
-
-    //run the loop.
-    asio_ios.run();
+    bot->start();
 
     return 0;
 }
