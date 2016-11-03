@@ -21,7 +21,7 @@ namespace discordpp {
 
         ~Bot();
 
-        void setResponse(std::string event, std::function<void(Bot*, json)> response);
+        void addResponse(std::string event, std::function<void(Bot *, json)> response);
 
         void start();
 

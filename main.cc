@@ -46,15 +46,15 @@ int main() {
 
     discordpp::Bot* bot = new discordpp::Bot(token);
 
-    bot->setResponse("MESSAGE_CREATE", [soft_commands](discordpp::Bot* bot, json jmessage){
-        for(auto& val : jmessage["d"]["mentions"]){
-            if(val["id"] == bot->me["id"] && jmessage["d"]["content"].get<std::string>().length() > 23){
+    bot->addResponse("MESSAGE_CREATE", [soft_commands](discordpp::Bot *bot, json jmessage) {
+        for (auto &val : jmessage["d"]["mentions"]) {
+            if (val["id"] == bot->me["id"] && jmessage["d"]["content"].get<std::string>().length() > 23) {
                 std::string message = jmessage["d"]["content"].get<std::string>();
                 message = message.substr(bot->me["id"].get<std::string>().length() + 4, message.length());
                 auto it = soft_commands.find(message);
                 std::string sid = jmessage["d"]["channel_id"];
                 auto id = boost::lexical_cast<discordpp::snowflake>(sid);
-                if(it == soft_commands.end()){
+                if (it == soft_commands.end()) {
                     discordpp::DiscordAPI::channels::messages::create(id, "`" + message + "` is not a command.");
                 } else {
                     discordpp::DiscordAPI::channels::messages::create(id, it->second);
@@ -62,10 +62,10 @@ int main() {
             }
         }
     });
-    bot->setResponse("PRESENCE_UPDATE", [](discordpp::Bot* bot, json jmessage){
+    bot->addResponse("PRESENCE_UPDATE", [](discordpp::Bot *bot, json jmessage) {
         //ignore
     });
-    bot->setResponse("TYPING_START", [](discordpp::Bot* bot, json jmessage){
+    bot->addResponse("TYPING_START", [](discordpp::Bot *bot, json jmessage) {
         //ignore
     });
 

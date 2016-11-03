@@ -16,9 +16,16 @@ Bot::~Bot() {
 
 }
 
-void Bot::setResponse(std::string event, std::function<void(Bot*, json)> response){
-    if(event != "READY"){
-        eventResponses_[event] = std::bind(response, this, std::placeholders::_1);
+void Bot::addResponse(std::string event, std::function<void(Bot *, json)> response){
+    std::function<void(json)> bound = std::bind(response, this, std::placeholders::_1);
+    if(eventResponses_.find(event) != eventResponses_.end()){
+        std::function<void(json)> old = eventResponses_[event];
+        eventResponses_[event] = [old, bound](json jmessage){
+            old(jmessage);
+            bound(jmessage);
+        };
+    }else{
+        eventResponses_[event] = bound;
     }
 }
 
