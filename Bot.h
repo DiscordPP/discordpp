@@ -15,6 +15,8 @@
 namespace asio = boost::asio;
 
 namespace discordpp {
+    using json = nlohmann::json;
+
     class Bot {
     public:
         Bot(std::string token);
@@ -26,10 +28,10 @@ namespace discordpp {
         void start();
 
         int gatewayVersion = -1;
-        nlohmann::json me = {};
-        nlohmann::json privateChannels = {};
-        nlohmann::json guilds = {};
-        nlohmann::json readState = {};
+        json me = {};
+        json privateChannels = {};
+        json guilds = {};
+        json readState = {};
         std::string sessionID = "";
 
     private:
@@ -46,6 +48,30 @@ namespace discordpp {
                     guilds = jmessage["d"]["guilds"];
                     readState = jmessage["d"]["read_state"];
                     sessionID = jmessage["d"]["session_id"];
+                }}, {"GUILD_CREATE", [this](json jmessage) {
+                    std::cout << "Recieved GUILD_CREATE payload.\n";
+                    //if(jmessage["s"].get<int>() == 4) {
+                    //    jmessage.erase("d");
+                    //}
+                    //std::cout << jmessage.dump(4) << "\n\n\n";
+
+                    bool replaced = false;
+                    for(json& guild : guilds){
+                        if(guild["id"] == jmessage["d"]["id"]){
+                            replaced = true;
+                            guild = jmessage["d"];
+                        }
+                    }
+                    if(!replaced){
+                        guilds.push_back(jmessage["d"]);
+                    }
+
+                    //gatewayVersion = jmessage["d"]["v"];
+                    //me = jmessage["d"]["user"];
+                    //privateChannels = jmessage["d"]["private_channels"];
+                    //guilds = jmessage["d"]["guilds"];
+                    //readState = jmessage["d"]["read_state"];
+                    //sessionID = jmessage["d"]["session_id"];
                 }}
         };
     };
