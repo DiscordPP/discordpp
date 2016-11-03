@@ -6,13 +6,16 @@
 #define DISCORDPP_DISCORDPP_HH
 
 #include <vector>
+#include <string>
+#include <cstdlib>
+#include <chrono>
+#include <thread>
 
 #include "lib/curlpp/include/curlpp/cURLpp.hpp"
 #include "lib/curlpp/include/curlpp/Easy.hpp"
 #include "lib/curlpp/include/curlpp/Options.hpp"
 #include "lib/curlpp/include/curlpp/Exception.hpp"
 #define STDC_HEADERS 1
-#include <string>
 
 #include "lib/nlohmannjson/src/json.hpp"
 
@@ -76,7 +79,9 @@ namespace discordpp{
                     //std::cout << returned.dump() << std::endl;
                     std::string message = returned.at("message").get<std::string>();
                     //std::cout << returned.dump() << std::endl;
-                    if(message != "") {
+                    if(message == "You are being rate limited."){
+                        std::this_thread::sleep_for(std::chrono::milliseconds(returned["retry_after"].get<int>()));
+                    }else if(message != "") {
                         std::cout << "Discord API sent a message: \"" << message << "\"" << std::endl;
                     }
                 } catch ( std::out_of_range & e) {
