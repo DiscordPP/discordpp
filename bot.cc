@@ -2,7 +2,7 @@
 // Created by aidan on 11/1/16.
 //
 
-#include "Bot.h"
+#include "bot.hh"
 
 #include <functional>
 
