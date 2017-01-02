@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.6)
-project(DiscordPP_lib)
+project(discordpp)
 
 set(CMAKE_CXX_STANDARD 11)
 
 set(SOURCE_FILES discordpp.hh bot.hh bot.cc)
-add_library(DiscordPP_lib SHARED ${SOURCE_FILES})
+add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES})
 
 #add_subdirectory(lib/curlpp)
 
