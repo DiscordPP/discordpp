@@ -1,6 +1,4 @@
-login.dat
-softcommands.dat
-token.dat
+cmake-build-debug/
 
 # Created by https://www.gitignore.io/api/jetbrains,c++,linux,windows
 
@@ -113,4 +111,3 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
-

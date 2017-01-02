@@ -27,16 +27,15 @@ namespace discordpp {
 
         void start();
 
-        int gatewayVersion = -1;
         json me = {};
         json privateChannels = {};
         json guilds = {};
-        json readState = {};
-        std::string sessionID = "";
 
     private:
         //asio::io_service asio_ios_;
         std::string token_;
+        std::string sessionID = "";
+        int gatewayVersion = -1;
 
         std::map<std::string, std::function<void(json)>> eventResponses_ = {
                 {"READY", [this](json jmessage) {
@@ -46,9 +45,9 @@ namespace discordpp {
                     me = jmessage["d"]["user"];
                     privateChannels = jmessage["d"]["private_channels"];
                     guilds = jmessage["d"]["guilds"];
-                    readState = jmessage["d"]["read_state"];
                     sessionID = jmessage["d"]["session_id"];
-                }}, {"GUILD_CREATE", [this](json jmessage) {
+                }},
+                {"GUILD_CREATE", [this](json jmessage) {
                     std::cout << "Recieved GUILD_CREATE payload.\n";
                     //if(jmessage["s"].get<int>() == 4) {
                     //    jmessage.erase("d");
@@ -72,7 +71,9 @@ namespace discordpp {
                     //guilds = jmessage["d"]["guilds"];
                     //readState = jmessage["d"]["read_state"];
                     //sessionID = jmessage["d"]["session_id"];
-                }}
+                }},
+                {"GUILD_UPDATE", eventResponses_["GUILD_CREATE"]},
+                {"GUILD_DELETE", eventResponses_["GUILD_CREATE"]}
         };
     };
 }

@@ -11,10 +11,10 @@
 #include <chrono>
 #include <thread>
 
-#include "lib/curlpp/include/curlpp/cURLpp.hpp"
-#include "lib/curlpp/include/curlpp/Easy.hpp"
-#include "lib/curlpp/include/curlpp/Options.hpp"
-#include "lib/curlpp/include/curlpp/Exception.hpp"
+#include <curlpp/cURLpp.hpp>
+#include <curlpp/Easy.hpp>
+#include <curlpp/Options.hpp>
+#include <curlpp/Exception.hpp>
 #define STDC_HEADERS 1
 
 #include "lib/nlohmannjson/src/json.hpp"
