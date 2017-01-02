@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 11)
 set(SOURCE_FILES discordpp.hh bot.hh bot.cc)
 add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES})
 
-#add_subdirectory(lib/curlpp)
+target_include_directories (${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 find_package(Boost REQUIRED system)
 
