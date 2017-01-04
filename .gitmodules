@@ -3,5 +3,4 @@
 	url = https://github.com/nlohmann/json.git
 [submodule "lib/curlpp"]
 	path = lib/curlpp
-	url = https://github.com/Aidoboy/curlpp.git
-	branch = experimental
+	url = https://github.com/jpbarrette/curlpp.git
