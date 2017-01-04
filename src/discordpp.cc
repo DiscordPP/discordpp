@@ -1,7 +1,7 @@
 //
 // Created by aidan on 1/2/17.
 //
-#include "discordpp.hh"
+#include "discordpp/discordpp.hh"
 
 #include <vector>
 #include <string>
