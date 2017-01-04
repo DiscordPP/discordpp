@@ -106,7 +106,7 @@ json discordpp::DiscordAPI::channels::messages::get(snowflake channelID, snowfla
     toSend["limit"] = limit;
     return DiscordAPI::call("/channels/" + std::to_string(channelID) + "/messages", token, toSend, "GET");
 }
-json discordpp::DiscordAPI::channels::messages::create(snowflake channelID, std::string message, std::string nonce = "", bool isTTS = false, std::string token) {
+json discordpp::DiscordAPI::channels::messages::create(snowflake channelID, std::string message, std::string nonce, bool isTTS, std::string token) {
     std::string callURL = "/channels/" + std::to_string(channelID) + "/messages";
 
     json toSend;
@@ -134,24 +134,22 @@ json discordpp::DiscordAPI::channels::messages::acknowledge(snowflake channelID,
     std::string callURL = "/channels/" + std::to_string(channelID) + "/messages/" + std::to_string(messageID) + "/ack";
     return DiscordAPI::call(callURL, token);
 }
-//I'm not sure hw to handle the permissions. https://discordapp.com/developers/docs/resources/channel#edit-channel-permissions
-namespace invites{
-    json get(snowflake channelID, std::string token){
-        return DiscordAPI::call("/channels/" + std::to_string(channelID) + "/invites", token, "GET");
-    }
-    json create(snowflake channelID, int max_age = 0, int max_uses = 0, bool temporary = true, bool xkcdpass = false, std::string token) {
-        std::string callURL = "/channels/" + std::to_string(channelID) + "/invites";
 
-        json toSend;
-        if(max_age != 0)
-            toSend["max_age"] = max_age;
-        if(max_uses != 0)
-            toSend["max_uses"] = max_uses;
-        toSend["temporary"] = temporary;
-        toSend["xkcdpass"] = xkcdpass;
+json discordpp::DiscordAPI::channels::messages::invites::get(snowflake channelID, std::string token){
+    return DiscordAPI::call("/channels/" + std::to_string(channelID) + "/invites", token, "GET");
+}
+json discordpp::DiscordAPI::channels::messages::invites::create(snowflake channelID, int max_age, int max_uses, bool temporary, bool xkcdpass, std::string token) {
+    std::string callURL = "/channels/" + std::to_string(channelID) + "/invites";
 
-        return DiscordAPI::call(callURL, token, toSend, "POST");
-    }
+    json toSend;
+    if(max_age != 0)
+        toSend["max_age"] = max_age;
+    if(max_uses != 0)
+        toSend["max_uses"] = max_uses;
+    toSend["temporary"] = temporary;
+    toSend["xkcdpass"] = xkcdpass;
+
+    return DiscordAPI::call(callURL, token, toSend, "POST");
 }
 json discordpp::DiscordAPI::channels::messages::typing(snowflake channelID, std::string token){
     return DiscordAPI::call("/channels/" + std::to_string(channelID) + "/typing", token, "POST");
@@ -203,7 +201,7 @@ json discordpp::DiscordAPI::guilds::channels::modify(snowflake guildID, json new
 json discordpp::DiscordAPI::guilds::members::getInfo(snowflake guildID, snowflake userID, std::string token){
     return DiscordAPI::call("/guilds/" + std::to_string(guildID) + "/members/" + std::to_string(userID) , token, "GET");
 }
-json discordpp::DiscordAPI::guilds::members::getList(snowflake guildID, int limit = 1, int offset = 0, std::string token){
+json discordpp::DiscordAPI::guilds::members::getList(snowflake guildID, int limit, int offset, std::string token){
     std::string callURL = "/guilds/" + std::to_string(guildID) + "/members";
 
     json toSend;
@@ -221,7 +219,7 @@ json discordpp::DiscordAPI::guilds::members::remove(snowflake guildID, snowflake
 json discordpp::DiscordAPI::guilds::bans::get(snowflake guildID, std::string token){
     return DiscordAPI::call("/guilds/" + std::to_string(guildID) + "/bans", token, "GET");
 }
-json discordpp::DiscordAPI::guilds::bans::create(snowflake guildID, snowflake userID, int deleteMessageDays = 1, std::string token){
+json discordpp::DiscordAPI::guilds::bans::create(snowflake guildID, snowflake userID, int deleteMessageDays, std::string token){
     std::string callURL = "/guilds/" + std::to_string(guildID) + "/bans/" + std::to_string(userID);
 
     json toSend;
@@ -333,7 +331,7 @@ void discordpp::DiscordAPI::auth::logout(std::string token) {
 }
 */
 
-json discordpp::DiscordAPI::users::queryUsers(int limit = 25, std::string username = "", std::string token){
+json discordpp::DiscordAPI::users::queryUsers(int limit, std::string username, std::string token){
     std::string callURL = "/users";
 
     json toSend;
@@ -419,8 +417,8 @@ discordpp::Client::Client(asio::io_service& asio_ios, const std::string& token, 
         client_.connect(connection_);
     }
 }
-std::map<std::string, std::function<void(json)>> discordpp::Client::eventResponses_;
-void discordpp::DiscordAPI::voice::on_message(websocketpp::connection_hdl hdl, message_ptr msg) {
+
+void discordpp::Client::on_message(websocketpp::connection_hdl hdl, message_ptr msg) {
     json jmessage = json::parse(msg->get_payload());
     if(jmessage["op"].get<int>() == 0){ //Dispatch
         std::map<std::string, std::function<void(json)>>::iterator it = eventResponses_.find(jmessage["t"]);
