@@ -18,7 +18,7 @@ Included <sup>(Git submodules)</sup>
 * [cURLpp](https://github.com/jpbarrette/curlpp)
 * [nlohmann::json](https://github.com/nlohmann/json)
 
-Building <sup>(Almost Hell on Earth)</sup>
+Building <sup>(Complicated)</sup>
 ---
 * In CMake:
     1. Add `ADD_SUBDIRECTORY(lib/discordpp)` before your `TARGET_LINK_LIBRARIES` command.
