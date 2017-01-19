@@ -4,30 +4,9 @@ A Discord API written in C++.
 
 Links:
 * [Discord Server](https://discord.gg/0usP6xmT4sRkB0Vl)
-* [Trello Board](trello.com/b/3CU2iRSo)
+* [Trello Board](trello.com/b/3CU2iRSo) <sub>(inactive)</sub>
 
-Functionality <sup>(Not much)</sup>
----
-Can respond to soft commands `@mention command` that are listed in `softcommands.dat`.
-
-`Softcommands.dat` Format:
-```
-command 1
-help blurb 1 (unused)
-response 1
-command 2
-help blurb 2 (unused)
-response 2
-multi-line command
-help blurb for multi-line commands
-{
-multi-line
-command
-}
-```
-
-
-Requirements <sup>(You need these)</sup>
+Requirements <sup>(I got these through APT)</sup>
 ---
 * [Boost](http://www.boost.org/)
 * [OpenSSL](https://www.openssl.org/)
@@ -41,6 +20,12 @@ Included <sup>(Git submodules)</sup>
 
 Building <sup>(Almost Hell on Earth)</sup>
 ---
-Build CMake targets `discorpp` and `curlpp`.
-
-Make a copy of `login.dat.example` and rename it `login.dat`. Replace the login information with your bots. Bot account support is planned, but not currently implemented.
+* In CMake:
+    1. Add `ADD_SUBDIRECTORY(lib/discordpp)` before your `TARGET_LINK_LIBRARIES` command.
+    2. Add `discordpp` to your `TARGET_LINK_LIBRARIES` command.
+* In your code:
+    1. Add `#include \<discordpp/bot.hh\>`.
+    2. Create a Bot object with `Bot(std::string token);`.
+    3. Add responses to events with the Bot's `void addResponse(std::string event, std::function<void(Bot *, json)> response);`.
+    4. Start the bot object with the Bot's `void start();`.
+    * Note: Code run after the Bot's `void start();` will not run until after the Bot stops, which I have not yet written.
