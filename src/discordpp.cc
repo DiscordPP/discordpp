@@ -344,7 +344,7 @@ json DiscordAPI::users::queryUsers(int limit, std::string username, std::string 
 
     return DiscordAPI::call(callURL, token, toSend, "POST");
 }
-json DiscordAPI::users::getUser(snowflake userID, std::string token){
+json DiscordAPI::users::get(snowflake userID, std::string token){
     return DiscordAPI::call("/users/" + std::to_string(userID), token, "GET");
 }
 json DiscordAPI::users::self::get(std::string token){

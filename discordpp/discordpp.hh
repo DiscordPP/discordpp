@@ -110,7 +110,7 @@ namespace discordpp{
 
         namespace users{
             json queryUsers(int limit = 25, std::string username = "", std::string token = data::lastToken());
-            json getUser(snowflake userID, std::string token = data::lastToken());
+            json get(snowflake userID, std::string token = data::lastToken());
             namespace self{
                 json get(std::string token = data::lastToken());
                 json modify(std::string username, std::string token = data::lastToken());
