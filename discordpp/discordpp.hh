@@ -40,7 +40,10 @@ namespace discordpp{
             json close(snowflake channelID, std::string token = data::lastToken());
 
             namespace messages{
-                json get(snowflake channelID, snowflake before = 0, snowflake after = 0, int limit = 50, std::string token = data::lastToken());
+                json get(snowflake channelID, int limit = 50, std::string token = data::lastToken());
+                json getAround(snowflake channelID, snowflake target = 0, int limit = 50, std::string token = data::lastToken());
+                json getBefore(snowflake channelID, snowflake target = 0, int limit = 50, std::string token = data::lastToken());
+                json getAfter(snowflake channelID, snowflake target = 0, int limit = 50, std::string token = data::lastToken());
                 json create(snowflake channelID, std::string message, std::string nonce = "", bool isTTS = false, std::string token = data::lastToken());
                 json edit(snowflake channelID, snowflake messageID, std::string message, std::string token = data::lastToken());
                 json remove(snowflake channelID, snowflake messageID, std::string token = data::lastToken());

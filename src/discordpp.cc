@@ -97,14 +97,26 @@ json DiscordAPI::channels::close(snowflake channelID, std::string token){
     return DiscordAPI::call("/channels/" + std::to_string(channelID), token, "DELETE");
 }
 
-json DiscordAPI::channels::messages::get(snowflake channelID, snowflake before, snowflake after, int limit, std::string token){
+json DiscordAPI::channels::messages::get(snowflake channelID, int limit, std::string token){
     json toSend;
-    if(before != 0){
-        toSend["before"] = before;
-    }
-    if(after != 0){
-        toSend["after"] = after;
-    }
+    toSend["limit"] = limit;
+    return DiscordAPI::call("/channels/" + std::to_string(channelID) + "/messages", token, toSend, "GET");
+}
+json DiscordAPI::channels::messages::getAround(snowflake channelID, snowflake target, int limit, std::string token){
+    json toSend;
+    toSend["around"] = target;
+    toSend["limit"] = limit;
+    return DiscordAPI::call("/channels/" + std::to_string(channelID) + "/messages", token, toSend, "GET");
+}
+json DiscordAPI::channels::messages::getBefore(snowflake channelID, snowflake target, int limit, std::string token){
+    json toSend;
+    toSend["before"] = target;
+    toSend["limit"] = limit;
+    return DiscordAPI::call("/channels/" + std::to_string(channelID) + "/messages", token, toSend, "GET");
+}
+json DiscordAPI::channels::messages::getAfter(snowflake channelID, snowflake target, int limit, std::string token){
+    json toSend;
+    toSend["after"] = target;
     toSend["limit"] = limit;
     return DiscordAPI::call("/channels/" + std::to_string(channelID) + "/messages", token, toSend, "GET");
 }
