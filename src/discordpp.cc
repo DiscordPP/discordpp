@@ -152,16 +152,14 @@ json DiscordAPI::channels::messages::acknowledge(snowflake channelID, snowflake 
 json DiscordAPI::channels::messages::invites::get(snowflake channelID, std::string token){
     return DiscordAPI::call("/channels/" + std::to_string(channelID) + "/invites", token, "GET");
 }
-json DiscordAPI::channels::messages::invites::create(snowflake channelID, int max_age, int max_uses, bool temporary, bool xkcdpass, std::string token) {
+json DiscordAPI::channels::messages::invites::create(snowflake channelID, int max_age = 86400, int max_uses = 0, bool temporary = false, bool unique = false, std::string token){
     std::string callURL = "/channels/" + std::to_string(channelID) + "/invites";
 
     json toSend;
-    if(max_age != 0)
-        toSend["max_age"] = max_age;
-    if(max_uses != 0)
-        toSend["max_uses"] = max_uses;
+    toSend["max_age"] = max_age;
+    toSend["max_uses"] = max_uses;
     toSend["temporary"] = temporary;
-    toSend["xkcdpass"] = xkcdpass;
+    toSend["unique"] = unique;
 
     return DiscordAPI::call(callURL, token, toSend, "POST");
 }

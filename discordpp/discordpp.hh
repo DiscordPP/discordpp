@@ -51,7 +51,7 @@ namespace discordpp{
                 //I'm not sure hw to handle the permissions. https://discordapp.com/developers/docs/resources/channel#edit-channel-permissions
                 namespace invites{
                     json get(snowflake channelID, std::string token = data::lastToken());
-                    json create(snowflake channelID, int max_age = 0, int max_uses = 0, bool temporary = true, bool xkcdpass = false, std::string token = data::lastToken());
+                    json create(snowflake channelID, int max_age = 86400, int max_uses = 0, bool temporary = false, bool unique = false, std::string token);
                 }
                 json typing(snowflake channelID, std::string token = data::lastToken());
             }
