@@ -63,7 +63,7 @@ namespace discordpp{
             json modify(snowflake guildID, json newParams, std::string token = data::lastToken());
             namespace channels{
                 json createText(snowflake guildID, std::string name, std::string token = data::lastToken());
-                json createVoice(snowflake guildID, std::string name, int bitrate, std::string token = data::lastToken());
+                json createVoice(snowflake guildID, std::string name, int bitrate = -1, int user_limit = -1, std::string token = data::lastToken());
                 json get(snowflake guildID, std::string token = data::lastToken());
                 json modify(snowflake guildID, json newParams, std::string token = data::lastToken());
             }

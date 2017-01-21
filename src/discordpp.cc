@@ -193,13 +193,18 @@ json DiscordAPI::guilds::channels::createText(snowflake guildID, std::string nam
     return DiscordAPI::call(callURL, token, toSend, "POST");
 }
 
-json DiscordAPI::guilds::channels::createVoice(snowflake guildID, std::string name, int bitrate, std::string token){
+json DiscordAPI::guilds::channels::createVoice(snowflake guildID, std::string name, int bitrate, int user_limit, std::string token){
     std::string callURL = "/guilds/" + std::to_string(guildID) + "/channels";
 
     json toSend;
     toSend["name"] = name;
     toSend["type"] = "voice";
-    toSend["bitrate"] = bitrate;
+    if(bitrate != -1){
+        toSend["bitrate"] = bitrate;
+    }
+    if(user_limit != -1){
+        toSend["user_limit"] = user_limit;
+    }
 
     return DiscordAPI::call(callURL, token, toSend, "POST");
 }
