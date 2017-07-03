@@ -407,6 +407,7 @@ Client::Client(asio::io_service& asio_ios, const std::string& token, std::map<st
 , keepalive_timer_(asio_ios)
 , eventResponses_(eventResponses)
 {
+    sequence_number_ = 0;
     client_.set_access_channels(websocketpp::log::alevel::all);
     client_.clear_access_channels(websocketpp::log::alevel::frame_payload);
 
@@ -437,6 +438,9 @@ Client::Client(asio::io_service& asio_ios, const std::string& token, std::map<st
 
 void Client::on_message(websocketpp::connection_hdl hdl, message_ptr msg) {
     json jmessage = json::parse(msg->get_payload());
+    if(!jmessage["s"].is_null()) {
+        sequence_number_ = jmessage["s"].get<int>();
+    }
     if(jmessage["op"].get<int>() == 0){ //Dispatch
         std::map<std::string, std::function<void(json)>>::iterator it = eventResponses_.find(jmessage["t"]);
         if(it != eventResponses_.end()){
@@ -457,12 +461,9 @@ void Client::on_message(websocketpp::connection_hdl hdl, message_ptr msg) {
 }
 
 void Client::keepalive(uint32_t ms){
-    auto now = std::chrono::system_clock::now();
-    auto duration = now.time_since_epoch();
-    auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
     json message = {
             {"op", 1},
-            {"d", millis}
+            {"d", sequence_number_}
     };
     std::cout << "Sending Heartbeat:\n";
     client_.send(connection_, message.dump(), websocketpp::frame::opcode::text);

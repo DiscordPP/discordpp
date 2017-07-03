@@ -160,6 +160,7 @@ namespace discordpp{
         websocketpp::uri_ptr uri_ptr_;
         client::connection_ptr connection_;
         asio::steady_timer keepalive_timer_;
+        uint32_t sequence_number_;
     };
 }
 
