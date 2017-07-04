@@ -424,6 +424,7 @@ Client::Client(asio::io_service& asio_ios, const std::string& token, std::map<st
 
     websocketpp::lib::error_code ec;
     std::string uri = fetchGateway(token);
+    uri = uri + "/?v=5&encoding=json";
     std::cout << "Connecting to gateway at " << uri << "\n";
     connection_ = client_.get_connection(uri, ec);
     if (ec) {
@@ -449,12 +450,31 @@ void Client::on_message(websocketpp::connection_hdl hdl, message_ptr msg) {
             std::cout << "There is no function for the event " << jmessage["t"] << ".\n";
         }
         if(jmessage["t"] == "READY") {
-            uint32_t ms = jmessage["d"]["heartbeat_interval"];
-            ms *= .9;
-            keepalive(ms);
         }
     } else if(jmessage["op"].get<int>() == 1){ //Heartbeat (This isn't implemented yet, still using periodic heartbeats for now.)
         //client_.send(hdl, jmessage.dump(), websocketpp::frame::opcode::text);
+    } else if(jmessage["op"].get<int>() == 10) {
+        json connect = {
+                {"op", 2},
+                {"d", {
+                               {"token", token_},
+                               {"v", 5},
+                               {"properties", {
+                                                      {"$os", "linux"},
+                                                      {"$browser", "discordpp"},
+                                                      {"$device", "discordpp"},
+                                                      {"$referrer",""}, {"$referring_domain",""}
+                                              }
+                               },
+                               {"compress", false},
+                               {"large_threshold", 250}
+                       }
+                }
+        };
+        std::cout << "Client Handshake:\n" << connect.dump(1) << "\n";
+        client_.send(hdl, connect.dump(), websocketpp::frame::opcode::text);
+        uint32_t ms = jmessage["d"]["heartbeat_interval"];
+        keepalive(ms);
     } else { //Wat
         std::cout << "Unexpected opcode received:\n\n" << jmessage.dump(4) << "\n\n\n";
     }
@@ -474,26 +494,6 @@ void Client::keepalive(uint32_t ms){
 
 void Client::on_open(websocketpp::connection_hdl hdl){
     std::cout << "Connection established.\n";
-
-    json connect = {
-            {"op", 2},
-            {"d", {
-                           {"token", token_},
-                           {"v", 4},
-                           {"properties", {
-                                                  {"$os", "linux"},
-                                                  {"$browser", "discordpp"},
-                                                  {"$device", "discordpp"},
-                                                  {"$referrer",""}, {"$referring_domain",""}
-                                          }
-                           },
-                           {"compress", false},
-                           {"large_threshold", 250}
-                   }
-            }
-    };
-    std::cout << "Client Handshake:\n" << connect.dump(1) << "\n";
-    client_.send(hdl, connect.dump(), websocketpp::frame::opcode::text);
 }
 std::string Client::fetchGateway(std::string token){
     return DiscordAPI::call("/gateway", token).at("url");
