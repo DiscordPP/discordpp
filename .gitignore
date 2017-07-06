@@ -111,3 +111,9 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+### CMake ###
+
+Makefile
+CMakeFiles/
+cmake_install.cmake
