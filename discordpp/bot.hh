@@ -17,7 +17,7 @@ namespace asio = boost::asio;
 namespace discordpp {
     using json = nlohmann::json;
 
-    class Bot {
+    class DLLAPI Bot {
     public:
         Bot(std::string token);
 
