@@ -1,12 +1,13 @@
 //
 // Created by aidan on 11/1/16.
 //
-
+#define DLL_EXPORT
 #include "discordpp/bot.hh"
 
 #include <functional>
 
 using namespace discordpp;
+namespace asio = boost::asio;
 
 Bot::Bot(std::string token)
         : token_(token) {
