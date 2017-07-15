@@ -39,7 +39,7 @@ json DiscordAPI::call(std::string targetURL, std::string token, json attachJSON,
         request.setOpt<curlpp::options::Url>("https://discordapp.com/api" + targetURL);
         request.setOpt(curlpp::options::Verbose(false));
 
-        if(!requestType.empty()) {
+        if (!requestType.empty()) {
             request.setOpt(curlpp::options::CustomRequest(requestType));
         }
 
@@ -51,14 +51,15 @@ json DiscordAPI::call(std::string targetURL, std::string token, json attachJSON,
         request.setOpt(curlpp::options::HttpHeader(header));
 
         if(!attachJSON.empty()) {
+            //std::cout << "attaching data\n";
             //std::cout << attachJSON.dump() << std::endl;
             request.setOpt(curlpp::options::PostFields(attachJSON.dump()));
             request.setOpt(curlpp::options::PostFieldSize(attachJSON.dump().length()));
         }
 
         request.perform();
-
-        json returned = json::parse(outstream.str());
+        std::string outstr = outstream.str();
+        json returned = outstr.empty() ? json{} : json::parse(outstr);
 
         try {
             //std::cout << returned.dump() << std::endl;
