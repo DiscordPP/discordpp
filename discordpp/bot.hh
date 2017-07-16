@@ -17,6 +17,8 @@
 namespace discordpp{
     using json = nlohmann::json;
     using snowflake = uint64_t;
+    using aios_ptr = std::shared_ptr<asio::io_service>;
+    using Handler = std::function<void(aios_ptr asio_ios, json)>;
 
     class Bot{
     public:
@@ -24,7 +26,7 @@ namespace discordpp{
             token_(token),
             rmod_(rmod),
             wsmod_(wsmod){
-            handlers_["READY"] = [this](json jmessage) {
+            handlers_["READY"] = [this](aios_ptr asio_ios, json jmessage) {
                 std::cout << "Recieved READY payload.\n";
                 std::cout << jmessage.dump(4) << "\n\n\n";
                 gatewayVersion_ = jmessage["d"]["v"];
@@ -32,7 +34,7 @@ namespace discordpp{
                 guilds = jmessage["d"]["guilds"];
                 sessionID_ = jmessage["d"]["session_id"];
             };
-            handlers_["GUILD_CREATE"] = [this](json jmessage) {
+            handlers_["GUILD_CREATE"] = [this](aios_ptr asio_ios, json jmessage) {
                 std::cout << "Recieved GUILD_CREATE payload.\n";
                 //if(jmessage["s"].get<int>() == 4) {
                 //    jmessage.erase("d");
@@ -65,31 +67,31 @@ namespace discordpp{
             rmod_->call(target, token_, body, type);
         }
 
-        void addHandler(std::string event, std::function<void(Bot *, json)> handler){
-            std::function<void(json)> bound = std::bind(handler, this, std::placeholders::_1);
+        void addHandler(std::string event, Handler handler){
+            //Handler bound = std::bind(handler, this, std::placeholders::_1, std::placeholders::_2);
             if(handlers_.find(event) != handlers_.end()){
-                std::function<void(json)> old = handlers_[event];
-                handlers_[event] = [old, bound](json jmessage){
-                    old(jmessage);
-                    bound(jmessage);
+                Handler old = handlers_[event];
+                handlers_[event] = [old, handler](aios_ptr asio_ios, json jmessage){
+                    old(asio_ios, jmessage);
+                    handler(asio_ios, jmessage);
                 };
             }else{
-                handlers_[event] = bound;
+                handlers_[event] = [this, handler](aios_ptr asio_ios, json jmessage){handler(asio_ios, jmessage);};
             }
         }
 
-        void run(std::shared_ptr<asio::io_service> asio_ios){
+        void init(aios_ptr asio_ios){
             auto on_message_wrapper = [this, asio_ios](json msg){
                 on_message(asio_ios, msg);
             };
             wsmod_->init(asio_ios, token_, rmod_->call("/gateway", token_).at("url").get<std::string>(), on_message_wrapper);
         }
 
-        void on_message(std::shared_ptr<asio::io_service> asio_ios, nlohmann::json jmessage) {
+        void on_message(aios_ptr asio_ios, nlohmann::json jmessage) {
             if(jmessage["op"].get<int>() == 0){ //Dispatch
-                std::map<std::string, std::function<void(json)>>::iterator it = handlers_.find(jmessage["t"]);
+                std::map<std::string, Handler>::iterator it = handlers_.find(jmessage["t"]);
                 if(it != handlers_.end()){
-                    asio_ios->post(std::bind(it->second, jmessage));
+                    asio_ios->post(std::bind(it->second, asio_ios, jmessage));
                 } else {
                     std::cout << "There is no function for the event " << jmessage["t"] << ".\n";
                 }
@@ -114,7 +116,7 @@ namespace discordpp{
         int gatewayVersion_ = -1;
         std::shared_ptr<RestModule> rmod_;
         std::shared_ptr<WebsocketModule> wsmod_;
-        std::map<std::string, std::function<void(json)>> handlers_ = {};
+        std::map<std::string, Handler> handlers_ = {};
     };
 }
 
