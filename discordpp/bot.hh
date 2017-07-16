@@ -66,6 +66,9 @@ namespace discordpp{
         }
 
         json call(std::string target, json body = {}, std::string type = ""){
+            if(target.at(0) != '/'){
+                target = '/' + target;
+            }
             rmod_->call(target, token_, body, type);
         }
 
