@@ -27,5 +27,5 @@ Building <sup>(Complicated)</sup>
     1. Add `#include \<discordpp/bot.hh\>`.
     2. Create a Bot object with `Bot(std::string token);`.
     3. Add responses to events with the Bot's `void addResponse(std::string event, std::function<void(Bot *, json)> response);`.
-    4. Start the bot object with the Bot's `void start();`.
-    * Note: Code run after the Bot's `void start();` will not run until after the Bot stops, which I have not yet written.
+    4. Start the bot object with the Bot's `void run();`.
+    * Note: Code run after the Bot's `void run();` will not run until after the Bot stops, which I have not yet written.
