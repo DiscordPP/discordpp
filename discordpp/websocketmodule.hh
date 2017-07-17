@@ -16,17 +16,16 @@ namespace discordpp{
     namespace asio = boost::asio;
     using boost::system::error_code;
     using json = nlohmann::json;
+    using aios_ptr = std::shared_ptr<asio::io_service>;
+    using WSMessageHandler = std::function<void(aios_ptr, json)>;
 
     class WebsocketModule{
     public:
-        virtual void init(std::shared_ptr<asio::io_service> asio_ios, const std::string &token, const std::string &gateway, std::function<void(json)> message_handler) = 0;
+        virtual void init(std::shared_ptr<asio::io_service> asio_ios, const std::string &token, const std::string &gateway, WSMessageHandler message_handler) = 0;
         void keepalive(uint32_t ms){
-            auto now = std::chrono::system_clock::now();
-            auto duration = now.time_since_epoch();
-            auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
             json message = {
                     {"op", 1},
-                    {"d", millis}
+                    {"d", sequence_number_}
             };
             std::cout << "Sending Heartbeat:\n";
             sendkeepalive(message);
@@ -36,9 +35,17 @@ namespace discordpp{
         }
 
     protected:
+        void keepalivewrap(aios_ptr asio_ios, json jmessage, WSMessageHandler handler){
+            if(!jmessage["s"].is_null()) {
+                sequence_number_ = jmessage["s"].get<int>();
+            }
+            handler(asio_ios, jmessage);
+        }
+
         virtual void sendkeepalive(json message) = 0;
 
         std::shared_ptr<asio::steady_timer> keepalive_timer_;
+        uint32_t sequence_number_ = 0;
     };
 }
 

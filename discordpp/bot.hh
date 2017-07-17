@@ -21,6 +21,7 @@ namespace discordpp{
     using snowflake = uint64_t;
     using aios_ptr = std::shared_ptr<asio::io_service>;
     using Handler = std::function<void(Bot*, aios_ptr, json)>;
+    using WSMessageHandler = std::function<void(aios_ptr, json)>;
 
     class Bot{
     public:
@@ -65,11 +66,11 @@ namespace discordpp{
             handlers_["GUILD_DELETE"] = handlers_["GUILD_CREATE"];
         }
 
-        json call(std::string target, json body = {}, std::string type = ""){
+        json call(aios_ptr asio_ios, std::string target, json body = {}, std::string type = ""){
             if(target.at(0) != '/'){
                 target = '/' + target;
             }
-            rmod_->call(target, token_, body, type);
+            return rmod_->call(asio_ios, target, token_, body, type);
         }
 
         void addHandler(std::string event, Handler handler){
@@ -86,10 +87,10 @@ namespace discordpp{
         }
 
         void init(aios_ptr asio_ios){
-            auto on_message_wrapper = [this, asio_ios](json msg){
+            WSMessageHandler on_message_wrapper = [this](aios_ptr asio_ios, json msg){
                 on_message(asio_ios, msg);
             };
-            wsmod_->init(asio_ios, token_, rmod_->call("/gateway", token_).at("url").get<std::string>(), on_message_wrapper);
+            wsmod_->init(asio_ios, token_, call(asio_ios, "/gateway")["url"], on_message_wrapper);
         }
 
         void on_message(aios_ptr asio_ios, nlohmann::json jmessage) {
@@ -115,7 +116,7 @@ namespace discordpp{
         json me_ = {};
         json guilds_ = {};
 
-    private:
+    protected:
         const std::string token_;
         std::string sessionID_ = "";
         int gatewayVersion_ = -1;
