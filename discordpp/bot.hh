@@ -20,8 +20,7 @@ namespace discordpp{
     using json = nlohmann::json;
     using snowflake = uint64_t;
     using aios_ptr = std::shared_ptr<asio::io_service>;
-    using Handler = std::function<void(Bot*, aios_ptr, json)>;
-    using WSMessageHandler = std::function<void(aios_ptr, json)>;
+    using Handler = std::function<std::vector<json>(Bot*, aios_ptr, json)>;
 
     class Bot{
     public:
@@ -32,10 +31,11 @@ namespace discordpp{
             handlers_["READY"] = [](Bot* bot, aios_ptr asio_ios, json jmessage) {
                 std::cout << "Recieved READY payload.\n";
                 std::cout << jmessage.dump(4) << "\n\n\n";
-                bot->gatewayVersion_ = jmessage["d"]["v"];
-                bot->me_ = jmessage["d"]["user"];
-                bot->guilds_ = jmessage["d"]["guilds"];
-                bot->sessionID_ = jmessage["d"]["session_id"];
+                bot->gatewayVersion_ = jmessage["v"];
+                bot->me_ = jmessage["user"];
+                bot->guilds_ = jmessage["guilds"];
+                bot->sessionID_ = jmessage["session_id"];
+                return std::vector<json>();
             };
             handlers_["GUILD_CREATE"] = [](Bot* bot, aios_ptr asio_ios, json jmessage) {
                 std::cout << "Recieved GUILD_CREATE payload.\n";
@@ -46,21 +46,22 @@ namespace discordpp{
 
                 bool replaced = false;
                 for(json& guild : bot->guilds_){
-                    if(guild["id"] == jmessage["d"]["id"]){
+                    if(guild["id"] == jmessage["id"]){
                         replaced = true;
-                        guild = jmessage["d"];
+                        guild = jmessage;
                     }
                 }
                 if(!replaced){
-                    bot->guilds_.push_back(jmessage["d"]);
+                    bot->guilds_.push_back(jmessage);
                 }
 
-                //gatewayVersion = jmessage["d"]["v"];
-                //me = jmessage["d"]["user"];
-                //privateChannels = jmessage["d"]["private_channels"];
-                //guilds = jmessage["d"]["guilds"];
-                //readState = jmessage["d"]["read_state"];
-                //sessionID = jmessage["d"]["session_id"];
+                //gatewayVersion = jmessage["v"];
+                //me = jmessage["user"];
+                //privateChannels = jmessage["private_channels"];
+                //guilds = jmessage["guilds"];
+                //readState = jmessage["read_state"];
+                //sessionID = jmessage["session_id"];
+                return std::vector<json>();
             };
             handlers_["GUILD_UPDATE"] = handlers_["GUILD_CREATE"];
             handlers_["GUILD_DELETE"] = handlers_["GUILD_CREATE"];
@@ -78,8 +79,10 @@ namespace discordpp{
             if(handlers_.find(event) != handlers_.end()){
                 Handler old = handlers_[event];
                 handlers_[event] = [old, handler](Bot* bot, aios_ptr asio_ios, json jmessage){
-                    old(bot, asio_ios, jmessage);
-                    handler(bot, asio_ios, jmessage);
+                    auto toSend = old(bot, asio_ios, jmessage),
+                            toSendCat = handler(bot, asio_ios, jmessage);
+                    toSend.insert(toSend.end(), toSendCat.begin(), toSendCat.end());
+                    return toSend;
                 };
             }else{
                 handlers_[event] = handler;
@@ -87,36 +90,31 @@ namespace discordpp{
         }
 
         void init(aios_ptr asio_ios){
-            WSMessageHandler on_message_wrapper = [this](aios_ptr asio_ios, json msg){
-                on_message(asio_ios, msg);
+            DispatchHandler on_message_wrapper = [this](aios_ptr asio_ios, std::string event, json data){
+                return handleDispatch(asio_ios, event, data);
             };
-            wsmod_->init(asio_ios, token_, call(asio_ios, "/gateway")["url"], on_message_wrapper);
-        }
-
-        void on_message(aios_ptr asio_ios, nlohmann::json jmessage) {
-            if(jmessage["op"].get<int>() == 0){ //Dispatch
-                std::map<std::string, Handler>::iterator it = handlers_.find(jmessage["t"]);
-                if(it != handlers_.end()){
-                    asio_ios->post(std::bind(it->second, this, asio_ios, jmessage));
-                } else {
-                    std::cout << "There is no function for the event " << jmessage["t"] << ".\n";
-                }
-                if(jmessage["t"] == "READY") {
-                    uint32_t ms = jmessage["d"]["heartbeat_interval"];
-                    ms *= .9;
-                    wsmod_->keepalive(ms);
-                }
-            } else if(jmessage["op"].get<int>() == 1){ //Heartbeat (This isn't implemented yet, still using periodic heartbeats for now.)
-                //client_.send(hdl, jmessage.dump(), websocketpp::frame::opcode::text);
-            } else { //Wat
-                std::cout << "Unexpected opcode received:\n\n" << jmessage.dump(4) << "\n\n\n";
-            }
+            wsmod_->init(asio_ios, token_, call(asio_ios, "/gateway")["url"].get<std::string>() + "/?v=5&encoding=json", on_message_wrapper);
         }
 
         json me_ = {};
         json guilds_ = {};
 
     protected:
+        json handleDispatch(aios_ptr asio_ios, std::string event, nlohmann::json msg) {
+            std::map<std::string, Handler>::iterator it = handlers_.find(event);
+            if (it != handlers_.end()) {
+                return it->second(this, asio_ios, msg);
+            } else {
+                std::cout << "There is no function for the event " << event << ".\n";
+                return std::vector<json>();
+            }
+            //if (jmessage["t"] == "READY") {
+            //    uint32_t ms = jmessage["heartbeat_interval"];
+            //    ms *= .9;
+            //    wsmod_->keepalive(ms);
+            //}
+        }
+
         const std::string token_;
         std::string sessionID_ = "";
         int gatewayVersion_ = -1;
