@@ -64,9 +64,9 @@ namespace discordpp{
             handlers_.insert(std::pair<std::string, Handler>("GUILD_CREATE", guildmod));
             handlers_.insert(std::pair<std::string, Handler>("GUILD_UPDATE", guildmod));
             handlers_.insert(std::pair<std::string, Handler>("GUILD_DELETE", guildmod));
-            for(auto handler : handlers_){
+            /*for(auto handler : handlers_){
                 std::cout << "    " << handler.first << '\n';
-            }
+            }*/
         }
 
         void call(aios_ptr asio_ios, std::string target, json body = {}, std::string type = "", Handler callback = [](Bot*, aios_ptr, json){}){
@@ -76,8 +76,8 @@ namespace discordpp{
             callback(this, asio_ios, rmod_->call(asio_ios, target, token_, body, type));
         }
 
-        void send(int opcode, json body = {}){
-            //wsmod_.
+        void send(int opcode, json payload = {}){
+            wsmod_->send(opcode, payload);
         }
 
         void addHandler(std::string event, Handler handler){
@@ -96,7 +96,7 @@ namespace discordpp{
 
         void init(aios_ptr asio_ios){
             DispatchHandler on_message_wrapper = [this](aios_ptr asio_ios, std::string event, json data){
-                std::cout << "here\n";
+                //std::cout << "here\n";
                 return handleDispatch(asio_ios, event, data);
             };
             call(asio_ios, "/gateway", /*body*/{}, /*type*/"", [this, on_message_wrapper](Bot*, aios_ptr asio_ios, json msg){
@@ -115,9 +115,9 @@ namespace discordpp{
 
     protected:
         void handleDispatch(aios_ptr asio_ios, std::string event, nlohmann::json msg) {
-            std::cout << event << '\n';
+            //std::cout << event << '\n';
             for(auto handler : handlers_){
-                std::cout << "    " << handler.first << '\n';
+                //std::cout << "    " << handler.first << '\n';
                 if(handler.first == event){
                     handler.second(this, asio_ios, msg);
                 }
@@ -141,7 +141,7 @@ namespace discordpp{
         std::shared_ptr<RestModule> rmod_;
         std::shared_ptr<WebsocketModule> wsmod_;
         std::multimap<std::string, Handler> handlers_ = {};
-        const unsigned int apiVersion_ = 5;
+        const unsigned int apiVersion_ = 6;
     };
 }
 

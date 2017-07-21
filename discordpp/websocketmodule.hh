@@ -27,9 +27,8 @@ namespace discordpp{
     protected:
         void handleMessage(aios_ptr asio_ios, const std::string &token, const unsigned int apiVersion, DispatchHandler disHandler, json msg){
             int opcode = msg["op"];
-            std::vector<json> toSend;
             //std::cout << "Opcode " << opcode << " recieved.\n";
-            std::cout << "recieved opcode " + std::to_string(msg["op"].get<int>()) + "\n";
+            //std::cout << "recieved opcode " + std::to_string(msg["op"].get<int>()) + "\n";
             switch(opcode){
                 case 0: // Dispatch
                     sequence_number_ = msg["s"];
@@ -38,7 +37,7 @@ namespace discordpp{
                     break;
                 case 10: // Hello
                     keepalive(msg["d"]["heartbeat_interval"]);
-                    toSend.push_back(genHandshake(token, apiVersion));
+                    send(2, genHandshake(token, apiVersion));
                     break;
                 case 11: // Heartbeat ACK
                     acknowledged = true;
@@ -55,6 +54,19 @@ namespace discordpp{
     private:
         json genHandshake(const std::string token, const unsigned int apiVersion){
             return {
+                    {"token", token},
+                    {"v", apiVersion},
+                    {"properties", {
+                                           {"$os", "linux"},
+                                           {"$browser", "discordpp"},
+                                           {"$device", "discordpp"},
+                                           {"$referrer", ""}, {"$referring_domain", ""}
+                                   }
+                    },
+                    {"compress", false},
+                    {"large_threshold", 250}
+            };
+            /*return {
                     {"op", 2},
                     {"d",  {
                                    {"token", token},
@@ -70,7 +82,7 @@ namespace discordpp{
                                    {"large_threshold", 250}
                            }
                     }
-            };
+            };*/
         }
 
         void keepalive(uint32_t ms){
