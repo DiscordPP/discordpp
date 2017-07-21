@@ -20,7 +20,7 @@ namespace discordpp{
     using json = nlohmann::json;
     using snowflake = uint64_t;
     using aios_ptr = std::shared_ptr<asio::io_service>;
-    using Handler = std::function<std::vector<json>(Bot*, aios_ptr, json)>;
+    using Handler = std::function<void(Bot*, aios_ptr, json)>;
 
     class Bot{
     public:
@@ -28,16 +28,15 @@ namespace discordpp{
             token_(token),
             rmod_(rmod),
             wsmod_(wsmod){
-            handlers_["READY"] = [](Bot* bot, aios_ptr asio_ios, json jmessage) {
+            handlers_.insert(std::pair<std::string, Handler>("READY", [](Bot* bot, aios_ptr asio_ios, json jmessage) {
                 std::cout << "Recieved READY payload.\n";
                 std::cout << jmessage.dump(4) << "\n\n\n";
                 bot->gatewayVersion_ = jmessage["v"];
                 bot->me_ = jmessage["user"];
                 bot->guilds_ = jmessage["guilds"];
                 bot->sessionID_ = jmessage["session_id"];
-                return std::vector<json>();
-            };
-            handlers_["GUILD_CREATE"] = [](Bot* bot, aios_ptr asio_ios, json jmessage) {
+            }));
+            Handler guildmod = [](Bot* bot, aios_ptr asio_ios, json jmessage) {
                 std::cout << "Recieved GUILD_CREATE payload.\n";
                 //if(jmessage["s"].get<int>() == 4) {
                 //    jmessage.erase("d");
@@ -61,53 +60,74 @@ namespace discordpp{
                 //guilds = jmessage["guilds"];
                 //readState = jmessage["read_state"];
                 //sessionID = jmessage["session_id"];
-                return std::vector<json>();
             };
-            handlers_["GUILD_UPDATE"] = handlers_["GUILD_CREATE"];
-            handlers_["GUILD_DELETE"] = handlers_["GUILD_CREATE"];
+            handlers_.insert(std::pair<std::string, Handler>("GUILD_CREATE", guildmod));
+            handlers_.insert(std::pair<std::string, Handler>("GUILD_UPDATE", guildmod));
+            handlers_.insert(std::pair<std::string, Handler>("GUILD_DELETE", guildmod));
+            /*for(auto handler : handlers_){
+                std::cout << "    " << handler.first << '\n';
+            }*/
         }
 
-        json call(aios_ptr asio_ios, std::string target, json body = {}, std::string type = ""){
+        void call(aios_ptr asio_ios, std::string target, json body = {}, std::string type = "", Handler callback = [](Bot*, aios_ptr, json){}){
             if(target.at(0) != '/'){
                 target = '/' + target;
             }
-            return rmod_->call(asio_ios, target, token_, body, type);
+            callback(this, asio_ios, rmod_->call(asio_ios, target, token_, body, type));
+        }
+
+        void send(int opcode, json payload = {}){
+            wsmod_->send(opcode, payload);
         }
 
         void addHandler(std::string event, Handler handler){
+            handlers_.insert(std::pair<std::string, Handler>(event, handler));
             //Handler bound = std::bind(handler, this, std::placeholders::_1, std::placeholders::_2);
-            if(handlers_.find(event) != handlers_.end()){
+            /*if(handlers_.find(event) != handlers_.end()){
                 Handler old = handlers_[event];
                 handlers_[event] = [old, handler](Bot* bot, aios_ptr asio_ios, json jmessage){
-                    auto toSend = old(bot, asio_ios, jmessage),
-                            toSendCat = handler(bot, asio_ios, jmessage);
-                    toSend.insert(toSend.end(), toSendCat.begin(), toSendCat.end());
-                    return toSend;
+                    old(bot, asio_ios, jmessage),
+                    handler(bot, asio_ios, jmessage);
                 };
             }else{
                 handlers_[event] = handler;
-            }
+            }*/
         }
 
         void init(aios_ptr asio_ios){
             DispatchHandler on_message_wrapper = [this](aios_ptr asio_ios, std::string event, json data){
+                //std::cout << "here\n";
                 return handleDispatch(asio_ios, event, data);
             };
-            wsmod_->init(asio_ios, token_, call(asio_ios, "/gateway")["url"].get<std::string>() + "/?v=5&encoding=json", on_message_wrapper);
+            call(asio_ios, "/gateway", /*body*/{}, /*type*/"", [this, on_message_wrapper](Bot*, aios_ptr asio_ios, json msg){
+                wsmod_->init(
+                        asio_ios,
+                        token_,
+                        apiVersion_,
+                        msg["url"].get<std::string>() + "/?v=" + std::to_string(apiVersion_) + "&encoding=json",
+                        on_message_wrapper
+                );
+            });
         }
 
         json me_ = {};
         json guilds_ = {};
 
     protected:
-        json handleDispatch(aios_ptr asio_ios, std::string event, nlohmann::json msg) {
-            std::map<std::string, Handler>::iterator it = handlers_.find(event);
+        void handleDispatch(aios_ptr asio_ios, std::string event, nlohmann::json msg) {
+            //std::cout << event << '\n';
+            for(auto handler : handlers_){
+                //std::cout << "    " << handler.first << '\n';
+                if(handler.first == event){
+                    handler.second(this, asio_ios, msg);
+                }
+            }
+            /*std::map<std::string, Handler>::iterator it = handlers_.find(event);
             if (it != handlers_.end()) {
-                return it->second(this, asio_ios, msg);
+                it->second(this, asio_ios, msg);
             } else {
                 std::cout << "There is no function for the event " << event << ".\n";
-                return std::vector<json>();
-            }
+            }*/
             //if (jmessage["t"] == "READY") {
             //    uint32_t ms = jmessage["heartbeat_interval"];
             //    ms *= .9;
@@ -120,7 +140,8 @@ namespace discordpp{
         int gatewayVersion_ = -1;
         std::shared_ptr<RestModule> rmod_;
         std::shared_ptr<WebsocketModule> wsmod_;
-        std::map<std::string, Handler> handlers_ = {};
+        std::multimap<std::string, Handler> handlers_ = {};
+        const unsigned int apiVersion_ = 6;
     };
 }
 
