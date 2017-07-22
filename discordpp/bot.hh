@@ -28,13 +28,13 @@ namespace discordpp{
             token_(token),
             rmod_(rmod),
             wsmod_(wsmod){
-            handlers_.insert(std::pair<std::string, Handler>("READY", [](Bot* bot, aios_ptr asio_ios, json jmessage) {
+            handlers_.insert(std::pair<std::string, Handler>("READY", [this](Bot* bot, aios_ptr asio_ios, json jmessage) {
                 std::cout << "Recieved READY payload.\n";
                 std::cout << jmessage.dump(4) << "\n\n\n";
                 bot->gatewayVersion_ = jmessage["v"];
                 bot->me_ = jmessage["user"];
                 bot->guilds_ = jmessage["guilds"];
-                bot->sessionID_ = jmessage["session_id"];
+                wsmod_->sessionID_ = jmessage["session_id"];
             }));
             Handler guildmod = [](Bot* bot, aios_ptr asio_ios, json jmessage) {
                 std::cout << "Recieved GUILD_CREATE payload.\n";
@@ -136,7 +136,6 @@ namespace discordpp{
         }
 
         const std::string token_;
-        std::string sessionID_ = "";
         int gatewayVersion_ = -1;
         std::shared_ptr<RestModule> rmod_;
         std::shared_ptr<WebsocketModule> wsmod_;

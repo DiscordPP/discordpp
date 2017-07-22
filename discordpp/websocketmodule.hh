@@ -24,6 +24,7 @@ namespace discordpp{
         virtual void init(std::shared_ptr<asio::io_service> asio_ios, const std::string &token, const unsigned int apiVersion, const std::string &gateway, DispatchHandler disHandler) = 0;
         virtual void send(int opcode = 0, json payload = {}) = 0;
 
+        std::string sessionID_ = "";
     protected:
         void handleMessage(aios_ptr asio_ios, const std::string &token, const unsigned int apiVersion, DispatchHandler disHandler, json msg){
             int opcode = msg["op"];
@@ -37,7 +38,15 @@ namespace discordpp{
                     break;
                 case 10: // Hello
                     keepalive(msg["d"]["heartbeat_interval"]);
-                    send(2, genHandshake(token, apiVersion));
+                    if(sessionID_.empty()) {
+                        send(2, genHandshake(token, apiVersion));
+                    }else{
+                        send(6, {
+                                {"token", token},
+                                {"session_id", sessionID_},
+                                {"seq", 1337}
+                        });
+                    }
                     break;
                 case 11: // Heartbeat ACK
                     acknowledged = true;
@@ -48,9 +57,32 @@ namespace discordpp{
         }
 
         virtual void sendkeepalive(json message) = 0;
+        virtual void connect() = 0;
+        virtual void close() = 0;
 
-        std::shared_ptr<asio::steady_timer> keepalive_timer_;
+        void closeHandler(aios_ptr asio_ios, std::string token){
+            keepalive_timer_->cancel();
+            connect();
+        }
+
+        /*void resume(aios_ptr asio_ios, std::string token) {
+            std::cout << "Attempting to resume.\n" << std::endl;
+            if (connected) {
+                send(6, {
+                    {"token", token},
+                    {"session_id", sessionID_},
+                    {"seq", 1337}
+                });
+            } else {
+                connect();
+                //reconnect_timer_ = std::make_unique<asio::deadline_timer>(*asio_ios, boost::posix_time::seconds(5));
+            }
+        }*/
+
+        std::unique_ptr<asio::steady_timer> keepalive_timer_;
+        std::unique_ptr<asio::deadline_timer> connect_timer_;
         uint32_t sequence_number_ = 0;
+        std::string gateway_;
     private:
         json genHandshake(const std::string token, const unsigned int apiVersion){
             return {
@@ -66,29 +98,14 @@ namespace discordpp{
                     {"compress", false},
                     {"large_threshold", 250}
             };
-            /*return {
-                    {"op", 2},
-                    {"d",  {
-                                   {"token", token},
-                                   {"v", apiVersion},
-                                   {"properties", {
-                                                          {"$os", "linux"},
-                                                          {"$browser", "discordpp"},
-                                                          {"$device", "discordpp"},
-                                                          {"$referrer", ""}, {"$referring_domain", ""}
-                                                  }
-                                   },
-                                   {"compress", false},
-                                   {"large_threshold", 250}
-                           }
-                    }
-            };*/
         }
 
         void keepalive(uint32_t ms){
-            if(acknowledged = false){
+            if(acknowledged == false){
                 //reconnect();
                 std::cerr << "Discord Lost" << '\n';
+                close();
+                return;
             }
             std::cout << "Sending Heartbeat " << sequence_number_ << ":\n";
             sendkeepalive({{"op", 1}, {"d", sequence_number_}});
