@@ -16,17 +16,20 @@ namespace discordpp{
     namespace asio = boost::asio;
     using boost::system::error_code;
     using json = nlohmann::json;
-    using aios_ptr = std::shared_ptr<asio::io_service>;
-    using DispatchHandler = std::function<void(aios_ptr, std::string, json)>;
+    using DispatchHandler = std::function<void(std::string, json)>;
 
     class WebsocketModule{
     public:
-        virtual void init(std::shared_ptr<asio::io_service> asio_ios, const std::string &token, const unsigned int apiVersion, const std::string &gateway, DispatchHandler disHandler) = 0;
+        WebsocketModule(std::shared_ptr<asio::io_service> asio_ios, const std::string &token):
+                aios_(asio_ios),
+                token_(token){}
+
+        virtual void init(const unsigned int apiVersion, const std::string &gateway, DispatchHandler disHandler) = 0;
         virtual void send(int opcode = 0, json payload = {}) = 0;
 
         std::string sessionID_ = "";
     protected:
-        void handleMessage(aios_ptr asio_ios, const std::string &token, const unsigned int apiVersion, DispatchHandler disHandler, json msg){
+        void handleMessage(const unsigned int apiVersion, DispatchHandler disHandler, json msg){
             int opcode = msg["op"];
             //std::cout << "Opcode " << opcode << " recieved.\n";
             //std::cout << "recieved opcode " + std::to_string(msg["op"].get<int>()) + "\n";
@@ -34,15 +37,16 @@ namespace discordpp{
                 case 0: // Dispatch
                     sequence_number_ = msg["s"];
                     //std::cout << "Event " << msg["t"] << " recieved.\n";
-                    disHandler(asio_ios, msg["t"], msg["d"]);
+                    disHandler(msg["t"], msg["d"]);
                     break;
                 case 10: // Hello
                     keepalive(msg["d"]["heartbeat_interval"]);
                     if(sessionID_.empty()) {
-                        send(2, genHandshake(token, apiVersion));
+                        send(2, genHandshake(apiVersion));
                     }else{
+                        hold_asio_.reset();
                         send(6, {
-                                {"token", token},
+                                {"token", token_},
                                 {"session_id", sessionID_},
                                 {"seq", 1337}
                         });
@@ -58,10 +62,10 @@ namespace discordpp{
 
         virtual void sendkeepalive(json message) = 0;
         virtual void connect() = 0;
+
         virtual void close() = 0;
 
-        void closeHandler(aios_ptr asio_ios, std::string token){
-            keepalive_timer_->cancel();
+        void closeHandler(){
             connect();
         }
 
@@ -79,14 +83,17 @@ namespace discordpp{
             }
         }*/
 
+        std::shared_ptr<asio::io_service> aios_;
+        const std::string token_;
         std::unique_ptr<asio::steady_timer> keepalive_timer_;
         std::unique_ptr<asio::deadline_timer> connect_timer_;
+        std::unique_ptr<asio::io_service::work> hold_asio_;
         uint32_t sequence_number_ = 0;
         std::string gateway_;
     private:
-        json genHandshake(const std::string token, const unsigned int apiVersion){
+        json genHandshake(const unsigned int apiVersion){
             return {
-                    {"token", token},
+                    {"token", token_},
                     {"v", apiVersion},
                     {"properties", {
                                            {"$os", "linux"},
@@ -105,14 +112,15 @@ namespace discordpp{
                 //reconnect();
                 std::cerr << "Discord Lost" << '\n';
                 close();
-                return;
+            }else {
+                std::cout << "Sending Heartbeat " << sequence_number_ << ":\n";
+                sendkeepalive({{"op", 1},
+                               {"d",  sequence_number_}});
+                acknowledged = false;
+                //reset timer
+                keepalive_timer_->expires_from_now(std::chrono::milliseconds(ms));
+                keepalive_timer_->async_wait(std::bind(&WebsocketModule::keepalive, this, ms));
             }
-            std::cout << "Sending Heartbeat " << sequence_number_ << ":\n";
-            sendkeepalive({{"op", 1}, {"d", sequence_number_}});
-            acknowledged = false;
-            //reset timer
-            keepalive_timer_->expires_from_now(std::chrono::milliseconds(ms));
-            keepalive_timer_->async_wait(std::bind(&WebsocketModule::keepalive, this, ms));
         }
 
         bool acknowledged = true;
