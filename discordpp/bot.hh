@@ -14,29 +14,30 @@
 #include "restmodule.hh"
 #include "websocketmodule.hh"
 
-namespace discordpp{
+namespace discordpp {
     class Bot;
 
     using json = nlohmann::json;
     using snowflake = uint64_t;
-    using aios_ptr = std::shared_ptr<asio::io_service>;
-    using Handler = std::function<void(Bot*, aios_ptr, json)>;
+    using Handler = std::function<void(Bot *, json)>;
 
-    class Bot{
+    class Bot {
     public:
-        Bot(std::string token, std::shared_ptr<RestModule> rmod, std::shared_ptr<WebsocketModule> wsmod) :
-            token_(token),
-            rmod_(rmod),
-            wsmod_(wsmod){
-            handlers_.insert(std::pair<std::string, Handler>("READY", [](Bot* bot, aios_ptr asio_ios, json jmessage) {
+        Bot(std::shared_ptr<asio::io_service> aios, std::string token, std::shared_ptr<RestModule> rmod,
+            std::shared_ptr<WebsocketModule> wsmod) :
+                aios_(aios),
+                token_(token),
+                rmod_(rmod),
+                wsmod_(wsmod) {
+            handlers_.insert(std::pair<std::string, Handler>("READY", [this](Bot *bot, json jmessage) {
                 std::cout << "Recieved READY payload.\n";
                 std::cout << jmessage.dump(4) << "\n\n\n";
                 bot->gatewayVersion_ = jmessage["v"];
                 bot->me_ = jmessage["user"];
                 bot->guilds_ = jmessage["guilds"];
-                bot->sessionID_ = jmessage["session_id"];
+                wsmod_->sessionID_ = jmessage["session_id"];
             }));
-            Handler guildmod = [](Bot* bot, aios_ptr asio_ios, json jmessage) {
+            Handler guildmod = [](Bot *bot, json jmessage) {
                 std::cout << "Recieved GUILD_CREATE payload.\n";
                 //if(jmessage["s"].get<int>() == 4) {
                 //    jmessage.erase("d");
@@ -44,13 +45,13 @@ namespace discordpp{
                 //std::cout << jmessage.dump(4) << "\n\n\n";
 
                 bool replaced = false;
-                for(json& guild : bot->guilds_){
-                    if(guild["id"] == jmessage["id"]){
+                for (json &guild : bot->guilds_) {
+                    if (guild["id"] == jmessage["id"]) {
                         replaced = true;
                         guild = jmessage;
                     }
                 }
-                if(!replaced){
+                if (!replaced) {
                     bot->guilds_.push_back(jmessage);
                 }
 
@@ -67,20 +68,34 @@ namespace discordpp{
             /*for(auto handler : handlers_){
                 std::cout << "    " << handler.first << '\n';
             }*/
+
+            {
+                DispatchHandler on_message_wrapper = [this](std::string event, json data){
+                    //std::cout << "here\n";
+                    return handleDispatch(event, data);
+                };
+                call("/gateway", /*body*/{}, /*type*/"", [this, on_message_wrapper](Bot*, json msg){
+                    wsmod_->init(
+                            apiVersion_,
+                            msg["url"].get<std::string>() + "/?v=" + std::to_string(apiVersion_) + "&encoding=json",
+                            on_message_wrapper
+                    );
+                });
+            }
         }
 
-        void call(aios_ptr asio_ios, std::string target, json body = {}, std::string type = "", Handler callback = [](Bot*, aios_ptr, json){}){
-            if(target.at(0) != '/'){
+        void call(std::string target, json body = {}, std::string type = "", Handler callback = [](Bot *, json) {}) {
+            if (target.at(0) != '/') {
                 target = '/' + target;
             }
-            callback(this, asio_ios, rmod_->call(asio_ios, target, token_, body, type));
+            callback(this, rmod_->call(target, token_, body, type));
         }
 
-        void send(int opcode, json payload = {}){
+        void send(int opcode, json payload = {}) {
             wsmod_->send(opcode, payload);
         }
 
-        void addHandler(std::string event, Handler handler){
+        void addHandler(std::string event, Handler handler) {
             handlers_.insert(std::pair<std::string, Handler>(event, handler));
             //Handler bound = std::bind(handler, this, std::placeholders::_1, std::placeholders::_2);
             /*if(handlers_.find(event) != handlers_.end()){
@@ -94,32 +109,16 @@ namespace discordpp{
             }*/
         }
 
-        void init(aios_ptr asio_ios){
-            DispatchHandler on_message_wrapper = [this](aios_ptr asio_ios, std::string event, json data){
-                //std::cout << "here\n";
-                return handleDispatch(asio_ios, event, data);
-            };
-            call(asio_ios, "/gateway", /*body*/{}, /*type*/"", [this, on_message_wrapper](Bot*, aios_ptr asio_ios, json msg){
-                wsmod_->init(
-                        asio_ios,
-                        token_,
-                        apiVersion_,
-                        msg["url"].get<std::string>() + "/?v=" + std::to_string(apiVersion_) + "&encoding=json",
-                        on_message_wrapper
-                );
-            });
-        }
-
         json me_ = {};
         json guilds_ = {};
 
     protected:
-        void handleDispatch(aios_ptr asio_ios, std::string event, nlohmann::json msg) {
+        void handleDispatch(std::string event, nlohmann::json msg) {
             //std::cout << event << '\n';
-            for(auto handler : handlers_){
+            for (auto handler : handlers_) {
                 //std::cout << "    " << handler.first << '\n';
-                if(handler.first == event){
-                    handler.second(this, asio_ios, msg);
+                if (handler.first == event) {
+                    handler.second(this, msg);
                 }
             }
             /*std::map<std::string, Handler>::iterator it = handlers_.find(event);
@@ -135,8 +134,8 @@ namespace discordpp{
             //}
         }
 
+        std::shared_ptr<asio::io_service> aios_;
         const std::string token_;
-        std::string sessionID_ = "";
         int gatewayVersion_ = -1;
         std::shared_ptr<RestModule> rmod_;
         std::shared_ptr<WebsocketModule> wsmod_;

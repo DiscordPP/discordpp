@@ -9,7 +9,6 @@
 
 namespace discordpp{
     using json = nlohmann::json;
-    using aios_ptr = std::shared_ptr<asio::io_service>;
 
     struct ratelimit{
         int millis;
@@ -17,7 +16,14 @@ namespace discordpp{
 
     class RestModule{
     public:
-        virtual json call(aios_ptr asio_ios, std::string targetURL, std::string token, json body = {}, std::string requestType = "") = 0;
+        RestModule(std::shared_ptr<asio::io_service> asio_ios, const std::string &token):
+            aios_(asio_ios),
+            token_(token){}
+        virtual json call(std::string targetURL, std::string token, json body = {}, std::string requestType = "") = 0;
+
+    protected:
+        std::shared_ptr<asio::io_service> aios_;
+        const std::string token_;
     };
 }
 
