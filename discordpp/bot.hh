@@ -65,6 +65,20 @@ namespace discordpp {
             handlers_.insert(std::pair<std::string, Handler>("GUILD_CREATE", guildmod));
             handlers_.insert(std::pair<std::string, Handler>("GUILD_UPDATE", guildmod));
             handlers_.insert(std::pair<std::string, Handler>("GUILD_DELETE", guildmod));
+            Handler presence_update = [](Bot *bot, json jmessage) {
+              std::cout << "Recieved PRESENCE_UPDATE payload.\n";
+              for (json &guild : bot->guilds_) {
+                  if (guild["id"] == jmessage["guild_id"]) {
+                    for (json &presence : guild["presences"]) {
+                      if (presence["user"]["id"] == jmessage["user"]["id"]) {
+                        presence = jmessage;
+                      }
+                    }
+                  }
+                }
+
+            };
+            handlers_.insert(std::pair<std::string, Handler>("PRESENCE_UPDATE", presence_update));
             /*for(auto handler : handlers_){
                 std::cout << "    " << handler.first << '\n';
             }*/
