@@ -4,7 +4,7 @@ A Discord API written in C++.
 
 Links:
 * [Discord Server](https://discord.gg/0usP6xmT4sQ4kIDh)
-* [Discord API Implementation Trello Board](https://trello.com/b/XZVPL956/discord)
+* ~~[Discord API Implementation Trello Board](https://trello.com/b/XZVPL956/discord)~~
 
 Requirements <sup>(I got these through APT)</sup>
 ---
