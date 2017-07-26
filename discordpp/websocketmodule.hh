@@ -43,6 +43,7 @@ namespace discordpp{
                 case 9:
                     std::cerr << "Invalid session, dumping session ID.\n";
                     sessionID_ = "";
+                    close();
                     break;
                 case 10: // Hello
                     keepalive(msg["d"]["heartbeat_interval"]);
