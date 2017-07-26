@@ -39,6 +39,10 @@ namespace discordpp{
                     //std::cout << "Event " << msg["t"] << " recieved.\n";
                     disHandler(msg["t"], msg["d"]);
                     break;
+                case 9:
+                    std::cerr << "Invalid session, dumping session ID.\n";
+                    sessionID_ = "";
+                    break;
                 case 10: // Hello
                     keepalive(msg["d"]["heartbeat_interval"]);
                     if(sessionID_.empty()) {
