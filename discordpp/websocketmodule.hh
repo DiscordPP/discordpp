@@ -10,7 +10,8 @@
 #include <boost/asio.hpp>
 #include <boost/asio/steady_timer.hpp>
 
-#include <lib/nlohmannjson/src/json.hpp>
+//#include <lib/nlohmannjson/src/json.hpp>
+#include <nlohmann/json.hpp>
 
 namespace discordpp{
     namespace asio = boost::asio;

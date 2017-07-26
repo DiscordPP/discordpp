@@ -9,7 +9,8 @@
 #include <string>
 
 
-#include <lib/nlohmannjson/src/json.hpp>
+//#include <lib/nlohmannjson/src/json.hpp>
+#include <nlohmann/json.hpp>
 
 #include "restmodule.hh"
 #include "websocketmodule.hh"

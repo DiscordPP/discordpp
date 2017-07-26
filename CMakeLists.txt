@@ -8,7 +8,9 @@ set(CMAKE_CXX_STANDARD 14)
 add_subdirectory(lib/nlohmannjson)
 
 add_library(${PROJECT_NAME} INTERFACE)
-target_sources(${PROJECT_NAME} INTERFACE "${PROJECT_SOURCE_DIR}/discordpp")
+# target_sources(${PROJECT_NAME} INTERFACE "${PROJECT_SOURCE_DIR}/discordpp")
+
+INCLUDE_DIRECTORIES(${discordpp_SOURCE_DIR} ${json_SOURCE_DIR})
 
 # INCLUDE_DIRECTORIES(${json_SOURCE_DIR})
 # TARGET_LINK_LIBRARIES(${PROJECT_NAME} INTERFACE json)

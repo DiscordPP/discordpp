@@ -5,7 +5,8 @@
 #ifndef EXAMPLE_BOT_RESTMODULE_HH
 #define EXAMPLE_BOT_RESTMODULE_HH
 
-#include <lib/nlohmannjson/src/json.hpp>
+//#include <lib/nlohmannjson/src/json.hpp>
+#include <nlohmann/json.hpp>
 
 namespace discordpp{
     using json = nlohmann::json;
