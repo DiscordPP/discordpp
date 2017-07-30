@@ -9,7 +9,8 @@
 #include <string>
 
 
-#include <lib/nlohmannjson/src/json.hpp>
+//#include <lib/nlohmannjson/src/json.hpp>
+#include <nlohmann/json.hpp>
 
 #include "restmodule.hh"
 #include "websocketmodule.hh"
@@ -34,7 +35,9 @@ namespace discordpp {
                 std::cout << jmessage.dump(4) << "\n\n\n";
                 bot->gatewayVersion_ = jmessage["v"];
                 bot->me_ = jmessage["user"];
-                bot->guilds_ = jmessage["guilds"];
+                for (json &guild : jmessage["guilds"]) {
+                      bot->guilds_[guild["id"].get<std::string>()] = guild;
+                }
                 wsmod_->sessionID_ = jmessage["session_id"];
             }));
             Handler guildmod = [](Bot *bot, json jmessage) {
@@ -44,15 +47,11 @@ namespace discordpp {
                 //}
                 //std::cout << jmessage.dump(4) << "\n\n\n";
 
-                bool replaced = false;
-                for (json &guild : bot->guilds_) {
-                    if (guild["id"] == jmessage["id"]) {
-                        replaced = true;
-                        guild = jmessage;
-                    }
-                }
-                if (!replaced) {
-                    bot->guilds_.push_back(jmessage);
+                bot->guilds_[jmessage["id"].get<std::string>()] = jmessage;
+
+                for (json &presence : jmessage["presences"]) {
+                      bot->presences_[presence["user"]["id"].get<std::string>()] = presence;
+
                 }
 
                 //gatewayVersion = jmessage["v"];
@@ -62,23 +61,13 @@ namespace discordpp {
                 //readState = jmessage["read_state"];
                 //sessionID = jmessage["session_id"];
             };
+            Handler presence_update = [](Bot *bot, json jmessage) {
+              bot->presences_[jmessage["user"]["id"].get<std::string>()] = jmessage;
+            };
+            handlers_.insert(std::pair<std::string, Handler>("PRESENCE_UPDATE", presence_update));
             handlers_.insert(std::pair<std::string, Handler>("GUILD_CREATE", guildmod));
             handlers_.insert(std::pair<std::string, Handler>("GUILD_UPDATE", guildmod));
             handlers_.insert(std::pair<std::string, Handler>("GUILD_DELETE", guildmod));
-            Handler presence_update = [](Bot *bot, json jmessage) {
-              std::cout << "Recieved PRESENCE_UPDATE payload.\n";
-              for (json &guild : bot->guilds_) {
-                  if (guild["id"] == jmessage["guild_id"]) {
-                    for (json &presence : guild["presences"]) {
-                      if (presence["user"]["id"] == jmessage["user"]["id"]) {
-                        presence = jmessage;
-                      }
-                    }
-                  }
-                }
-
-            };
-            handlers_.insert(std::pair<std::string, Handler>("PRESENCE_UPDATE", presence_update));
             /*for(auto handler : handlers_){
                 std::cout << "    " << handler.first << '\n';
             }*/
@@ -124,7 +113,8 @@ namespace discordpp {
         }
 
         json me_ = {};
-        json guilds_ = {};
+        json guilds_;
+        json presences_;
 
     protected:
         void handleDispatch(std::string event, nlohmann::json msg) {
