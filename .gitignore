@@ -1,6 +1,7 @@
 cmake-build-debug/
 CMakeFiles/
 cmake_install.cmake
+Makefile
 
 # Created by https://www.gitignore.io/api/jetbrains,c++,linux,windows
 
