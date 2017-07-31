@@ -6,10 +6,12 @@
 #define EXAMPLE_BOT_RESTMODULE_HH
 
 //#include <lib/nlohmannjson/src/json.hpp>
+#include <boost/asio.hpp>
 #include <nlohmann/json.hpp>
 
 namespace discordpp{
     using json = nlohmann::json;
+    namespace asio = boost::asio;
 
     struct ratelimit{
         int millis;

@@ -10,6 +10,7 @@
 
 
 //#include <lib/nlohmannjson/src/json.hpp>
+#include <boost/asio.hpp>
 #include <nlohmann/json.hpp>
 
 #include "restmodule.hh"
@@ -19,6 +20,7 @@ namespace discordpp {
     class Bot;
 
     using json = nlohmann::json;
+    namespace asio = boost::asio;
     using snowflake = uint64_t;
     using Handler = std::function<void(Bot *, json)>;
 
@@ -36,7 +38,7 @@ namespace discordpp {
                 bot->gatewayVersion_ = jmessage["v"];
                 bot->me_ = jmessage["user"];
                 bot->guilds_ = jmessage["guilds"];
-                wsmod_->sessionID_ = jmessage["session_id"];
+                wsmod_->sessionID_ = jmessage["session_id"].dump();
             }));
             Handler guildmod = [](Bot *bot, json jmessage) {
                 std::cout << "Recieved GUILD_CREATE payload.\n";
