@@ -71,10 +71,6 @@ namespace discordpp{
 
         virtual void close() = 0;
 
-        void closeHandler(){
-            connect();
-        }
-
         /*void resume(aios_ptr asio_ios, std::string token) {
             std::cout << "Attempting to resume.\n" << std::endl;
             if (connected) {
