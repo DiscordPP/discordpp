@@ -114,7 +114,7 @@ namespace discordpp{
         }
 
         void keepalive(uint32_t ms){
-            if(acknowledged == false){
+            if(!acknowledged){
                 //reconnect();
                 std::cerr << "Discord Lost" << '\n';
                 close();
