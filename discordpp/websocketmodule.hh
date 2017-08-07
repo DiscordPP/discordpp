@@ -54,7 +54,7 @@ namespace discordpp{
                         send(6, {
                                 {"token", token_},
                                 {"session_id", sessionID_},
-                                {"seq", 1337}
+                                {"seq", sequence_number_}
                         });
                     }
                     break;
