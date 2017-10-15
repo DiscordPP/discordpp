@@ -54,7 +54,7 @@ namespace discordpp{
                         send(6, {
                                 {"token", token_},
                                 {"session_id", sessionID_},
-                                {"seq", 1337}
+                                {"seq", sequence_number_}
                         });
                     }
                     break;
@@ -70,10 +70,6 @@ namespace discordpp{
         virtual void connect() = 0;
 
         virtual void close() = 0;
-
-        void closeHandler(){
-            connect();
-        }
 
         /*void resume(aios_ptr asio_ios, std::string token) {
             std::cout << "Attempting to resume.\n" << std::endl;
@@ -114,7 +110,7 @@ namespace discordpp{
         }
 
         void keepalive(uint32_t ms){
-            if(acknowledged == false){
+            if(!acknowledged){
                 //reconnect();
                 std::cerr << "Discord Lost" << '\n';
                 close();
