@@ -9,15 +9,33 @@
 
 namespace discordpp {
     using json = nlohmann::json;
+
     struct ratelimit{
         int millis;
     };
+
     class BotStruct {
     public:
-        virtual json call(std::string targetURL, std::string token, json body = {}, std::string requestType = "") = 0;
+        virtual json call(std::string targetURL, json body = {}, std::string requestType = "") = 0;
+
+        void run(){
+            bool ready = true;
+            for(auto module: needInit){
+                if(module.second){
+                    std::cerr << "Forgot to initialize: " << module.first << '\n';
+                    ready = false;
+                }
+            }
+            if(ready) {
+                aioc->run();
+            }
+        }
 
     protected:
-        unsigned int apiVersion;
+        std::map<std::string, bool> needInit;
+        unsigned int apiVersion = 6;
+        std::shared_ptr<asio::io_context> aioc;
+        std::string token;
     };
 }
 
