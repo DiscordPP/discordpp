@@ -14,6 +14,11 @@ Required by what are currently the only modules:
 * [Crypto++](https://www.cryptopp.com/)
 * [Websocket++](http://www.zaphoyd.com/websocketpp)
 
+Install everything (for Ubuntu):
+```bash
+sudo apt install build-essential libboost-all-dev libssl-dev libcrypto++-dev libcurl4-openssl-dev libwebsocketpp-dev libcurlpp-dev
+```
+
 Included <sup>(Git submodules)</sup>
 --
 * [nlohmann::json](https://github.com/nlohmann/json)\
