@@ -91,14 +91,14 @@ namespace discordpp {
             }
             callback(this, rmod_->call(target, token_, body, type));
         }
-		
-		void callWithFile(std::string target, json body, std::string filename, std::string type = "", Handler callback = [](Bot *, json) {}) {
+
+        void callWithFile(std::string target, json body, std::string filename, std::string type = "", Handler callback = [](Bot *, json) {}) {
             if (target.at(0) != '/') {
                 target = '/' + target;
             }
             callback(this, rmod_->callWithFile(target, token_, body, filename, type));
-        }		
-		
+        }
+
         void send(int opcode, json payload = {}) {
             wsmod_->send(opcode, payload);
         }

@@ -21,8 +21,8 @@ namespace discordpp{
             aios_(asio_ios),
             token_(token){}
         virtual json call(std::string targetURL, std::string token, json body = {}, std::string requestType = "") = 0;
-		virtual json callWithFile(std::string targetURL, std::string token, json body, std::string fileName, std::string requestType = "") = 0;
-		
+        virtual json callWithFile(std::string targetURL, std::string token, json body, std::string fileName, std::string requestType = "") = 0;
+
     protected:
         std::shared_ptr<asio::io_service> aios_;
         const std::string token_;
