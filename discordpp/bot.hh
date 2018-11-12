@@ -75,7 +75,7 @@ namespace discordpp {
                     //std::cout << "here\n";
                     return handleDispatch(event, data);
                 };
-                call("/gateway", /*body*/{}, /*type*/"", [this, on_message_wrapper](Bot*, json msg){
+                call("/gateway", /*body*/{}, /*type*/"", /*fileName*/"", [this, on_message_wrapper](Bot*, json msg){
                     wsmod_->init(
                             apiVersion_,
                             msg["url"].get<std::string>() + "/?v=" + std::to_string(apiVersion_) + "&encoding=json",
@@ -85,18 +85,11 @@ namespace discordpp {
             }
         }
 
-        void call(std::string target, json body = {}, std::string type = "", Handler callback = [](Bot *, json) {}) {
+        void call(std::string target, json body = {}, std::string type = "", std::string fileName = "", Handler callback = [](Bot *, json) {}) {
             if (target.at(0) != '/') {
                 target = '/' + target;
             }
-            callback(this, rmod_->call(target, token_, body, type));
-        }
-
-        void callWithFile(std::string target, json body, std::string filename, std::string type = "", Handler callback = [](Bot *, json) {}) {
-            if (target.at(0) != '/') {
-                target = '/' + target;
-            }
-            callback(this, rmod_->callWithFile(target, token_, body, filename, type));
+            callback(this, rmod_->call(target, token_, body, type, fileName));
         }
 
         void send(int opcode, json payload = {}) {
