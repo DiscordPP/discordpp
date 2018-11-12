@@ -20,7 +20,7 @@ namespace discordpp{
         RestModule(std::shared_ptr<asio::io_service> asio_ios, const std::string &token):
             aios_(asio_ios),
             token_(token){}
-        virtual json call(std::string targetURL, std::string token, json body = {}, std::string requestType = "") = 0;
+        virtual json call(std::string targetURL, std::string token, json body = {}, std::string requestType = "", std::string fileName = "") = 0;
 
     protected:
         std::shared_ptr<asio::io_service> aios_;
