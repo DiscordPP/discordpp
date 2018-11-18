@@ -20,7 +20,7 @@ namespace discordpp {
 
     class BotStruct {
     public:
-        virtual json call(std::string targetURL, json body = {}, std::string requestType = "") = 0;
+        virtual json call(std::string requestType, std::string targetURL, json body) = 0;
 
         void run(){
             bool ready = true;
