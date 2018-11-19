@@ -14,9 +14,13 @@ Required by what are currently the only modules:
 * [Crypto++](https://www.cryptopp.com/)
 * [Websocket++](http://www.zaphoyd.com/websocketpp)
 
-Install everything (for Ubuntu):
-```bash
+Install everything (Debian-based distros):
+```sh
 sudo apt install build-essential libboost-all-dev libssl-dev libcrypto++-dev libcurl4-openssl-dev libwebsocketpp-dev libcurlpp-dev
+```
+Install everything (Fedora/RHEL-based distros):
+```sh
+sudo dnf install openssl-devel boost-devel cryptopp-devel cryptopp curlpp-devel websocketpp-devel cmake
 ```
 
 Included <sup>(Git submodules)</sup>
