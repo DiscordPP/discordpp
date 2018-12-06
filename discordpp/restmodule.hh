@@ -12,6 +12,7 @@ namespace discordpp{
     using json = nlohmann::json;
 
     struct ratelimit{
+        ratelimit(int _millis) : millis(_millis) {}
         int millis;
     };
 
