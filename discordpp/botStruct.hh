@@ -5,6 +5,10 @@
 #ifndef EXAMPLE_BOT_BOTREQUIRED_HH
 #define EXAMPLE_BOT_BOTREQUIRED_HH
 
+#include <iostream>
+
+#include <boost/asio.hpp>
+
 #include <nlohmann/json.hpp>
 
 namespace discordpp {
@@ -16,7 +20,7 @@ namespace discordpp {
 
     class BotStruct {
     public:
-        virtual json call(std::string targetURL, json body = {}, std::string requestType = "") = 0;
+        virtual json call(std::string requestType, std::string targetURL, json body) = 0;
 
         void run(){
             bool ready = true;
@@ -34,7 +38,7 @@ namespace discordpp {
     protected:
         std::map<std::string, bool> needInit;
         unsigned int apiVersion = 6;
-        std::shared_ptr<asio::io_context> aioc;
+        std::shared_ptr<boost::asio::io_context> aioc;
         std::string token;
     };
 }
