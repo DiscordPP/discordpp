@@ -20,9 +20,11 @@ namespace discordpp {
 
     class BotStruct {
     public:
-        virtual json call(std::string requestType, std::string targetURL, json body) = 0;
+        virtual ~BotStruct(){};
+        virtual json call(std::string requestType, std::string targetURL, json body = {}) = 0;
+        virtual void send(int opcode, json payload = {}) = 0;
 
-        void run(){
+        virtual void run(){
             bool ready = true;
             for(auto module: needInit){
                 if(module.second){
