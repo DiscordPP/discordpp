@@ -24,7 +24,7 @@ namespace discordpp {
         virtual json call(std::string requestType, std::string targetURL, json body = {}) = 0;
         virtual void send(int opcode, json payload = {}) = 0;
 
-        virtual void run(){
+        void run(){
             bool ready = true;
             for(auto module: needInit){
                 if(module.second){
@@ -33,11 +33,15 @@ namespace discordpp {
                 }
             }
             if(ready) {
-                aioc->run();
+                runctd();
             }
         }
 
     protected:
+        virtual void runctd(){
+            aioc->run();
+        }
+
         std::map<std::string, bool> needInit;
         unsigned int apiVersion = 6;
         std::shared_ptr<boost::asio::io_context> aioc;
