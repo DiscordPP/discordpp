@@ -17,6 +17,10 @@ namespace discordpp {
     using snowflake = uint64_t;
 
     class Bot : virtual BotStruct {
+        std::unique_ptr<boost::asio::steady_timer> pacemaker_;
+        std::unique_ptr<std::chrono::milliseconds> heartrate_;
+        std::unique_ptr<int> sequence_ = nullptr;
+        bool gotACK = true;
     public:
         Bot() {
             needInit["Bot"] = true;
@@ -27,6 +31,69 @@ namespace discordpp {
             token = tokenIn;
             aioc = aiocIn;
             needInit["Bot"] = false;
+        }
+
+    protected:
+        void sendHeartbeat() {
+            if(!gotACK){
+                std::cerr << "Discord Servers did not respond to heartbeat. Reconnect not implemented.";
+                exit(1);
+            }
+            gotACK = false;
+            std::cerr << "Sending heartbeat\n";
+            pacemaker_ = std::make_unique<boost::asio::steady_timer>(
+                    *aioc,
+                    std::chrono::steady_clock::now() + *heartrate_
+            );
+            pacemaker_->async_wait(
+                    [this](const boost::system::error_code) {
+                        sendHeartbeat();
+                    }
+            );
+            if(sequence_ == nullptr) {
+                send(1, {});
+            }else{
+                send(1, *sequence_);
+            }
+        }
+
+        void recievePayload(json payload) override {
+            std::cerr << "Recieved Payload: " << payload.dump(4) << '\n';
+
+            switch (payload["op"].get<int>()) {
+                case 0:  // Dispatch:           dispatches an event
+                    std::cerr << "Warning: opcode " << payload["op"] << " is not implemented.\n";
+                    break;
+                case 1:  // Heartbeat:          used for ping checking
+                    std::cerr << "Discord Servers requested a heartbeat, which is not implemented.\n";
+                    break;
+                case 7:  // Reconnect:          used to tell clients to reconnect to the gateway
+                    std::cerr << "Discord Servers requested a reconnect. Reconnect not implemented.";
+                    exit(1);
+                case 9:  // Invalid Session:	used to notify client they have an invalid session id
+                    std::cerr << "Discord Servers notified of an invalid session ID. Reconnect not implemented.";
+                    exit(1);
+                case 10: // Hello:              sent immediately after connecting, contains heartbeat and server debug information
+                    heartrate_ = std::make_unique<std::chrono::milliseconds>(payload["d"]["heartbeat_interval"]);
+                    sendHeartbeat();
+                    send(2, {
+                            {"token",      token},
+                            {"properties", {
+                                                   {"$os", "linux"},
+                                                   {"$browser", "discordpp"},
+                                                   {"$device", "discordpp"},
+                                           }
+                            }
+                    });
+                    break;
+                case 11: // Heartbeat ACK:      sent immediately following a client heartbeat that was received
+                    gotACK = true;
+                    std::cout << "Heartbeat Successful." << std::endl;
+                    break;
+                default:
+                    std::cerr << "Unexpected opcode " << payload["op"] << "! Message:\n"
+                              << payload.dump(4) << '\n';
+            }
         }
     };
 }
