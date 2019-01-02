@@ -18,10 +18,11 @@ namespace discordpp {
 
     class Bot : virtual BotStruct {
     public:
-        Bot(){
+        Bot() {
             needInit["Bot"] = true;
         }
-        void initBot(unsigned int apiVersionIn, std::string tokenIn, std::shared_ptr<asio::io_context> aiocIn){
+
+        void initBot(unsigned int apiVersionIn, std::string tokenIn, std::shared_ptr<asio::io_context> aiocIn) {
             apiVersion = apiVersionIn;
             token = tokenIn;
             aioc = aiocIn;
