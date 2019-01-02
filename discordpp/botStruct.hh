@@ -42,6 +42,8 @@ namespace discordpp {
             aioc->run();
         }
 
+        virtual void recievePayload(json payload) = 0;
+
         std::map<std::string, bool> needInit;
         unsigned int apiVersion = 6;
         std::shared_ptr<boost::asio::io_context> aioc;
