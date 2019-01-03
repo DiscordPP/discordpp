@@ -19,14 +19,16 @@ namespace discordpp {
     class Bot : virtual BotStruct {
         std::unique_ptr<boost::asio::steady_timer> pacemaker_;
         std::unique_ptr<std::chrono::milliseconds> heartrate_;
-        std::unique_ptr<int> sequence_ = nullptr;
+        int sequence_ = -1;
         bool gotACK = true;
     public:
+        std::multimap<std::string, std::function<void(json)>> handlers;
+
         Bot() {
             needInit["Bot"] = true;
         }
 
-        void initBot(unsigned int apiVersionIn, std::string tokenIn, std::shared_ptr<asio::io_context> aiocIn) {
+        void initBot(unsigned int apiVersionIn, const std::string &tokenIn, std::shared_ptr<asio::io_context> aiocIn) {
             apiVersion = apiVersionIn;
             token = tokenIn;
             aioc = aiocIn;
@@ -50,19 +52,26 @@ namespace discordpp {
                         sendHeartbeat();
                     }
             );
-            if(sequence_ == nullptr) {
-                send(1, {});
+            if(sequence_ >= 0) {
+                send(1, sequence_);
             }else{
-                send(1, *sequence_);
+                send(1, {});
             }
         }
 
         void recievePayload(json payload) override {
-            std::cerr << "Recieved Payload: " << payload.dump(4) << '\n';
+            //std::cerr << "Recieved Payload: " << payload.dump(4) << '\n';
 
             switch (payload["op"].get<int>()) {
                 case 0:  // Dispatch:           dispatches an event
-                    std::cerr << "Warning: opcode " << payload["op"] << " is not implemented.\n";
+                    sequence_ = payload["s"].get<int>();
+                    if(handlers.find(payload["t"]) == handlers.end()){
+                        std::cerr << "No handlers defined for " << payload["t"] << "\n";
+                    }else{
+                        for(auto handler = handlers.lower_bound(payload["t"]); handler != handlers.upper_bound(payload["t"]); handler++){
+                            handler->second(payload["d"]);
+                        }
+                    }
                     break;
                 case 1:  // Heartbeat:          used for ping checking
                     std::cerr << "Discord Servers requested a heartbeat, which is not implemented.\n";
