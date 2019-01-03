@@ -39,7 +39,9 @@ namespace discordpp {
 
     protected:
         virtual void runctd(){
+            std::cerr << "Starting run loop" << '\n';
             aioc->run();
+            std::cerr << "Ending run loop" << '\n';
         }
 
         virtual void recievePayload(json payload) = 0;

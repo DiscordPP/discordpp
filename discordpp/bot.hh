@@ -38,11 +38,11 @@ namespace discordpp {
     protected:
         void sendHeartbeat() {
             if(!gotACK){
-                std::cerr << "Discord Servers did not respond to heartbeat. Reconnect not implemented.";
+                std::cerr << "Discord Servers did not respond to heartbeat. Reconnect not implemented.\n";
                 exit(1);
             }
             gotACK = false;
-            std::cerr << "Sending heartbeat\n";
+            std::cout << "Sending heartbeat..." << std::endl;
             pacemaker_ = std::make_unique<boost::asio::steady_timer>(
                     *aioc,
                     std::chrono::steady_clock::now() + *heartrate_
