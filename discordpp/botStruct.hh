@@ -11,6 +11,8 @@
 
 #include <nlohmann/json.hpp>
 
+#include "colors.hh"
+
 namespace discordpp {
     using json = nlohmann::json;
 
@@ -28,7 +30,7 @@ namespace discordpp {
             bool ready = true;
             for(auto module: needInit){
                 if(module.second){
-                    std::cerr << "Forgot to initialize: " << module.first << '\n';
+                    std::cerr << clr(Red) << "Forgot to initialize: " << module.first << clr(Reset) << '\n';
                     ready = false;
                 }
             }
@@ -39,9 +41,9 @@ namespace discordpp {
 
     protected:
         virtual void runctd(){
-            std::cerr << "Starting run loop" << '\n';
+            std::cerr << clr(Bold) << "Starting run loop" << clr(Reset) << '\n';
             aioc->run();
-            std::cerr << "Ending run loop" << '\n';
+            std::cerr << clr(Bold) << "Ending run loop" << clr(Reset) << '\n';
         }
 
         virtual void recievePayload(json payload) = 0;
