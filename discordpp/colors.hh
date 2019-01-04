@@ -24,7 +24,7 @@ namespace discordpp
         White
     };
 
-    void color(std::string str, Color color)
+    std::string color(std::string str, Color color)
     {
         std::string clrstr = std::to_string(color);
         std::ostringstream clr;
@@ -34,9 +34,9 @@ namespace discordpp
             << "m"
             << str
             << "\033["
-            << Color.Reset
+            << std::to_string(Reset)
             << "m";
-        return clr;
+        return clr.str();
     }
 }
 

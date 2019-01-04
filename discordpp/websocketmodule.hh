@@ -64,9 +64,9 @@ namespace discordpp{
                     acknowledged = true;
                     break;
                 default:
-                    std::cout << color("Unknown opcode ", Color.Red) 
-                              << color(opcode, Color.Bold) 
-                              << color(" recieved.\n", Color.Red);
+                    std::cout << color("Unknown opcode ", Red) 
+                              << color(opcode, Bold) 
+                              << color(" recieved.\n", Red);
             }
         }
 
@@ -119,7 +119,7 @@ namespace discordpp{
                 std::cerr << "Discord Lost" << '\n';
                 close();
             }else {
-                std::cout << color("Sending Heartbeat ", Color.Green) << color(sequence_number_, Color.Bold) << ":\n";
+                std::cout << color("Sending Heartbeat ", Green) << color(sequence_number_, Bold) << ":\n";
                 sendkeepalive({{"op", 1},
                                {"d",  sequence_number_}});
                 acknowledged = false;
