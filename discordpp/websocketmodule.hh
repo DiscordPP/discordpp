@@ -13,6 +13,8 @@
 //#include <lib/nlohmannjson/src/json.hpp>
 #include <nlohmann/json.hpp>
 
+#include "colors.hh"
+
 namespace discordpp{
     namespace asio = boost::asio;
     using boost::system::error_code;
@@ -62,7 +64,9 @@ namespace discordpp{
                     acknowledged = true;
                     break;
                 default:
-                    std::cout << "Unknown opcode " << opcode << " recieved.\n";
+                    std::cout << color("Unknown opcode ", Color.Red) 
+                              << color(opcode, Color.Bold) 
+                              << color(" recieved.\n", Color.Red);
             }
         }
 
@@ -115,7 +119,7 @@ namespace discordpp{
                 std::cerr << "Discord Lost" << '\n';
                 close();
             }else {
-                std::cout << "Sending Heartbeat " << sequence_number_ << ":\n";
+                std::cout << color("Sending Heartbeat ", Color.Green) << color(sequence_number_, Color.Bold) << ":\n";
                 sendkeepalive({{"op", 1},
                                {"d",  sequence_number_}});
                 acknowledged = false;

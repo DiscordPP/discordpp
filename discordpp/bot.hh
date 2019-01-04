@@ -15,6 +15,8 @@
 #include "restmodule.hh"
 #include "websocketmodule.hh"
 
+#include "colors.hh"
+
 namespace discordpp {
     class Bot;
 
@@ -31,15 +33,15 @@ namespace discordpp {
                 rmod_(rmod),
                 wsmod_(wsmod) {
             handlers_.insert(std::pair<std::string, Handler>("READY", [this](Bot *bot, json jmessage) {
-                std::cout << "Recieved READY payload.\n";
-                std::cout << jmessage.dump(4) << "\n\n\n";
+                std::cout << color("Recieved READY payload.\n", Color.Green);
+                std::cout << color(jmessage.dump(4), Color.Italic) << "\n\n\n";
                 bot->gatewayVersion_ = jmessage["v"];
                 bot->me_ = jmessage["user"];
                 bot->guilds_ = jmessage["guilds"];
                 wsmod_->sessionID_ = jmessage["session_id"];
             }));
             Handler guildmod = [](Bot *bot, json jmessage) {
-                std::cout << "Recieved GUILD_CREATE payload.\n";
+                std::cout << color("Recieved GUILD_CREATE payload.\n", Color.Green);
                 //if(jmessage["s"].get<int>() == 4) {
                 //    jmessage.erase("d");
                 //}
