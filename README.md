@@ -4,7 +4,6 @@ A Discord API written in C++.
 
 Links:
 * [Discord Server](https://discord.gg/0usP6xmT4sQ4kIDh)
-* ~~[Discord API Implementation Trello Board](https://trello.com/b/XZVPL956/discord)~~
 
 Requirements <sup>(I got these through APT)</sup>
 ---
@@ -27,6 +26,7 @@ Included <sup>(Git submodules)</sup>
 * [nlohmann::json](https://github.com/nlohmann/json)
 
 Building <sup>(Complicated) <sup>(Out of Date)</sup></sup>
+You can also find detailed setup instructions in the [https://github.com/DiscordPP/echo-bot](Echo) repository, currently on the [refactor branch](https://github.com/DiscordPP/echo-bot/tree/dpp-refactor)
 ---
 * Download:
     1. Download or `git clone` Discord++, a Discord++ REST module, and a Discord++ Websocket module.
