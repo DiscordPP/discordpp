@@ -8,140 +8,102 @@
 #include <vector>
 #include <string>
 
-
-//#include <lib/nlohmannjson/src/json.hpp>
 #include <nlohmann/json.hpp>
 
-#include "restmodule.hh"
-#include "websocketmodule.hh"
+#include "botStruct.hh"
 
 namespace discordpp {
-    class Bot;
-
     using json = nlohmann::json;
     using snowflake = uint64_t;
-    using Handler = std::function<void(Bot *, json)>;
 
-    class Bot {
+    class Bot : virtual BotStruct {
+        std::unique_ptr<boost::asio::steady_timer> pacemaker_;
+        std::unique_ptr<std::chrono::milliseconds> heartrate_;
+        int sequence_ = -1;
+        bool gotACK = true;
     public:
-        Bot(std::shared_ptr<asio::io_service> aios, std::string token, std::shared_ptr<RestModule> rmod,
-            std::shared_ptr<WebsocketModule> wsmod) :
-                aios_(aios),
-                token_(token),
-                rmod_(rmod),
-                wsmod_(wsmod) {
-            handlers_.insert(std::pair<std::string, Handler>("READY", [this](Bot *bot, json jmessage) {
-                std::cout << "Recieved READY payload.\n";
-                std::cout << jmessage.dump(4) << "\n\n\n";
-                bot->gatewayVersion_ = jmessage["v"];
-                bot->me_ = jmessage["user"];
-                bot->guilds_ = jmessage["guilds"];
-                wsmod_->sessionID_ = jmessage["session_id"];
-            }));
-            Handler guildmod = [](Bot *bot, json jmessage) {
-                std::cout << "Recieved GUILD_CREATE payload.\n";
-                //if(jmessage["s"].get<int>() == 4) {
-                //    jmessage.erase("d");
-                //}
-                //std::cout << jmessage.dump(4) << "\n\n\n";
+        std::multimap<std::string, std::function<void(json)>> handlers;
 
-                bool replaced = false;
-                for (json &guild : bot->guilds_) {
-                    if (guild["id"] == jmessage["id"]) {
-                        replaced = true;
-                        guild = jmessage;
-                    }
-                }
-                if (!replaced) {
-                    bot->guilds_.push_back(jmessage);
-                }
-
-                //gatewayVersion = jmessage["v"];
-                //me = jmessage["user"];
-                //privateChannels = jmessage["private_channels"];
-                //guilds = jmessage["guilds"];
-                //readState = jmessage["read_state"];
-                //sessionID = jmessage["session_id"];
-            };
-            handlers_.insert(std::pair<std::string, Handler>("GUILD_CREATE", guildmod));
-            handlers_.insert(std::pair<std::string, Handler>("GUILD_UPDATE", guildmod));
-            handlers_.insert(std::pair<std::string, Handler>("GUILD_DELETE", guildmod));
-            /*for(auto handler : handlers_){
-                std::cout << "    " << handler.first << '\n';
-            }*/
-
-            {
-                DispatchHandler on_message_wrapper = [this](std::string event, json data){
-                    //std::cout << "here\n";
-                    return handleDispatch(event, data);
-                };
-                call("/gateway", /*body*/{}, /*type*/"", /*fileName*/"", [this, on_message_wrapper](Bot*, json msg){
-                    wsmod_->init(
-                            apiVersion_,
-                            msg["url"].get<std::string>() + "/?v=" + std::to_string(apiVersion_) + "&encoding=json",
-                            on_message_wrapper
-                    );
-                });
-            }
+        Bot() {
+            needInit["Bot"] = true;
         }
 
-        void call(std::string target, json body = {}, std::string type = "", std::string fileName = "", Handler callback = [](Bot *, json) {}) {
-            if (target.at(0) != '/') {
-                target = '/' + target;
-            }
-            callback(this, rmod_->call(target, token_, body, type, fileName));
+        void initBot(unsigned int apiVersionIn, const std::string &tokenIn, std::shared_ptr<asio::io_context> aiocIn) {
+            apiVersion = apiVersionIn;
+            token = tokenIn;
+            aioc = aiocIn;
+            needInit["Bot"] = false;
         }
-
-        void send(int opcode, json payload = {}) {
-            wsmod_->send(opcode, payload);
-        }
-
-        void addHandler(std::string event, Handler handler) {
-            handlers_.insert(std::pair<std::string, Handler>(event, handler));
-            //Handler bound = std::bind(handler, this, std::placeholders::_1, std::placeholders::_2);
-            /*if(handlers_.find(event) != handlers_.end()){
-                Handler old = handlers_[event];
-                handlers_[event] = [old, handler](Bot* bot, aios_ptr asio_ios, json jmessage){
-                    old(bot, asio_ios, jmessage),
-                    handler(bot, asio_ios, jmessage);
-                };
-            }else{
-                handlers_[event] = handler;
-            }*/
-        }
-
-        json me_ = {};
-        json guilds_ = {};
 
     protected:
-        void handleDispatch(std::string event, nlohmann::json msg) {
-            //std::cout << event << '\n';
-            for (auto handler : handlers_) {
-                //std::cout << "    " << handler.first << '\n';
-                if (handler.first == event) {
-                    handler.second(this, msg);
-                }
+        void sendHeartbeat() {
+            if(!gotACK){
+                std::cerr << "Discord Servers did not respond to heartbeat. Reconnect not implemented.\n";
+                exit(1);
             }
-            /*std::map<std::string, Handler>::iterator it = handlers_.find(event);
-            if (it != handlers_.end()) {
-                it->second(this, asio_ios, msg);
-            } else {
-                std::cout << "There is no function for the event " << event << ".\n";
-            }*/
-            //if (jmessage["t"] == "READY") {
-            //    uint32_t ms = jmessage["heartbeat_interval"];
-            //    ms *= .9;
-            //    wsmod_->keepalive(ms);
-            //}
+            gotACK = false;
+            std::cout << "Sending heartbeat..." << std::endl;
+            pacemaker_ = std::make_unique<boost::asio::steady_timer>(
+                    *aioc,
+                    std::chrono::steady_clock::now() + *heartrate_
+            );
+            pacemaker_->async_wait(
+                    [this](const boost::system::error_code) {
+                        sendHeartbeat();
+                    }
+            );
+            if(sequence_ >= 0) {
+                send(1, sequence_);
+            }else{
+                send(1, {});
+            }
         }
 
-        std::shared_ptr<asio::io_service> aios_;
-        const std::string token_;
-        int gatewayVersion_ = -1;
-        std::shared_ptr<RestModule> rmod_;
-        std::shared_ptr<WebsocketModule> wsmod_;
-        std::multimap<std::string, Handler> handlers_ = {};
-        const unsigned int apiVersion_ = 6;
+        void recievePayload(json payload) override {
+            //std::cerr << "Recieved Payload: " << payload.dump(4) << '\n';
+
+            switch (payload["op"].get<int>()) {
+                case 0:  // Dispatch:           dispatches an event
+                    sequence_ = payload["s"].get<int>();
+                    if(handlers.find(payload["t"]) == handlers.end()){
+                        std::cerr << "No handlers defined for " << payload["t"] << "\n";
+                    }else{
+                        for(auto handler = handlers.lower_bound(payload["t"]); handler != handlers.upper_bound(payload["t"]); handler++){
+                            handler->second(payload["d"]);
+                        }
+                    }
+                    break;
+                case 1:  // Heartbeat:          used for ping checking
+                    std::cerr << "Discord Servers requested a heartbeat, which is not implemented.\n";
+                    break;
+                case 7:  // Reconnect:          used to tell clients to reconnect to the gateway
+                    std::cerr << "Discord Servers requested a reconnect. Reconnect not implemented.";
+                    exit(1);
+                case 9:  // Invalid Session:	used to notify client they have an invalid session id
+                    std::cerr << "Discord Servers notified of an invalid session ID. Reconnect not implemented.";
+                    exit(1);
+                case 10: // Hello:              sent immediately after connecting, contains heartbeat and server debug information
+                    heartrate_ = std::make_unique<std::chrono::milliseconds>(payload["d"]["heartbeat_interval"]);
+                    sendHeartbeat();
+                    send(2, {
+                            {"token",      token},
+                            {"properties", {
+                                                   {"$os", "linux"},
+                                                   {"$browser", "discordpp"},
+                                                   {"$device", "discordpp"},
+                                           }
+                            }
+                    });
+                    break;
+                case 11: // Heartbeat ACK:      sent immediately following a client heartbeat that was received
+                    gotACK = true;
+                    std::cout << "Heartbeat Successful." << std::endl;
+                    break;
+                default:
+                    std::cerr << "Unexpected opcode " << payload["op"] << "! Message:\n"
+                              << payload.dump(4) << '\n';
+            }
+        }
     };
 }
 

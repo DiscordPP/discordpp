@@ -10,25 +10,23 @@ Requirements <sup>(I got these through APT)</sup>
 * [Boost](http://www.boost.org/)\
 Required by what are currently the only modules:
 * [OpenSSL](https://www.openssl.org/)
-* [Crypto++](https://www.cryptopp.com/)
-* [Websocket++](http://www.zaphoyd.com/websocketpp)
+* TODO: Verify [Crypto++](https://www.cryptopp.com/)
 
 Install everything (Debian-based distros):
 ```sh
-sudo apt install build-essential libboost-all-dev libssl-dev libcrypto++-dev libcurl4-openssl-dev libwebsocketpp-dev libcurlpp-dev
+sudo apt install build-essential libboost-all-dev libssl-dev libcrypto++-dev libcurl4-openssl-dev
 ```
 Install everything (Fedora/RHEL-based distros):
 ```sh
-sudo dnf install openssl-devel boost-devel cryptopp-devel cryptopp curlpp-devel websocketpp-devel cmake
+sudo dnf install openssl-devel boost-devel cryptopp-devel cryptopp cmake
 ```
 
 Included <sup>(Git submodules)</sup>
 --
-* [nlohmann::json](https://github.com/nlohmann/json)\
-Included by what are currently the only modules:
-* [cURLpp](https://github.com/jpbarrette/curlpp)
+* [nlohmann::json](https://github.com/nlohmann/json)
 
-Building <sup>(Complicated)</sup>
+Building <sup>(Complicated) <sup>(Out of Date)</sup></sup>
+You can also find detailed setup instructions in the [https://github.com/DiscordPP/echo-bot](Echo) repository, currently on the [refactor branch](https://github.com/DiscordPP/echo-bot/tree/dpp-refactor)
 ---
 You can also find detailed setup instructions in the [https://github.com/DiscordPP/echo-bot](Echo) repository, currently on the [refactor branch](https://github.com/DiscordPP/echo-bot/tree/dpp-refactor)
 * Download:
