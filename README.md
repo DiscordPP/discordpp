@@ -1,4 +1,4 @@
-DiscordPP <sup>(it's cool)</sup>
+Discord++ <sup>(it's cool)</sup>
 ===
 A Discord API written in C++.
 
