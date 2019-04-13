@@ -8,8 +8,6 @@
 #include <vector>
 #include <string>
 
-#include <nlohmann/json.hpp>
-
 #include "botStruct.hh"
 
 namespace discordpp {
@@ -28,7 +26,7 @@ namespace discordpp {
             needInit["Bot"] = true;
         }
 
-        void initBot(unsigned int apiVersionIn, const std::string &tokenIn, std::shared_ptr<asio::io_context> aiocIn) {
+        void initBot(unsigned int apiVersionIn, const std::string &tokenIn, std::shared_ptr<boost::asio::io_context> aiocIn) {
             apiVersion = apiVersionIn;
             token = tokenIn;
             aioc = aiocIn;
