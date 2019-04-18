@@ -26,7 +26,7 @@ Included <sup>(Git submodules)</sup>
 * [nlohmann::json](https://github.com/nlohmann/json)
 
 Building <sup>(Complicated) <sup>(Out of Date)</sup></sup>
-You can also find detailed setup instructions in the [https://github.com/DiscordPP/echo-bot](Echo) repository, currently on the [refactor branch](https://github.com/DiscordPP/echo-bot/tree/dpp-refactor)
+You can also find detailed setup instructions in the [https://github.com/DiscordPP/echo-bot](Echo) repository
 ---
 You can also find detailed setup instructions in the [https://github.com/DiscordPP/echo-bot](Echo) repository, currently on the [refactor branch](https://github.com/DiscordPP/echo-bot/tree/dpp-refactor)
 * Download:
