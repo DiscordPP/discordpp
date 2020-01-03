@@ -21,6 +21,7 @@ namespace discordpp {
         bool gotACK = true;
     public:
         std::multimap<std::string, std::function<void(json)>> handlers;
+        bool debugUnhandled = true;
 
         Bot() {
             needInit["Bot"] = true;
@@ -64,7 +65,9 @@ namespace discordpp {
                 case 0:  // Dispatch:           dispatches an event
                     sequence_ = payload["s"].get<int>();
                     if(handlers.find(payload["t"]) == handlers.end()){
-                        std::cerr << "No handlers defined for " << payload["t"] << "\n";
+                    	if(debugUnhandled){
+		                    std::cerr << "No handlers defined for " << payload["t"] << "\n";
+	                    }
                     }else{
                         for(auto handler = handlers.lower_bound(payload["t"]); handler != handlers.upper_bound(payload["t"]); handler++){
                             handler->second(payload["d"]);
