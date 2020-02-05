@@ -14,7 +14,7 @@ namespace discordpp{
 	using json = nlohmann::json;
 	using snowflake = uint64_t;
 
-	class Bot: virtual BotStruct{
+	class Bot: public virtual BotStruct{
 		std::unique_ptr<boost::asio::steady_timer> pacemaker_;
 		std::unique_ptr<std::chrono::milliseconds> heartrate_;
 		int sequence_ = -1;
@@ -27,7 +27,7 @@ namespace discordpp{
 			needInit["Bot"] = true;
 		}
 
-		void
+		virtual void
 		initBot(unsigned int apiVersionIn, const std::string &tokenIn, std::shared_ptr<boost::asio::io_context> aiocIn){
 			apiVersion = apiVersionIn;
 			token = tokenIn;
@@ -53,13 +53,13 @@ namespace discordpp{
 					}
 			);
 			if(sequence_ >= 0){
-				send(1, sequence_);
+				send(1, std::make_shared<json>(sequence_), nullptr);
 			}else{
-				send(1, {});
+				send(1, nullptr, nullptr);
 			}
 		}
 
-		void recievePayload(json payload) override{
+		virtual void receivePayload(json payload) override{
 			//std::cerr << "Recieved Payload: " << payload.dump(4) << '\n';
 
 			switch(payload["op"].get<int>()){
@@ -88,7 +88,7 @@ namespace discordpp{
 				case 10: // Hello:              sent immediately after connecting, contains heartbeat and server debug information
 					heartrate_ = std::make_unique<std::chrono::milliseconds>(payload["d"]["heartbeat_interval"]);
 					sendHeartbeat();
-					send(2, {
+					send(2, std::make_shared<json>(json({
 							{"token",      token},
 							{"properties", {
 									               {"$os", "linux"},
@@ -96,7 +96,7 @@ namespace discordpp{
 									               {"$device", "discordpp"},
 							               }
 							}
-					});
+					})), nullptr);
 					break;
 				case 11: // Heartbeat ACK:      sent immediately following a client heartbeat that was received
 					gotACK = true;
