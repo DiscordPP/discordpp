@@ -2,8 +2,7 @@
 // Created by Aidan on 6/21/2018.
 //
 
-#ifndef EXAMPLE_BOT_BOTREQUIRED_HH
-#define EXAMPLE_BOT_BOTREQUIRED_HH
+#pragma once
 
 #include <iostream>
 
@@ -61,5 +60,3 @@ namespace discordpp{
 		std::string token;
 	};
 }
-
-#endif //EXAMPLE_BOT_BOTREQUIRED_HH
