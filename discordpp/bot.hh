@@ -19,7 +19,6 @@ namespace discordpp{
 		int sequence_ = -1;
 		bool gotACK = true;
 	public:
-		std::multimap<std::string, std::function<void(json)>> handlers;
 		bool debugUnhandled = true;
 
 		Bot(){

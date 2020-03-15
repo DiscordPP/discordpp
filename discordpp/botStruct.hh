@@ -23,6 +23,8 @@ namespace discordpp{
 
 	class BotStruct{
 	public:
+		std::multimap<std::string, std::function<void(json)>> handlers;
+
 		virtual ~BotStruct(){};
 
 		virtual void call(
