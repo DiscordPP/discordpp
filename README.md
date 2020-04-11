@@ -6,7 +6,7 @@ A library for the Discord API written in C++.
 
 Links:
 * [Discord Server](https://discord.gg/0usP6xmT4sQ4kIDh)
-* [Example / Template Bot](https://github.com/DiscordPP/echo-bot)
+* [Echo: Example / Template Bot](https://github.com/DiscordPP/echo-bot)
 
 Requirements <sup>(I got these through APT)</sup>
 ---
