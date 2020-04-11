@@ -1,6 +1,6 @@
 Discord++ <sup>(it's cool)</sup>
 ===
-A library for the Discord API written in C++.
+A Modularized C++ Library for the Discord API
 
 ***This library is not a hacked Discord mobile app will not give you free Nitro. Free Nitro doesn't exist, all the YouTube videos are just trying to get you to download malware or get ad money off you.***
 
