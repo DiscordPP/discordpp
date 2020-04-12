@@ -1,8 +1,10 @@
+[![GitHub stars](https://img.shields.io/github/stars/DiscordPP/discordpp?style=for-the-badge)](https://github.com/DiscordPP/discordpp/stargazers)[![Discord](https://img.shields.io/discord/164234463247597568?color=%237289DA&label=Discord&style=for-the-badge)](https://discord.gg/0usP6xmT4sQ4kIDh)
+
 Discord++ <sup>(it's cool)</sup>
 ===
 A Modularized C++ Library for the Discord API
 
-***This library is not a hacked Discord mobile app will not give you free Nitro. Free Nitro doesn't exist, all the YouTube videos are just trying to get you to download malware or get ad money off you.***
+***This library is not a hacked Discord mobile app that will give you free Nitro. Free Nitro does not exist, and any YouTube video saying otherwise is attempting either to get you to install malware or to collect ad revenue off of you.***
 
 Links:
 * [Discord Server](https://discord.gg/0usP6xmT4sQ4kIDh)
