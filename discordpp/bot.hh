@@ -36,8 +36,8 @@ namespace discordpp{
 	protected:
 		void sendHeartbeat(){
 			if(!gotACK){
-				std::cerr << "Discord Servers did not respond to heartbeat. Reconnect not implemented.\n";
-				exit(1);
+				std::cerr << "Discord Servers did not respond to heartbeat.\n";
+				reconnect(sequence_);
 			}
 			gotACK = false;
 			std::cout << "Sending heartbeat..." << std::endl;
@@ -78,11 +78,13 @@ namespace discordpp{
 					std::cerr << "Discord Servers requested a heartbeat, which is not implemented.\n";
 					break;
 				case 7:  // Reconnect:          used to tell clients to reconnect to the gateway
-					std::cerr << "Discord Servers requested a reconnect. Reconnect not implemented.";
-					exit(1);
+					std::cerr << "Discord Servers requested a reconnect.\n";
+					reconnect(sequence_);
+					break;
 				case 9:  // Invalid Session:	used to notify client they have an invalid session id
-					std::cerr << "Discord Servers notified of an invalid session ID. Reconnect not implemented.";
-					exit(1);
+					std::cerr << "Discord Servers notified of an invalid session ID.\n";
+					reconnect();
+					break;
 				case 10: // Hello:              sent immediately after connecting, contains heartbeat and server debug information
 					heartrate_ = std::make_unique<std::chrono::milliseconds>(payload["d"]["heartbeat_interval"]);
 					sendHeartbeat();

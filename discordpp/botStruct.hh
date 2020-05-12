@@ -54,6 +54,11 @@ namespace discordpp{
 			std::cerr << "Ending run loop" << '\n';
 		}
 
+		virtual void reconnect(int sequence = -1){
+			std::cerr << "Reconnect not implemented.\n";
+			exit(1);
+		}
+
 		virtual void receivePayload(json payload) = 0;
 
 		std::map<std::string, bool> needInit;
