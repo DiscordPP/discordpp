@@ -16,6 +16,7 @@ namespace discordpp{
 	class Bot: public virtual BotStruct{
 		std::unique_ptr<boost::asio::steady_timer> pacemaker_;
 		std::unique_ptr<std::chrono::milliseconds> heartrate_;
+		std::string session_id_ = "";
 		int sequence_ = -1;
 		bool gotACK = true;
 	public:
@@ -23,6 +24,15 @@ namespace discordpp{
 
 		Bot(){
 			needInit["Bot"] = true;
+
+			handlers.insert(
+					{
+							"READY",
+							[this](json data){
+								session_id_ = data["session_id"];
+							}
+					}
+			);
 		}
 
 		virtual void
