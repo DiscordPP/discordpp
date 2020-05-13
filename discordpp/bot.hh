@@ -47,7 +47,7 @@ namespace discordpp{
 		void sendHeartbeat(){
 			if(!gotACK){
 				std::cerr << "Discord Servers did not respond to heartbeat.\n";
-				reconnect(sequence_);
+				reconnect();
 			}
 			gotACK = false;
 			std::cout << "Sending heartbeat..." << std::endl;
@@ -89,11 +89,11 @@ namespace discordpp{
 					break;
 				case 7:  // Reconnect:          used to tell clients to reconnect to the gateway
 					std::cerr << "Discord Servers requested a reconnect.\n";
-					reconnect(sequence_);
+					reconnect();
 					break;
 				case 9:  // Invalid Session:	used to notify client they have an invalid session id
 					std::cerr << "Discord Servers notified of an invalid session ID.\n";
-					reconnect();
+					reconnect(false);
 					break;
 				case 10: // Hello:              sent immediately after connecting, contains heartbeat and server debug information
 					heartrate_ = std::make_unique<std::chrono::milliseconds>(payload["d"]["heartbeat_interval"]);
@@ -116,6 +116,24 @@ namespace discordpp{
 					std::cerr << "Unexpected opcode " << payload["op"] << "! Message:\n"
 					          << payload.dump(4) << '\n';
 			}
+		}
+
+
+		void reconnect(const bool resume = true){
+			if(!resume){
+				sequence_ = -1;
+				session_id_ = "";
+			}
+			pacemaker_->cancel();
+			connect([this, resume](){
+				if(resume){
+					send(6, std::make_shared<json>(json({
+							{"token", token},
+							{"session_id", },
+							{"seq", sequence_},
+					})), nullptr);
+				}
+			});
 		}
 	};
 }
