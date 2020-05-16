@@ -54,7 +54,8 @@ namespace discordpp{
 			std::cerr << "Ending run loop" << '\n';
 		}
 
-		virtual void connect(const std::function<void ()>& then = [](){});
+		virtual void connect(const std::function<void ()>& then = [](){}) = 0;
+		virtual void reconnect(const bool resume = true) = 0;
 
 		virtual void receivePayload(json payload) = 0;
 

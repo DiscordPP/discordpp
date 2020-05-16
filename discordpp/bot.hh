@@ -22,7 +22,7 @@ namespace discordpp{
 	public:
 		bool debugUnhandled = true;
 
-		Bot(){
+		Bot() {
 			needInit["Bot"] = true;
 
 			handlers.insert(
@@ -119,7 +119,8 @@ namespace discordpp{
 		}
 
 
-		void reconnect(const bool resume = true){
+		void reconnect(const bool resume = true) override {
+			std::cerr << "Reconnecting...\n";
 			if(!resume){
 				sequence_ = -1;
 				session_id_ = "";
