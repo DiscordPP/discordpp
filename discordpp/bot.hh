@@ -44,7 +44,10 @@ namespace discordpp{
 		}
 
 	protected:
-		void sendHeartbeat(){
+		void sendHeartbeat(const boost::system::error_code e){
+			if(e.failed()){
+				return;
+			}
 			if(!gotACK){
 				std::cerr << "Discord Servers did not respond to heartbeat.\n";
 				reconnect();
@@ -56,8 +59,8 @@ namespace discordpp{
 					std::chrono::steady_clock::now() + *heartrate_
 			);
 			pacemaker_->async_wait(
-					[this](const boost::system::error_code){
-						sendHeartbeat();
+					[this](const boost::system::error_code ec){
+						sendHeartbeat(ec);
 					}
 			);
 			if(sequence_ >= 0){
@@ -97,7 +100,7 @@ namespace discordpp{
 					break;
 				case 10: // Hello:              sent immediately after connecting, contains heartbeat and server debug information
 					heartrate_ = std::make_unique<std::chrono::milliseconds>(payload["d"]["heartbeat_interval"]);
-					sendHeartbeat();
+					sendHeartbeat(boost::system::errc::make_error_code(boost::system::errc::success));
 					send(2, std::make_shared<json>(json({
 							{"token",      token},
 							{"properties", {
@@ -126,6 +129,7 @@ namespace discordpp{
 				session_id_ = "";
 			}
 			pacemaker_->cancel();
+			disconnect();
 			connect([this, resume](){
 				if(resume){
 					send(6, std::make_shared<json>(json({

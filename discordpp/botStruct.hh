@@ -55,6 +55,7 @@ namespace discordpp{
 		}
 
 		virtual void connect(const std::function<void ()>& then = [](){}) = 0;
+		virtual void disconnect() = 0;
 		virtual void reconnect(const bool resume = true) = 0;
 
 		virtual void receivePayload(json payload) = 0;
@@ -63,5 +64,6 @@ namespace discordpp{
 		unsigned int apiVersion = 6;
 		std::shared_ptr<boost::asio::io_context> aioc;
 		std::string token;
+		bool connecting = true;
 	};
 }
