@@ -131,13 +131,13 @@ namespace discordpp{
 			pacemaker_->cancel();
 			disconnect();
 			connect([this, resume](){
-				if(resume){
+				/*if(resume){
 					send(6, std::make_shared<json>(json({
 							{"token", token},
 							{"session_id", },
 							{"seq", sequence_},
 					})), nullptr);
-				}
+				}*/
 			});
 		}
 	};
