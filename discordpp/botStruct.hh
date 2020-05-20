@@ -54,7 +54,7 @@ namespace discordpp{
 			std::cerr << "Ending run loop" << '\n';
 		}
 
-		virtual void connect(const std::function<void ()>& then = [](){}) = 0;
+		virtual void connect() = 0;
 		virtual void disconnect() = 0;
 		virtual void reconnect(const bool resume = true) = 0;
 
