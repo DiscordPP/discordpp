@@ -16,10 +16,12 @@ namespace discordpp{
 
 	class Bot: public virtual BotStruct{
 		std::unique_ptr<boost::asio::steady_timer> reconnect_;
-		std::function<int()> reconnect_millis = std::bind(
-				std::uniform_int_distribution<int>(0, 5000),
-				std::default_random_engine(std::chrono::system_clock::now().time_since_epoch().count())
-		);
+		std::function<int()> reconnect_millis = [
+				distribution = std::make_shared<std::uniform_int_distribution<int> >(0, 5000),
+				generator = std::make_shared<std::default_random_engine>(std::chrono::system_clock::now().time_since_epoch().count())
+		](){
+			return (*distribution)(*generator);
+		};
 		std::unique_ptr<boost::asio::steady_timer> pacemaker_;
 		std::unique_ptr<std::chrono::milliseconds> heartrate_;
 		std::string session_id_ = "";
