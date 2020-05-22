@@ -30,8 +30,9 @@ namespace discordpp{
 		virtual void call(
 				sptr<const std::string> requestType,
 				sptr<const std::string> targetURL,
-				sptr<const json> body,
-				sptr<const std::function<void(const json)>> callback
+				sptr<const json> body = nullptr,
+				sptr<const std::function<void()>> onWrite = nullptr,
+				sptr<const std::function<void(const json)>> onRead = nullptr
 		) = 0;
 
 		virtual void send(const int opcode, sptr<const json> payload, sptr<const std::function<void()>> callback) = 0;
