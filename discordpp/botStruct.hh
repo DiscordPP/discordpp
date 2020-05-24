@@ -54,11 +54,16 @@ namespace discordpp{
 			std::cerr << "Ending run loop" << '\n';
 		}
 
+		virtual void connect() = 0;
+		virtual void disconnect() = 0;
+		virtual void reconnect(const bool resume = true) = 0;
+
 		virtual void receivePayload(json payload) = 0;
 
 		std::map<std::string, bool> needInit;
 		unsigned int apiVersion = 6;
 		std::shared_ptr<boost::asio::io_context> aioc;
 		std::string token;
+		bool connecting = true;
 	};
 }
