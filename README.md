@@ -72,7 +72,7 @@ INCLUDE_DIRECTORIES( ${discordpp_SOURCE_DIR} ${discordpp-rest-curlpp_SOURCE_DIR}
 ```cpp
 auto bot = std::make_shared<DppBot>();
 ```
-   * For this example, I declaered a `DppBot` alias just after the `#include` statements
+   * For this example, I declared a `DppBot` alias just after the `#include` statements
    
 ```cpp
 using DppBot =
