@@ -50,6 +50,7 @@ namespace discordpp{
 	protected:
 		virtual void runctd(){
 			std::cerr << "Starting run loop" << '\n';
+			work = std::make_unique<boost::asio::executor_work_guard<boost::asio::io_context::executor_type>>(boost::asio::make_work_guard(*aioc));
 			aioc->run();
 			std::cerr << "Ending run loop" << '\n';
 		}
@@ -62,6 +63,7 @@ namespace discordpp{
 
 		std::map<std::string, bool> needInit;
 		unsigned int apiVersion = 6;
+		std::unique_ptr<boost::asio::executor_work_guard<boost::asio::io_context::executor_type>> work;
 		std::shared_ptr<boost::asio::io_context> aioc;
 		std::string token;
 		bool connecting = true;
