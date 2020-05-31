@@ -38,7 +38,6 @@ namespace discordpp{
 		virtual void send(const int opcode, sptr<const json> payload, sptr<const std::function<void()>> callback) = 0;
 
 		void run(){
-			bool ready = true;
 			for(auto module: needInit){
 				if(module.second){
 					std::cerr << "Forgot to initialize: " << module.first << '\n';
