@@ -16,6 +16,11 @@ namespace discordpp{
 
 	template<typename T>
 	using sptr = std::shared_ptr<T>;
+	
+	using handleEvent = std::function<void(const json msg)>;
+	using handleRead = std::function<void(const bool error, const json msg)>;
+	using handleWrite = std::function<void(const bool error)>;
+	using handleSent = std::function<void()>;
 
 	struct ratelimit{
 		int millis;
@@ -23,7 +28,7 @@ namespace discordpp{
 
 	class BotStruct{
 	public:
-		std::multimap<std::string, std::function<void(json)>> handlers;
+		std::multimap<std::string, handleEvent> handlers;
 
 		virtual ~BotStruct(){};
 
@@ -31,11 +36,11 @@ namespace discordpp{
 				sptr<const std::string> requestType,
 				sptr<const std::string> targetURL,
 				sptr<const json> body = nullptr,
-				sptr<const std::function<void()>> onWrite = nullptr,
-				sptr<const std::function<void(const json)>> onRead = nullptr
+				sptr<const handleWrite> onWrite = nullptr,
+				sptr<const handleRead> onRead = nullptr
 		) = 0;
 
-		virtual void send(const int opcode, sptr<const json> payload, sptr<const std::function<void()>> callback) = 0;
+		virtual void send(const int opcode, sptr<const json> payload, sptr<const handleSent> callback) = 0;
 
 		void run(){
 			for(auto module: needInit){
