@@ -37,7 +37,7 @@ namespace discordpp{
 					{
 							"READY",
 							[this](json data){
-								session_id_ = data["session_id"];
+								session_id_ = data["session_id"].get<std::string>();
 							}
 					}
 			);
