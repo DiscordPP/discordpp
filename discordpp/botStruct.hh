@@ -73,6 +73,7 @@ class BotStruct {
         work;
     std::shared_ptr<boost::asio::io_context> aioc;
     std::string token;
-    bool connecting = true;
+    bool connecting_ = false;
+    bool connected_ = false;
 };
 } // namespace discordpp

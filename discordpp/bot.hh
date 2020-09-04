@@ -51,7 +51,7 @@ class Bot : public virtual BotStruct {
 
   protected:
     void sendHeartbeat(const boost::system::error_code e) {
-        if (e.failed()) {
+        if (!connected_ || e.failed()) {
             return;
         }
         if (!gotACK) {
