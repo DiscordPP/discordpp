@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "botStruct.hh"
+#include "log.hh"
 
 namespace discordpp {
 using json = nlohmann::json;
@@ -27,7 +28,7 @@ class Bot : public virtual BotStruct {
     std::unique_ptr<std::chrono::milliseconds> heartrate_;
     std::string session_id_ = "";
     int sequence_ = -1;
-    bool gotACK = true;
+    int needACK_ = -1;
 
   public:
     bool debugUnhandled = true;
@@ -48,17 +49,35 @@ class Bot : public virtual BotStruct {
         aioc = aiocIn;
         needInit["Bot"] = false;
     }
+    
+    void reconnect(const std::string& reason, const bool resume = true) override {
+        std::cerr << "Reconnecting because \"" << reason << "\" ...\n";
+        if (!resume) {
+            sequence_ = -1;
+            session_id_ = "";
+        }
+        pacemaker_->cancel();
+        needACK_ = -1;
+        disconnect();
+        connect();
+    }
 
   protected:
     void sendHeartbeat(const boost::system::error_code e) {
         if (!connected_ || e.failed()) {
             return;
         }
-        if (!gotACK) {
-            std::cerr << "Discord Servers did not respond to heartbeat.\n";
-            reconnect();
+        if (needACK_ > 1) {
+            log::log(log::error, [this](std::ostream *log) {
+              *log << "Discord Servers did not respond to " << needACK_ << " heartbeat" << (needACK_ == 1 ? "" : "s") << "  within " << std::chrono::milliseconds(*heartrate_).count() << "ms; aborting connection.\n";
+            });
+            reconnect("Discord did not acknowledge too many heartbeats");
+        } else if(needACK_ > 0){
+            log::log(log::warning, [this](std::ostream *log) {
+              *log << "Discord Servers did not respond to " << needACK_ << " heartbeat" << (needACK_ == 1 ? "" : "s") << " within " << std::chrono::milliseconds(*heartrate_).count() << "ms but we're letting this one slip.\n";
+            });
         }
-        gotACK = false;
+        needACK_++;
         std::cout << "Sending heartbeat..." << std::endl;
         pacemaker_ = std::make_unique<boost::asio::steady_timer>(
             *aioc, std::chrono::steady_clock::now() + *heartrate_);
@@ -72,7 +91,9 @@ class Bot : public virtual BotStruct {
     }
 
     virtual void receivePayload(json payload) override {
-        // std::cerr << "Recieved Payload: " << payload.dump(4) << '\n';
+        log::log(log::trace, [payload](std::ostream *log) {
+          *log << "Recieved Payload: " << payload.dump(4) << '\n';
+        });
 
         switch (payload["op"].get<int>()) {
         case 0: // Dispatch:           dispatches an event
@@ -96,7 +117,7 @@ class Bot : public virtual BotStruct {
         case 7: // Reconnect:          used to tell clients to reconnect to the
                 // gateway
             std::cerr << "Discord Servers requested a reconnect.\n";
-            reconnect();
+            reconnect("The gateway is restarting");
             break;
         case 9: // Invalid Session:	used to notify client they have an
                 // invalid session id
@@ -105,12 +126,13 @@ class Bot : public virtual BotStruct {
                 *aioc, std::chrono::steady_clock::now() +
                            std::chrono::milliseconds(reconnect_millis()));
             reconnect_->async_wait(
-                [this](const boost::system::error_code) { reconnect(false); });
+                [this](const boost::system::error_code) { reconnect("The session is invalid", false); });
             break;
         case 10: // Hello:              sent immediately after connecting,
                  // contains heartbeat and server debug information
             heartrate_ = std::make_unique<std::chrono::milliseconds>(
                 payload["d"]["heartbeat_interval"]);
+            needACK_ = 0;
             sendHeartbeat(boost::system::errc::make_error_code(
                 boost::system::errc::success));
             if (sequence_ >= 0) {
@@ -136,24 +158,13 @@ class Bot : public virtual BotStruct {
             break;
         case 11: // Heartbeat ACK:      sent immediately following a client
                  // heartbeat that was received
-            gotACK = true;
+            needACK_ = false;
             std::cout << "Heartbeat Successful." << std::endl;
             break;
         default:
             std::cerr << "Unexpected opcode " << payload["op"] << "! Message:\n"
                       << payload.dump(4) << '\n';
         }
-    }
-
-    void reconnect(const bool resume = true) override {
-        std::cerr << "Reconnecting...\n";
-        if (!resume) {
-            sequence_ = -1;
-            session_id_ = "";
-        }
-        pacemaker_->cancel();
-        disconnect();
-        connect();
     }
 };
 } // namespace discordpp

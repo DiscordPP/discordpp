@@ -62,7 +62,7 @@ class BotStruct {
 
     virtual void connect() = 0;
     virtual void disconnect() = 0;
-    virtual void reconnect(const bool resume = true) = 0;
+    virtual void reconnect(const std::string& reason, const bool resume = true) = 0;
 
     virtual void receivePayload(json payload) = 0;
 
