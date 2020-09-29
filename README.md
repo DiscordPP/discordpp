@@ -98,5 +98,5 @@ bot->handlers.insert(
     
 3. Create a `std::shared_ptr<boost::asio::io_context>`
    * e.g. `auto aioc = std::make_shared<asio::io_context>();`
-4. Initialize the bot object and any plugins that require it e.g. `bot->initBot(6, token, aioc)`.
+4. Initialize the bot object and any plugins that require it e.g. `bot->initBot(6, token, aioc)`. The token should be in the form `Bot <token>` where you replace `<token>` with your token.
 5. Run the bot: `bot->run();` (This will also run the io_context)
