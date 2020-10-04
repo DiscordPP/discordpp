@@ -32,6 +32,7 @@ class Bot : public virtual BotStruct {
 
   public:
     bool debugUnhandled = true;
+    bool showHeartbeats = true;
 
     Bot() {
         needInit["Bot"] = true;
@@ -78,7 +79,9 @@ class Bot : public virtual BotStruct {
             });
         }
         needACK_++;
-        std::cout << "Sending heartbeat..." << std::endl;
+        if(showHeartbeats) {
+            std::cout << "Sending heartbeat..." << std::endl;
+        }
         pacemaker_ = std::make_unique<boost::asio::steady_timer>(
             *aioc, std::chrono::steady_clock::now() + *heartrate_);
         pacemaker_->async_wait(
@@ -159,7 +162,9 @@ class Bot : public virtual BotStruct {
         case 11: // Heartbeat ACK:      sent immediately following a client
                  // heartbeat that was received
             needACK_ = false;
-            std::cout << "Heartbeat Successful." << std::endl;
+            if(showHeartbeats) {
+                std::cout << "Heartbeat Successful." << std::endl;
+            }
             break;
         default:
             std::cerr << "Unexpected opcode " << payload["op"] << "! Message:\n"
