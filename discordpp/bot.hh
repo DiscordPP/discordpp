@@ -50,8 +50,9 @@ class Bot : public virtual BotStruct {
         aioc = aiocIn;
         needInit["Bot"] = false;
     }
-    
-    void reconnect(const std::string& reason, const bool resume = true) override {
+
+    void reconnect(const std::string &reason,
+                   const bool resume = true) override {
         std::cerr << "Reconnecting because \"" << reason << "\" ...\n";
         if (!resume) {
             sequence_ = -1;
@@ -70,12 +71,19 @@ class Bot : public virtual BotStruct {
         }
         if (needACK_ > 1) {
             log::log(log::error, [this](std::ostream *log) {
-              *log << "Discord Servers did not respond to " << needACK_ << " heartbeat" << (needACK_ == 1 ? "" : "s") << "  within " << std::chrono::milliseconds(*heartrate_).count() << "ms; aborting connection.\n";
+                *log << "Discord Servers did not respond to " << needACK_
+                     << " heartbeat" << (needACK_ == 1 ? "" : "s")
+                     << "  within "
+                     << std::chrono::milliseconds(*heartrate_).count()
+                     << "ms; aborting connection.\n";
             });
             reconnect("Discord did not acknowledge too many heartbeats");
-        } else if(needACK_ > 0){
+        } else if (needACK_ > 0) {
             log::log(log::warning, [this](std::ostream *log) {
-              *log << "Discord Servers did not respond to " << needACK_ << " heartbeat" << (needACK_ == 1 ? "" : "s") << " within " << std::chrono::milliseconds(*heartrate_).count() << "ms but we're letting this one slip.\n";
+                *log << "Discord Servers did not respond to " << needACK_
+                     << " heartbeat" << (needACK_ == 1 ? "" : "s") << " within "
+                     << std::chrono::milliseconds(*heartrate_).count()
+                     << "ms but we're letting this one slip.\n";
             });
         }
         needACK_++;
@@ -95,7 +103,7 @@ class Bot : public virtual BotStruct {
 
     virtual void receivePayload(json payload) override {
         log::log(log::trace, [payload](std::ostream *log) {
-          *log << "Recieved Payload: " << payload.dump(4) << '\n';
+            *log << "Recieved Payload: " << payload.dump(4) << '\n';
         });
 
         switch (payload["op"].get<int>()) {
@@ -128,8 +136,9 @@ class Bot : public virtual BotStruct {
             reconnect_ = std::make_unique<boost::asio::steady_timer>(
                 *aioc, std::chrono::steady_clock::now() +
                            std::chrono::milliseconds(reconnect_millis()));
-            reconnect_->async_wait(
-                [this](const boost::system::error_code) { reconnect("The session is invalid", false); });
+            reconnect_->async_wait([this](const boost::system::error_code) {
+                reconnect("The session is invalid", false);
+            });
             break;
         case 10: // Hello:              sent immediately after connecting,
                  // contains heartbeat and server debug information
@@ -171,5 +180,7 @@ class Bot : public virtual BotStruct {
                       << payload.dump(4) << '\n';
         }
     }
+
+    // REST //////////////////////
 };
 } // namespace discordpp
