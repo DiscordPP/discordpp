@@ -10,6 +10,7 @@
 
 #include "botStruct.hh"
 #include "log.hh"
+#include "intents.hh"
 
 namespace discordpp {
 using json = nlohmann::json;
@@ -33,6 +34,8 @@ class Bot : public virtual BotStruct {
   public:
     bool debugUnhandled = true;
     bool showHeartbeats = true;
+
+    uint16_t intents = intents::NONE;
 
     Bot() {
         needInit["Bot"] = true;
@@ -159,6 +162,7 @@ class Bot : public virtual BotStruct {
                 send(
                     2,
                     std::make_shared<json>(json({{"token", token},
+                                                 {"intents", intents_},
                                                  {"properties",
                                                   {
                                                       {"$os", "linux"},
