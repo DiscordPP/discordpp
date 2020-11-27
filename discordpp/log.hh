@@ -13,10 +13,10 @@ namespace log {
 using handleLog = std::function<void(std::ostream *)>;
 
 enum level { trace, debug, info, warning, error, fatal };
-level filter = warning;
-std::ostream *out = &std::cout;
+inline level filter = warning;
+inline std::ostream *out = &std::cout;
 
-void log(level l, handleLog msg) {
+inline void log(level l, handleLog msg) {
     if (l >= filter) {
         msg(out);
     }
