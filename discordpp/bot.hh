@@ -162,7 +162,7 @@ class Bot : public virtual BotStruct {
                 send(
                     2,
                     std::make_shared<json>(json({{"token", token},
-                                                 {"intents", intents_},
+                                                 {"intents", intents},
                                                  {"properties",
                                                   {
                                                       {"$os", "linux"},
