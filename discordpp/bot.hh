@@ -35,7 +35,12 @@ class Bot : public virtual BotStruct {
     bool debugUnhandled = true;
     bool showHeartbeats = true;
 
+    // This temporarily blocks sending the NONE intent on API 6 until it is inactive
+    bool sendNoneIntent = false;
     uint16_t intents = intents::NONE;
+    
+    // API 8 is untested
+    unsigned int api = 6;
 
     Bot() {
         needInit["Bot"] = true;
@@ -159,17 +164,20 @@ class Bot : public virtual BotStruct {
                      })),
                      nullptr);
             } else {
-                send(
-                    2,
+                auto identify =
                     std::make_shared<json>(json({{"token", token},
-                                                 {"intents", intents},
                                                  {"properties",
                                                   {
                                                       {"$os", "linux"},
                                                       {"$browser", "discordpp"},
                                                       {"$device", "discordpp"},
-                                                  }}})),
-                    nullptr);
+                                                  }}}));
+
+                if (intents != intents::NONE || api >= 8 || sendNoneIntent) {
+                    (*identify)[intents] = intents;
+                }
+
+                send(2, identify, nullptr);
             }
             break;
         case 11: // Heartbeat ACK:      sent immediately following a client
