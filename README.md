@@ -18,6 +18,8 @@ A Modularized C++ Library for the Discord API
       * Requires [OpenSSL](https://www.openssl.org/)
 * A Discord++ WebSocket module
    * [WebSocket: Beast](https://github.com/DiscordPP/websocket-beast)
+      * Currently out of date
+   * [WebSocket: Simple-WebSocket-Server](https://github.com/DiscordPP/websocket-simpleweb)
 
 ### Included <sup>(Git submodules)</sup>
 * [nlohmann::json](https://github.com/nlohmann/json)
