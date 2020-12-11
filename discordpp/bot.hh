@@ -168,10 +168,23 @@ class Bot : public virtual BotStruct {
                     std::make_shared<json>(json({{"token", token},
                                                  {"properties",
                                                   {
-                                                      {"$os", "linux"},
                                                       {"$browser", "discordpp"},
                                                       {"$device", "discordpp"},
                                                   }}}));
+
+                #if defined(_WIN32) || defined(_WIN64)
+                    (*identify)["properties"]["$os"] = "windows";
+                #elif defined(__APPLE__) || defined(__MACH__)
+                    (*identify)["properties"]["$os"] = "osx";
+                #elif defined(__linux__)
+                    (*identify)["properties"]["$os"] = "linux";
+                #elif defined(__FreeBSD__)
+                    (*identify)["properties"]["$os"] = "freebsd";
+                #elif defined(__unix) || defined(__unix__)
+                    (*identify)["properties"]["$os"] = "unix";
+                #else
+                    (*identify)["properties"]["$os"] = "other";
+                #endif
 
                 if (intents != intents::NONE || api >= 8 || sendNoneIntent) {
                     (*identify)[intents] = intents;
