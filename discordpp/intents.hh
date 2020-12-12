@@ -7,10 +7,9 @@
 
 namespace discordpp{
 namespace intents{
-enum Intents{
-    NONE = 0,
-    
-    GUILDS = 1u << 0u,
+const uint16_t NONE = 0;
+
+const uint16_t GUILDS = 1u << 0u;
     // GUILD_CREATE
     // GUILD_UPDATE
     // GUILD_DELETE
@@ -21,65 +20,64 @@ enum Intents{
     // CHANNEL_UPDATE
     // CHANNEL_DELETE
     // CHANNEL_PINS_UPDATE
-    
-    GUILD_MEMBERS = 1u << 1u,
+
+const uint16_t GUILD_MEMBERS = 1u << 1u;
     // GUILD_MEMBER_ADD
     // GUILD_MEMBER_UPDATE
     // GUILD_MEMBER_REMOVE
-    
-    GUILD_BANS = 1u << 2u,
+
+const uint16_t GUILD_BANS = 1u << 2u;
     // GUILD_BAN_ADD
     // GUILD_BAN_REMOVE
-    
-    GUILD_EMOJIS = 1u << 3u,
+
+const uint16_t GUILD_EMOJIS = 1u << 3u;
     // GUILD_EMOJIS_UPDATE
-    
-    GUILD_INTEGRATIONS = 1u << 4u,
+
+const uint16_t GUILD_INTEGRATIONS = 1u << 4u;
     // GUILD_INTEGRATIONS_UPDATE
-    
-    GUILD_WEBHOOKS = 1u << 5u,
+
+const uint16_t GUILD_WEBHOOKS = 1u << 5u;
     // WEBHOOKS_UPDATE
-    
-    GUILD_INVITES = 1u << 6u,
+
+const uint16_t GUILD_INVITES = 1u << 6u;
     // INVITE_CREATE
     // INVITE_DELETE
-    
-    GUILD_VOICE_STATES = 1u << 7u,
+
+const uint16_t GUILD_VOICE_STATES = 1u << 7u;
     // VOICE_STATE_UPDATE
-    
-    GUILD_PRESENCES = 1u << 8u,
+
+const uint16_t GUILD_PRESENCES = 1u << 8u;
     // PRESENCE_UPDATE
-    
-    GUILD_MESSAGES = 1u << 9u,
+
+const uint16_t GUILD_MESSAGES = 1u << 9u;
     // MESSAGE_CREATE
     // MESSAGE_UPDATE
     // MESSAGE_DELETE
     // MESSAGE_DELETE_BULK
-    
-    GUILD_MESSAGE_REACTIONS = 1u << 10u,
+
+const uint16_t GUILD_MESSAGE_REACTIONS = 1u << 10u;
     // MESSAGE_REACTION_ADD
     // MESSAGE_REACTION_REMOVE
     // MESSAGE_REACTION_REMOVE_ALL
     // MESSAGE_REACTION_REMOVE_EMOJI
-    
-    GUILD_MESSAGE_TYPING = 1u << 11u,
+
+const uint16_t GUILD_MESSAGE_TYPING = 1u << 11u;
     // TYPING_START
-    
-    DIRECT_MESSAGES = 1u << 12u,
+
+const uint16_t DIRECT_MESSAGES = 1u << 12u;
     // MESSAGE_CREATE
     // MESSAGE_UPDATE
     // MESSAGE_DELETE
     // CHANNEL_PINS_UPDATE
-    
-    DIRECT_MESSAGE_REACTIONS = 1u << 13u,
+
+const uint16_t DIRECT_MESSAGE_REACTIONS = 1u << 13u;
     // MESSAGE_REACTION_ADD
     // MESSAGE_REACTION_REMOVE
     // MESSAGE_REACTION_REMOVE_ALL
     // MESSAGE_REACTION_REMOVE_EMOJI
-    
-    DIRECT_MESSAGE_TYPING = 1u << 14u
+
+const uint16_t DIRECT_MESSAGE_TYPING = 1u << 14u;
     // TYPING_START
-};
 }
 }
 
