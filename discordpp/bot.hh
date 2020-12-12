@@ -187,7 +187,7 @@ class Bot : public virtual BotStruct {
                 #endif
 
                 if (intents != intents::NONE || api >= 8 || sendNoneIntent) {
-                    (*identify)[intents] = intents;
+                    (*identify)["intents"] = intents;
                 }
 
                 send(2, identify, nullptr);
