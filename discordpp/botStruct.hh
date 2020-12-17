@@ -27,7 +27,7 @@ class BotStruct {
                       sptr<const handleSent> callback) = 0;
 
     void run() {
-        for (auto module : needInit) {
+        for (const auto& module : needInit) {
             if (module.second) {
                 std::cerr << "Forgot to initialize: " << module.first << '\n';
                 exit(1);
