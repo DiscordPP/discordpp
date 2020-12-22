@@ -117,9 +117,12 @@ class Bot : public virtual BotStruct {
         switch (payload["op"].get<int>()) {
         case 0: // Dispatch:           dispatches an event
             sequence_ = payload["s"].get<int>();
+            if (anyHandler) {
+                anyHandler(payload["t"], payload["d"]);
+            }
             if (handlers.find(payload["t"]) == handlers.end()) {
                 if (debugUnhandled) {
-                    std::cerr << "No handlers defined for " << payload["t"]
+                    std::cerr << "No specific handlers defined for " << payload["t"]
                               << "\n";
                 }
             } else {
