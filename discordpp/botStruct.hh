@@ -18,6 +18,7 @@ namespace discordpp {
 class BotStruct {
   public:
     std::multimap<std::string, handleEvent> handlers;
+    handleAnyEvent anyHandler = nullptr;
 
     virtual ~BotStruct(){};
 
