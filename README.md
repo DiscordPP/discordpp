@@ -25,7 +25,7 @@ A Modularized C++ Library for the Discord API
 * [nlohmann::json](https://github.com/nlohmann/json)
 
 ### Recommended Plugins
-* \[Incomplete\] [Plugin: RateLimit](https://github.com/DiscordPP/plugin-ratelimit) handes rate limiting
+* [Plugin: RateLimit](https://github.com/DiscordPP/plugin-ratelimit) handes rate limiting
    * Without this plugin, Discord++ exits when encountering a rate limit for your safety
 * [Plugin: Overload](https://github.com/DiscordPP/plugin-overload) provides overloads for the websocket and REST `call` and `send` functions to create `std::shared_ptr`s for you and provides some sane defaults when you don't need all their arguments.
 * [Plugin: Responder](https://github.com/DiscordPP/plugin-responder) provides a simple interface for detecting commands in the form of a character and a string, e.g. `!help`
@@ -38,6 +38,8 @@ A Modularized C++ Library for the Discord API
    * Contains detailed setup instructions
    * Branches often track development of new features
 * Feel free to submit your own templates as a PR
+
+# The insructions that follow are you of date, please use Echo as a template
 
 ### Manual
 * Download:
