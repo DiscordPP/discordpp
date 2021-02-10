@@ -13,6 +13,7 @@
 
 #include "call.hh"
 #include "alias.hh"
+#include "log.hh"
 
 namespace discordpp {
 class BotStruct {
@@ -29,7 +30,7 @@ class BotStruct {
     void run() {
         for (const auto& module : needInit) {
             if (module.second) {
-                std::cerr << "Forgot to initialize: " << module.first << '\n';
+                log::log(log::error, [module](std::ostream* log) { *log << "Forgot to initialize: " << module.first << '\n'; });
                 exit(1);
             }
         }
@@ -38,12 +39,12 @@ class BotStruct {
 
   protected:
     virtual void runctd() {
-        std::cerr << "Starting run loop" << '\n';
+        log::log(log::error, [](std::ostream* log) { *log << "Starting run loop" << '\n'; });
         work = std::make_unique<boost::asio::executor_work_guard<
             boost::asio::io_context::executor_type>>(
             boost::asio::make_work_guard(*aioc));
         aioc->run();
-        std::cerr << "Ending run loop" << '\n';
+        log::log(log::error, [](std::ostream* log) { *log << "Ending run loop" << '\n'; });
     }
 
     virtual void connect() = 0;
