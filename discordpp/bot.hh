@@ -61,7 +61,7 @@ class Bot : public virtual BotStruct {
 
     void reconnect(const std::string &reason,
                    const bool resume = true) override {
-        std::cerr << "Reconnecting because \"" << reason << "\" ...\n";
+        log::logerr([reason](std::ostream* log) { *log << "Reconnecting because \"" << reason << "\" ...\n"; });
         if (!resume) {
             sequence_ = -1;
             session_id_ = "";
@@ -96,7 +96,7 @@ class Bot : public virtual BotStruct {
         }
         needACK_++;
         if(showHeartbeats) {
-            std::cout << "Sending heartbeat..." << std::endl;
+            log::logheartbeat([](std::ostream* log) { *log << "Sending heartbeat...\n"; });
         }
         pacemaker_ = std::make_unique<boost::asio::steady_timer>(
             *aioc, std::chrono::steady_clock::now() + *heartrate_);
@@ -119,8 +119,7 @@ class Bot : public virtual BotStruct {
             sequence_ = payload["s"].get<int>();
             if (handlers.find(payload["t"]) == handlers.end()) {
                 if (debugUnhandled) {
-                    std::cerr << "No handlers defined for " << payload["t"]
-                              << "\n";
+                    log::logerr([payload](std::ostream* log) { *log << "No handlers defined for " << payload["t"] << "\n"; });
                 }
             } else {
                 for (auto handler = handlers.lower_bound(payload["t"]);
@@ -130,17 +129,16 @@ class Bot : public virtual BotStruct {
             }
             break;
         case 1: // Heartbeat:          used for ping checking
-            std::cerr << "Discord Servers requested a heartbeat, which is not "
-                         "implemented.\n";
+            log::logerr([](std::ostream* log) { *log << "Discord Servers requested a heartbeat, which is not implemented.\n"; });
             break;
         case 7: // Reconnect:          used to tell clients to reconnect to the
                 // gateway
-            std::cerr << "Discord Servers requested a reconnect.\n";
+            log::logerr([](std::ostream* log) { *log << "Discord Servers requested a reconnect.\n"; });
             reconnect("The gateway is restarting");
             break;
         case 9: // Invalid Session:	used to notify client they have an
                 // invalid session id
-            std::cerr << "Discord Servers notified of an invalid session ID.\n";
+            log::logerr([](std::ostream* log) { *log << "Discord Servers notified of an invalid session ID.\n"; });
             reconnect_ = std::make_unique<boost::asio::steady_timer>(
                 *aioc, std::chrono::steady_clock::now() +
                            std::chrono::milliseconds(reconnect_millis()));
@@ -197,12 +195,11 @@ class Bot : public virtual BotStruct {
                  // heartbeat that was received
             needACK_ = false;
             if(showHeartbeats) {
-                std::cout << "Heartbeat Successful." << std::endl;
+                log::logheartbeat([](std::ostream* log) { *log << "Heartbeat Sucessful.\n"; });
             }
             break;
         default:
-            std::cerr << "Unexpected opcode " << payload["op"] << "! Message:\n"
-                      << payload.dump(4) << '\n';
+            log::logerr([payload](std::ostream* log) { *log << "Unexpected opcode " << payload["op"] << "! Message:\n" << payload.dump(4) << '\n'; });
         }
     }
 
