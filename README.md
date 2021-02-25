@@ -39,7 +39,7 @@ A Modularized C++ Library for the Discord API
    * Branches often track development of new features
 * Feel free to submit your own templates as a PR
 
-# The insructions that follow are you of date, please use Echo as a template
+# The insructions that follow are out of date, please use Echo as a template
 
 ### Manual
 * Download:
