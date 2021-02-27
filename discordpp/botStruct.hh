@@ -13,6 +13,7 @@
 
 #include "alias.hh"
 #include "log.hh"
+#include "util.hh"
 
 namespace discordpp {
 class BotStruct {
@@ -114,7 +115,7 @@ class BotStruct {
 #define RENDER_CALL_FIELD(TYPE, NAME)                                          \
   protected:                                                                   \
     sptr<const TYPE> render_##NAME() override {                                \
-        return std::make_shared<const TYPE>(*_##NAME);                         \
+        return _##NAME ? std::make_shared<const TYPE>(*_##NAME) : nullptr;     \
     }
 
 #define CALL_FIELD(TYPE, NAME, USEDBY)                                         \
@@ -151,7 +152,9 @@ class BotStruct {
         CALL_FIELD(handleRead, onRead, onRead)
       protected:
         sptr<const std::string> render_type() override {
-            return std::make_shared<const std::string>("application/json");
+            static auto type =
+                std::make_shared<const std::string>("application/json");
+            return type;
         }
         SET_CALL_FIELD(json, payload, body)
       protected:
@@ -161,6 +164,118 @@ class BotStruct {
     };
 
     auto callJson() { return sptr<JsonCall>(new JsonCall(this)); }
+
+    ////////////////////////////////////////////////////////////////////////////
+
+    class FileCall : public Call,
+                     public std::enable_shared_from_this<FileCall> {
+        friend BotStruct;
+
+      protected:
+        explicit FileCall(BotStruct *bot) : Call(bot) {}
+
+      protected:
+        sptr<const std::string> render_method() override {
+            static auto method = std::make_shared<const std::string>("POST");
+            return method;
+        }
+
+      public:
+        auto target(sptr<std::string> targetIn) {
+            _rendered_target = nullptr;
+            _rendered_body = nullptr;
+            _target = std::move(targetIn);
+            return shared_from_this();
+        }
+        auto target(const std::string &targetIn) {
+            return target(std::make_shared<std::string>(targetIn));
+        }
+
+      protected:
+        sptr<std::string> _target = nullptr;
+
+      protected:
+        sptr<const std::string> render_target() override {
+            return _target ? std::make_shared<const std::string>(*_target)
+                           : nullptr;
+        }
+
+        CALL_FIELD(handleWrite, onWrite, onWrite)
+        CALL_FIELD(handleRead, onRead, onRead)
+      protected:
+        sptr<const std::string> render_type() override {
+            return std::make_shared<const std::string>(
+                "multipart/form-data; boundary=" + *render_boundary());
+        }
+
+      public:
+        auto payload(sptr<json> payloadIn) {
+            _rendered_body = nullptr;
+            _rendered_boundary = nullptr;
+            _payload = std::move(payloadIn);
+            return shared_from_this();
+        }
+        auto payload(const json &payloadIn) {
+            return payload(std::make_shared<json>(payloadIn));
+        }
+
+      protected:
+        sptr<json> _payload = nullptr;
+
+        SET_CALL_FIELD(std::string, filename, body)
+        SET_CALL_FIELD(std::string, filetype, body)
+
+      public:
+        auto file(sptr<std::string> fileIn) {
+            _rendered_body = nullptr;
+            _rendered_boundary = nullptr;
+            _file = std::move(fileIn);
+            return shared_from_this();
+        }
+        auto file(const std::string &fileIn) {
+            return file(std::make_shared<std::string>(fileIn));
+        }
+
+      protected:
+        sptr<std::string> _file = nullptr;
+
+      protected:
+        sptr<const std::string> _rendered_boundary = nullptr;
+        sptr<const std::string> render_boundary() {
+            return _rendered_boundary ? _rendered_boundary
+                                      : _rendered_boundary =
+                                            std::make_shared<const std::string>(
+                                                util::generate_boundary(
+                                                    _payload->dump(), _file));
+        }
+
+        sptr<const std::string> render_body() override {
+            auto boundary = render_boundary();
+            auto body = std::make_shared<std::string>("\r\n--");
+            *body += *boundary;
+            if (_payload) {
+                *body +=
+                    "\r\nContent-Disposition: form-data; name=\"payload_json\""
+                    "\r\nContent-Type: application/json\r\n\r\n";
+                *body += _payload->dump();
+                *body += "\r\n--";
+                *body += *boundary;
+            }
+            *body += "\r\nContent-Disposition: form-data; name=\"file\"; "
+                     "filename=\"";
+            *body += *_filename;
+            *body += "\"\r\nContent-Type: ";
+            *body += *_filetype;
+            *body += "\r\n\r\n";
+            *body += *_file;
+            *body += "\r\n--";
+            *body += *boundary;
+            *body += "--";
+            return std::const_pointer_cast<const std::string>(body);
+        }
+    };
+
+    auto callFile() { return sptr<FileCall>(new FileCall(this)); }
 
     /*    friend class Call;
         class Call {
