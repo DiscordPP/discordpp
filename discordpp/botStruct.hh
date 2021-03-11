@@ -22,6 +22,109 @@ class BotStruct {
 
     virtual ~BotStruct(){};
 
+    class RenderedCall;
+
+#define BASECALL
+#define Bot BotStruct
+#define Class Call
+#define function call
+#define Fields                                                                 \
+    NEW_BASIC_RENDERABLE_FIELD(std::string, method, USEDBY(method))            \
+    NEW_BASIC_RENDERABLE_FIELD(std::string, target, USEDBY(target))            \
+    NEW_BASIC_RENDERABLE_FIELD(std::string, type, USEDBY(type))                \
+    NEW_BASIC_RENDERABLE_FIELD(std::string, body, USEDBY(body))                \
+    NEW_BASIC_RENDERABLE_FIELD(handleWrite, onWrite, USEDBY(onWrite))          \
+    NEW_BASIC_RENDERABLE_FIELD(handleRead, onRead, USEDBY(onRead))
+
+#include "macros/defineCallOpen.hh"
+    // This line intentionally left blank
+#include "macros/defineCallClose.hh"
+
+#define Bot BotStruct
+#define Parent Call
+#define Class JsonCall
+#define function callJson
+#define Fields                                                                 \
+    NEW_FIELD(json, payload, USEDBY(body))                                     \
+    FORWARD_FIELD(std::string, method, )                                       \
+    FORWARD_FIELD(std::string, target, )                                       \
+    HIDE_FIELD(std::string, type)                                              \
+    HIDE_FIELD(std::string, body)                                              \
+    FORWARD_FIELD(handleWrite, onWrite, )                                      \
+    FORWARD_FIELD(handleRead, onRead, )
+
+#include "macros/defineCallOpen.hh"
+  protected:
+    sptr<const std::string> render_type() override {
+        static auto type =
+            std::make_shared<const std::string>("application/json");
+        return type;
+    }
+    sptr<const std::string> render_body() override {
+        return std::make_shared<const std::string>(_payload->dump());
+    }
+#include "macros/defineCallClose.hh"
+
+#define Bot BotStruct
+#define Parent JsonCall
+#define Class FileCall
+#define function callFile
+#define Fields                                                                 \
+    NEW_BASIC_RENDERABLE_FIELD(std::string, filename, USEDBY(body))            \
+    NEW_BASIC_RENDERABLE_FIELD(std::string, filetype, USEDBY(body))            \
+    NEW_FIELD(std::string, file, USEDBY(body, boundary, type))                 \
+    FORWARD_FIELD(json, payload, USEDBY(boundary, type))                       \
+    HIDE_FIELD(std::string, method)                                            \
+    FORWARD_FIELD(std::string, target, )                                       \
+    FORWARD_FIELD(handleWrite, onWrite, ) FORWARD_FIELD(handleRead, onRead, )
+
+#include "macros/defineCallOpen.hh"
+  protected:
+    sptr<const std::string> render_method() override {
+        static auto method = std::make_shared<const std::string>("POST");
+        return method;
+    }
+
+  protected:
+    sptr<const std::string> render_type() override {
+        return std::make_shared<const std::string>(
+            "multipart/form-data; boundary=" + *render_boundary());
+    }
+
+  protected:
+    sptr<const std::string> _rendered_boundary = nullptr;
+    sptr<const std::string> render_boundary() {
+        return _rendered_boundary
+                   ? _rendered_boundary
+                   : _rendered_boundary = std::make_shared<const std::string>(
+                         util::generate_boundary(_payload->dump(), _file));
+    }
+
+    sptr<const std::string> render_body() override {
+        auto boundary = render_boundary();
+        auto body = std::make_shared<std::string>("\r\n--");
+        *body += *boundary;
+        if (_payload) {
+            *body += "\r\nContent-Disposition: form-data; name=\"payload_json\""
+                     "\r\nContent-Type: application/json\r\n\r\n";
+            *body += _payload->dump();
+            *body += "\r\n--";
+            *body += *boundary;
+        }
+        *body += "\r\nContent-Disposition: form-data; name=\"file\"; "
+                 "filename=\"";
+        *body += *_filename;
+        *body += "\"\r\nContent-Type: ";
+        *body += *_filetype;
+        *body += "\r\n\r\n";
+        *body += *_file;
+        *body += "\r\n--";
+        *body += *boundary;
+        *body += "--";
+        return std::const_pointer_cast<const std::string>(body);
+    }
+#include "macros/defineCallClose.hh"
+
 #define FIELDS                                                                 \
     FIELD(std::string, method)                                                 \
     SEPARATOR                                                                  \
@@ -34,42 +137,6 @@ class BotStruct {
     FIELD(handleWrite, onWrite)                                                \
     SEPARATOR                                                                  \
     FIELD(handleRead, onRead)
-
-    class RenderedCall;
-
-    class Call {
-        friend BotStruct;
-        friend RenderedCall;
-
-      protected:
-        explicit Call(BotStruct *bot) : bot_(bot) {}
-
-      public:
-        auto render() { return std::make_shared<RenderedCall>(this); }
-        void run() { bot_->doCall(render()); }
-
-#define FIELD(type, name)                                                      \
-  protected:                                                                   \
-    sptr<const type> _rendered_##name = nullptr;                               \
-    virtual sptr<const type> render_##name() = 0;                              \
-                                                                               \
-  private:                                                                     \
-    virtual sptr<const type> get_##name() {                                    \
-        return _rendered_##name ? _rendered_##name                             \
-                                : _rendered_##name = render_##name();          \
-    }
-#define SEPARATOR
-
-        FIELDS
-
-      private:
-        BotStruct *bot_;
-
-#undef SEPARATOR
-#undef FIELD
-    };
-
-    ////////////////////////////////////////////////////////////////////////////
 
     class RenderedCall {
       public:
@@ -96,278 +163,7 @@ class BotStruct {
 #undef FIELD
     };
 
-    ////////////////////////////////////////////////////////////////////////////
-
-#define SET_CALL_FIELD(TYPE, NAME, USEDBY)                                     \
-  public:                                                                      \
-    auto NAME(sptr<TYPE> NAME##In) {                                           \
-        _rendered_##USEDBY = nullptr;                                          \
-        _##NAME = std::move(NAME##In);                                         \
-        return shared_from_this();                                             \
-    }                                                                          \
-    auto NAME(const TYPE &NAME##In) {                                          \
-        return NAME(std::make_shared<TYPE>(NAME##In));                         \
-    }                                                                          \
-                                                                               \
-  protected:                                                                   \
-    sptr<TYPE> _##NAME = nullptr;
-
-#define RENDER_CALL_FIELD(TYPE, NAME)                                          \
-  protected:                                                                   \
-    sptr<const TYPE> render_##NAME() override {                                \
-        return _##NAME ? std::make_shared<const TYPE>(*_##NAME) : nullptr;     \
-    }
-
-#define CALL_FIELD(TYPE, NAME, USEDBY)                                         \
-    SET_CALL_FIELD(TYPE, NAME, USEDBY)                                         \
-    RENDER_CALL_FIELD(TYPE, NAME)
-
-    class RawCall : public Call, public std::enable_shared_from_this<RawCall> {
-        friend BotStruct;
-
-      protected:
-        explicit RawCall(BotStruct *bot) : Call(bot) {}
-
-#define FIELD(TYPE, NAME) CALL_FIELD(TYPE, NAME, NAME)
-#define SEPARATOR
-        FIELDS
-#undef SEPARATOR
-#undef FIELD
-    };
-
-    auto call() { return sptr<RawCall>(new RawCall(this)); }
-
 #undef FIELDS
-
-    class JsonCall : public Call,
-                     public std::enable_shared_from_this<JsonCall> {
-        friend BotStruct;
-
-      protected:
-        explicit JsonCall(BotStruct *bot) : Call(bot) {}
-
-        CALL_FIELD(std::string, method, method)
-        CALL_FIELD(std::string, target, target)
-        CALL_FIELD(handleWrite, onWrite, onWrite)
-        CALL_FIELD(handleRead, onRead, onRead)
-      protected:
-        sptr<const std::string> render_type() override {
-            static auto type =
-                std::make_shared<const std::string>("application/json");
-            return type;
-        }
-        SET_CALL_FIELD(json, payload, body)
-      protected:
-        sptr<const std::string> render_body() override {
-            return std::make_shared<const std::string>(_payload->dump());
-        }
-    };
-
-    auto callJson() { return sptr<JsonCall>(new JsonCall(this)); }
-
-    ////////////////////////////////////////////////////////////////////////////
-
-    class FileCall : public Call,
-                     public std::enable_shared_from_this<FileCall> {
-        friend BotStruct;
-
-      protected:
-        explicit FileCall(BotStruct *bot) : Call(bot) {}
-
-      protected:
-        sptr<const std::string> render_method() override {
-            static auto method = std::make_shared<const std::string>("POST");
-            return method;
-        }
-
-      public:
-        auto target(sptr<std::string> targetIn) {
-            _rendered_target = nullptr;
-            _rendered_body = nullptr;
-            _target = std::move(targetIn);
-            return shared_from_this();
-        }
-        auto target(const std::string &targetIn) {
-            return target(std::make_shared<std::string>(targetIn));
-        }
-
-      protected:
-        sptr<std::string> _target = nullptr;
-
-      protected:
-        sptr<const std::string> render_target() override {
-            return _target ? std::make_shared<const std::string>(*_target)
-                           : nullptr;
-        }
-
-        CALL_FIELD(handleWrite, onWrite, onWrite)
-        CALL_FIELD(handleRead, onRead, onRead)
-      protected:
-        sptr<const std::string> render_type() override {
-            return std::make_shared<const std::string>(
-                "multipart/form-data; boundary=" + *render_boundary());
-        }
-
-      public:
-        auto payload(sptr<json> payloadIn) {
-            _rendered_body = nullptr;
-            _rendered_boundary = nullptr;
-            _payload = std::move(payloadIn);
-            return shared_from_this();
-        }
-        auto payload(const json &payloadIn) {
-            return payload(std::make_shared<json>(payloadIn));
-        }
-
-      protected:
-        sptr<json> _payload = nullptr;
-
-        SET_CALL_FIELD(std::string, filename, body)
-        SET_CALL_FIELD(std::string, filetype, body)
-
-      public:
-        auto file(sptr<std::string> fileIn) {
-            _rendered_body = nullptr;
-            _rendered_boundary = nullptr;
-            _file = std::move(fileIn);
-            return shared_from_this();
-        }
-        auto file(const std::string &fileIn) {
-            return file(std::make_shared<std::string>(fileIn));
-        }
-
-      protected:
-        sptr<std::string> _file = nullptr;
-
-      protected:
-        sptr<const std::string> _rendered_boundary = nullptr;
-        sptr<const std::string> render_boundary() {
-            return _rendered_boundary ? _rendered_boundary
-                                      : _rendered_boundary =
-                                            std::make_shared<const std::string>(
-                                                util::generate_boundary(
-                                                    _payload->dump(), _file));
-        }
-
-        sptr<const std::string> render_body() override {
-            auto boundary = render_boundary();
-            auto body = std::make_shared<std::string>("\r\n--");
-            *body += *boundary;
-            if (_payload) {
-                *body +=
-                    "\r\nContent-Disposition: form-data; name=\"payload_json\""
-                    "\r\nContent-Type: application/json\r\n\r\n";
-                *body += _payload->dump();
-                *body += "\r\n--";
-                *body += *boundary;
-            }
-            *body += "\r\nContent-Disposition: form-data; name=\"file\"; "
-                     "filename=\"";
-            *body += *_filename;
-            *body += "\"\r\nContent-Type: ";
-            *body += *_filetype;
-            *body += "\r\n\r\n";
-            *body += *_file;
-            *body += "\r\n--";
-            *body += *boundary;
-            *body += "--";
-            return std::const_pointer_cast<const std::string>(body);
-        }
-    };
-
-    auto callFile() { return sptr<FileCall>(new FileCall(this)); }
-
-    /*    friend class Call;
-        class Call {
-    #define SELF Call
-            friend class BotStruct;
-
-          protected:
-            explicit Call(BotStruct *bot) : bot_(bot) {}
-
-          public:
-            void run() { bot_->doCall(self_); }
-
-    #define FORWARD_RUN() \
-      public: \ void run() { PARENT::run(); }
-
-    #define CALL_FIELD(TYPE, NAME) \
-      public: \
-        sptr<SELF> NAME(const TYPE &NAME##In) { \
-            return NAME(std::make_shared<const TYPE>(NAME##In)); \
-        } \
-        sptr<SELF> NAME(sptr<const TYPE> NAME##In) { \
-            _##NAME = std::move(NAME##In); \
-            return std::static_pointer_cast<SELF>(self_); \
-        } \
-        virtual sptr<const TYPE> get_##NAME() { return _##NAME; }; \
-                                                                                   \
-      protected: \ sptr<const TYPE> _##NAME = nullptr;
-
-    #define FORWARD_SET_CALL_FIELD(TYPE, NAME) \
-      public: \
-        virtual sptr<SELF> NAME(const TYPE &NAME##In) { \
-            return std::static_pointer_cast<SELF>(PARENT::NAME(NAME##In)); \
-        } \
-        virtual sptr<SELF> NAME(sptr<const TYPE> NAME##In) { \
-            return std::static_pointer_cast<SELF>( \
-                PARENT::NAME(std::move(NAME##In))); \
-        } \ sptr<const TYPE> _##NAME = nullptr;
-
-    #define FORWARD_GET_CALL_FIELD(TYPE, NAME) \
-      public: \ sptr<const TYPE> get_##NAME() override { return
-    PARENT::get_##NAME(); };
-
-    #define FORWARD_CALL_FIELD(TYPE, NAME) \
-        FORWARD_SET_CALL_FIELD(TYPE, NAME) \ FORWARD_GET_CALL_FIELD(TYPE,
-    NAME)
-
-            CALL_FIELD(std::string, type)
-            CALL_FIELD(std::string, target)
-            CALL_FIELD(handleWrite, onWrite)
-            CALL_FIELD(handleRead, onRead)
-            CALL_FIELD(std::string, body)
-
-          protected:
-            BotStruct *bot_;
-            std::shared_ptr<Call> self_ = nullptr;
-        };
-    #define BUILD_CALL(name) \
-        virtual sptr<SELF> name() { \
-            Call *call = new SELF(this); \
-            call->self_ = sptr<Call>(call); \
-            return std::reinterpret_pointer_cast<SELF>(call->self_); \
-        };
-
-        BUILD_CALL(call)
-    #undef SELF
-
-        friend class JsonCall;
-        class JsonCall : protected Call {
-    #define SELF JsonCall
-    #define PARENT Call
-            friend class BotStruct;
-
-          protected:
-            explicit JsonCall(BotStruct *bot) : Call(bot) {}
-
-            FORWARD_RUN()
-
-            FORWARD_CALL_FIELD(std::string, type)
-            FORWARD_CALL_FIELD(std::string, target)
-            FORWARD_CALL_FIELD(handleWrite, onWrite)
-            FORWARD_CALL_FIELD(handleRead, onRead)
-            CALL_FIELD(json, payload)
-
-          protected:
-            sptr<const std::string> get_body() override {
-                return _payload ?
-    std::make_shared<std::string>(_payload->dump()) : nullptr;
-            };
-        };
-        BUILD_CALL(callJson)
-    #undef PARENT
-    #undef SELF*/
 
     virtual void send(const int opcode, sptr<const json> payload,
                       sptr<const handleSent> callback) = 0;
