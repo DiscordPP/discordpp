@@ -27,6 +27,7 @@
 #error The call needs some fields
 #endif
 
+public:
 #ifdef BASECALL
 class Class : public std::enable_shared_from_this<Class> {
     friend RenderedCall;
@@ -96,6 +97,13 @@ class Class : public Parent {
   protected:                                                                   \
     using Parent::name;
 
+#define STATIC_FIELD(type, name, value)                                        \
+    HIDE_FIELD(type, name)                                                     \
+    sptr<const type> render_##name() override {                                \
+        static auto name = std::make_shared<const type>(value);                \
+        return name;                                                           \
+    }
+
 #define FORWARD_FIELD(type, name, usedby)                                      \
   public:                                                                      \
     auto name(sptr<type> name##In) {                                           \
@@ -118,4 +126,5 @@ class Class : public Parent {
 #undef NEW_CUSTOM_RENDERABLE_FIELD
 #undef NEW_BASIC_RENDERABLE_FIELD
 #undef HIDE_FIELD
+#undef STATIC_FIELD
 #undef FORWARD_FIELD

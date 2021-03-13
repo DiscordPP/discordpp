@@ -45,7 +45,7 @@ class BotStruct {
 #define Class JsonCall
 #define function callJson
 #define Fields                                                                 \
-    NEW_FIELD(json, payload, USEDBY(body))                                     \
+    NEW_RENDERABLE_FIELD(json, payload, USEDBY(body))                          \
     FORWARD_FIELD(std::string, method, )                                       \
     FORWARD_FIELD(std::string, target, )                                       \
     HIDE_FIELD(std::string, type)                                              \
@@ -60,8 +60,11 @@ class BotStruct {
             std::make_shared<const std::string>("application/json");
         return type;
     }
+    virtual sptr<const json> render_payload() {
+        return std::make_shared<const json>(*_payload);
+    }
     sptr<const std::string> render_body() override {
-        return std::make_shared<const std::string>(_payload->dump());
+        return std::make_shared<const std::string>(get_payload()->dump());
     }
 #include "macros/defineCallClose.hh"
 
@@ -74,17 +77,11 @@ class BotStruct {
     NEW_BASIC_RENDERABLE_FIELD(std::string, filetype, USEDBY(body))            \
     NEW_FIELD(std::string, file, USEDBY(body, boundary, type))                 \
     FORWARD_FIELD(json, payload, USEDBY(boundary, type))                       \
-    HIDE_FIELD(std::string, method)                                            \
+    STATIC_FIELD(std::string, method, "POST")                                  \
     FORWARD_FIELD(std::string, target, )                                       \
     FORWARD_FIELD(handleWrite, onWrite, ) FORWARD_FIELD(handleRead, onRead, )
 
 #include "macros/defineCallOpen.hh"
-  protected:
-    sptr<const std::string> render_method() override {
-        static auto method = std::make_shared<const std::string>("POST");
-        return method;
-    }
-
   protected:
     sptr<const std::string> render_type() override {
         return std::make_shared<const std::string>(
@@ -97,29 +94,31 @@ class BotStruct {
         return _rendered_boundary
                    ? _rendered_boundary
                    : _rendered_boundary = std::make_shared<const std::string>(
-                         util::generate_boundary(_payload->dump(), _file));
+                         util::generate_boundary(get_payload()?get_payload()->dump():"", _file));
     }
 
     sptr<const std::string> render_body() override {
         auto boundary = render_boundary();
         auto body = std::make_shared<std::string>("\r\n--");
         *body += *boundary;
-        if (_payload) {
+        if (get_payload()) {
             *body += "\r\nContent-Disposition: form-data; name=\"payload_json\""
                      "\r\nContent-Type: application/json\r\n\r\n";
-            *body += _payload->dump();
+            *body += get_payload()->dump();
             *body += "\r\n--";
             *body += *boundary;
         }
-        *body += "\r\nContent-Disposition: form-data; name=\"file\"; "
-                 "filename=\"";
-        *body += *_filename;
-        *body += "\"\r\nContent-Type: ";
-        *body += *_filetype;
-        *body += "\r\n\r\n";
-        *body += *_file;
-        *body += "\r\n--";
-        *body += *boundary;
+        if(_file) {
+            *body += "\r\nContent-Disposition: form-data; name=\"file\"; "
+                     "filename=\"";
+            *body += *_filename;
+            *body += "\"\r\nContent-Type: ";
+            *body += *_filetype;
+            *body += "\r\n\r\n";
+            *body += *_file;
+            *body += "\r\n--";
+            *body += *boundary;
+        }
         *body += "--";
         return std::const_pointer_cast<const std::string>(body);
     }

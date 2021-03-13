@@ -15,8 +15,6 @@
 #undef CALL_FIELD
 
 namespace discordpp {
-using json = nlohmann::json;
-using snowflake = uint64_t;
 
 class Bot : public virtual BotStruct {
     std::unique_ptr<boost::asio::steady_timer> reconnect_;

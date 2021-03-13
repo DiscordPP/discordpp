@@ -5,11 +5,14 @@
 #ifndef DEFINE_CALL_OPEN
 #error There is no open Call definition
 #endif
+}
+;
 
+#define CALLFUNC(name)                                                         \
+    auto name() { return sptr<Class>(new Class(this)); }
 
-};
-
-auto function() { return sptr<Class>(new Class(this)); }
+DPP_FOR_EACH(CALLFUNC, function);
+#undef CALLFUNC
 
 #undef BASECALL
 #undef Bot
