@@ -30,20 +30,22 @@ inline std::string rand_str(int length) {
     return output;
 }
 
-inline std::string generate_boundary(const std::string& payload, sptr<std::string> file) {
+inline std::string generate_boundary(const std::string &payload,
+                                     sptr<std::string> file) {
     std::string out = rand_str(8);
-    while ((file && file->find(out) != std::string::npos) || payload.find(out) != std::string::npos) {
+    while ((file && file->find(out) != std::string::npos) ||
+           payload.find(out) != std::string::npos) {
         out += rand_str(out.length());
     }
     return out;
 }
 } // namespace util
-inline snowflake get_snowflake(std::string src){
+inline snowflake get_snowflake(std::string src) {
     snowflake out;
     std::istringstream(src) >> out;
     return out;
 }
-inline snowflake get_snowflake(json src){
+inline snowflake get_snowflake(json src) {
     return get_snowflake(src.get<std::string>());
 }
 } // namespace discordpp
