@@ -55,13 +55,18 @@ class Class : public Parent {
     explicit Class(BotStruct *bot) : Parent(bot) {}
 #endif
 
-#define SET_NULL(usedby) _rendered_##usedby = nullptr;
-#define USEDBY(...) DPP_FOR_EACH(SET_NULL, __VA_ARGS__)
+//#define SET_NULL(usedby) _rendered_##usedby = nullptr;
+#define SET_CLEAR(usedby) clear_##usedby();
+#define AND_CLEAR(usedby, name)                                                \
+    usedby;                                                                    \
+    SET_CLEAR(name);
+#define USEDBY(...) DPP_FOR_EACH(SET_CLEAR, __VA_ARGS__)
 
 #define NEW_FIELD(type, name, usedby)                                          \
   public:                                                                      \
     auto name(sptr<type> name##In) {                                           \
-        usedby _##name = std::move(name##In);                                  \
+        usedby;                                                                \
+        _##name = std::move(name##In);                                         \
         return shared_from_base<Class>();                                      \
     }                                                                          \
     auto name(const type &name##In) {                                          \
@@ -72,9 +77,14 @@ class Class : public Parent {
     sptr<type> _##name = nullptr;
 
 #define NEW_RENDERABLE_FIELD(type, name, usedby)                               \
-    NEW_FIELD(type, name, usedby)                                              \
+    NEW_FIELD(type, name, AND_CLEAR(usedby, name))                             \
   protected:                                                                   \
     sptr<const type> _rendered_##name = nullptr;                               \
+                                                                               \
+    void clear_##name() {                                                      \
+        _rendered_##name = nullptr;                                            \
+        usedby;                                                                \
+    }                                                                          \
                                                                                \
   private:                                                                     \
     virtual sptr<const type> get_##name() {                                    \

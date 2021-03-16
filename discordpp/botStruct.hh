@@ -29,12 +29,12 @@ class BotStruct {
 #define Class Call
 #define function call
 #define Fields                                                                 \
-    NEW_BASIC_RENDERABLE_FIELD(std::string, method, USEDBY(method))            \
-    NEW_BASIC_RENDERABLE_FIELD(std::string, target, USEDBY(target))            \
-    NEW_BASIC_RENDERABLE_FIELD(std::string, type, USEDBY(type))                \
-    NEW_BASIC_RENDERABLE_FIELD(std::string, body, USEDBY(body))                \
-    NEW_BASIC_RENDERABLE_FIELD(handleWrite, onWrite, USEDBY(onWrite))          \
-    NEW_BASIC_RENDERABLE_FIELD(handleRead, onRead, USEDBY(onRead))
+    NEW_BASIC_RENDERABLE_FIELD(std::string, method, )                          \
+    NEW_BASIC_RENDERABLE_FIELD(std::string, target, )                          \
+    NEW_BASIC_RENDERABLE_FIELD(std::string, type, )                            \
+    NEW_BASIC_RENDERABLE_FIELD(std::string, body, )                            \
+    NEW_BASIC_RENDERABLE_FIELD(handleWrite, onWrite, )                         \
+    NEW_BASIC_RENDERABLE_FIELD(handleRead, onRead, )
 
 #include "macros/defineCallOpen.hh"
     // This line intentionally left blank
@@ -75,11 +75,12 @@ class BotStruct {
 #define Fields                                                                 \
     NEW_BASIC_RENDERABLE_FIELD(std::string, filename, USEDBY(body))            \
     NEW_BASIC_RENDERABLE_FIELD(std::string, filetype, USEDBY(body))            \
-    NEW_FIELD(std::string, file, USEDBY(body, boundary, type))                 \
-    FORWARD_FIELD(json, payload, USEDBY(boundary, type))                       \
+    NEW_FIELD(std::string, file, USEDBY(body, boundary))                       \
+    FORWARD_FIELD(json, payload, USEDBY(boundary))                             \
     STATIC_FIELD(std::string, method, "POST")                                  \
     FORWARD_FIELD(std::string, target, )                                       \
-    FORWARD_FIELD(handleWrite, onWrite, ) FORWARD_FIELD(handleRead, onRead, )
+    FORWARD_FIELD(handleWrite, onWrite, )                                      \
+    FORWARD_FIELD(handleRead, onRead, )
 
 #include "macros/defineCallOpen.hh"
   protected:
@@ -123,6 +124,12 @@ class BotStruct {
         }
         *body += "--";
         return std::const_pointer_cast<const std::string>(body);
+    }
+
+    void clear_boundary() {
+        _rendered_boundary = nullptr;
+        clear_type();
+        clear_body();
     }
 #include "macros/defineCallClose.hh"
 
