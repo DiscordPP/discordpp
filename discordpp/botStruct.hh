@@ -94,7 +94,9 @@ class BotStruct {
         return _rendered_boundary
                    ? _rendered_boundary
                    : _rendered_boundary = std::make_shared<const std::string>(
-                         util::generate_boundary(get_payload()?get_payload()->dump():"", _file));
+                         util::generate_boundary(
+                             get_payload() ? get_payload()->dump() : "",
+                             _file));
     }
 
     sptr<const std::string> render_body() override {
@@ -108,7 +110,7 @@ class BotStruct {
             *body += "\r\n--";
             *body += *boundary;
         }
-        if(_file) {
+        if (_file) {
             *body += "\r\nContent-Disposition: form-data; name=\"file\"; "
                      "filename=\"";
             *body += *_filename;
