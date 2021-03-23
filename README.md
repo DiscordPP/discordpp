@@ -27,8 +27,9 @@ A Modularized C++ Library for the Discord API
 ### Recommended Plugins
 * [Plugin: RateLimit](https://github.com/DiscordPP/plugin-ratelimit) handes rate limiting
    * Without this plugin, Discord++ exits when encountering a rate limit for your safety
-* [Plugin: Overload](https://github.com/DiscordPP/plugin-overload) provides overloads for the websocket and REST `call` and `send` functions to create `std::shared_ptr`s for you and provides some sane defaults when you don't need all their arguments.
+* [Plugin: Overload](https://github.com/DiscordPP/plugin-overload) provides overloads for the websocket  `send` function to create `std::shared_ptr`s for you and provides some sane defaults when you don't need all their arguments.
 * [Plugin: Responder](https://github.com/DiscordPP/plugin-responder) provides a simple interface for detecting commands in the form of a character and a string, e.g. `!help`
+* [Plugin: Endpoints](https://github.com/DiscordPP/plugin-endpoints) provides extensions to the default `call`, `callJson`, and `callFile` methods specific to different endpoints
 * You can find more plugins on the [#discordpp-plugin](https://github.com/topics/discordpp-plugin) tag
 
 ## Usage
@@ -38,8 +39,6 @@ A Modularized C++ Library for the Discord API
    * Contains detailed setup instructions
    * Branches often track development of new features
 * Feel free to submit your own templates as a PR
-
-# The insructions that follow are you of date, please use Echo as a template
 
 ### Manual
 * Download:
@@ -52,14 +51,14 @@ A Modularized C++ Library for the Discord API
 
 ```cmake
 add_subdirectory(lib/discordpp)
-add_subdirectory(lib/rest-curlpp)
-add_subdirectory(lib/websocket-websocketpp)
+add_subdirectory(lib/rest-beast)
+add_subdirectory(lib/websocket-simpleweb)
 ```
         
 2. Add `discordpp` and each module to your `INCLUDE_DIRECTORIES` command.
 
 ```cmake
-INCLUDE_DIRECTORIES( ${discordpp_SOURCE_DIR} ${discordpp-rest-curlpp_SOURCE_DIR} ${discordpp-websocket-websocketpp_SOURCE_DIR})
+INCLUDE_DIRECTORIES( ${discordpp_SOURCE_DIR} ${discordpp-rest-beast_SOURCE_DIR} ${discordpp-websocket-simpleweb_SOURCE_DIR})
 ```
     
 * In your code:
@@ -76,7 +75,7 @@ INCLUDE_DIRECTORIES( ${discordpp_SOURCE_DIR} ${discordpp-rest-curlpp_SOURCE_DIR}
 ```cpp
 auto bot = std::make_shared<DppBot>();
 ```
-   * For this example, I declared a `DppBot` alias just after the `#include` statements
+   * For this example, I declared a `DppBot` `using` alias just after the `#include` statements
    
 ```cpp
 using DppBot =
@@ -86,6 +85,13 @@ dpp::WebsocketBeast<
 		>
 >;
 ```
+
+> As-is all of Discord++ will recompile along with your codes as it's header-only.
+> To mitigate this you can move your `include` statements to a separate header and you can define the template in a separate source file.
+> 
+> See [Echo](https://github.com/DiscordPP/echo-bot) for an example
+> 
+> In the future C++20's modules should make this a non-issue if I understand things correctly
 
 3. Add responses to events with `handlers.insert` e.g.
     
