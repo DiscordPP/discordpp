@@ -36,8 +36,8 @@ class Class : public Parent {
 #endif
     friend Bot;
 
-  protected:
 #ifdef BASECALL
+  protected:
     explicit Class(BotStruct *bot) : bot_(bot) {}
 
     // https://stackoverflow.com/a/32172486
@@ -47,12 +47,19 @@ class Class : public Parent {
 
   public:
     auto render() { return std::make_shared<RenderedCall>(this); }
-    void run() { bot_->doCall(render()); }
+    auto run() {
+        bot_->doCall(render());
+        return shared_from_this();
+    }
 
   private:
     BotStruct *bot_;
 #else
+  protected:
     explicit Class(BotStruct *bot) : Parent(bot) {}
+
+  public:
+    auto run() { return std::static_pointer_cast<Class>(Parent::run()); }
 #endif
 
 //#define SET_NULL(usedby) _rendered_##usedby = nullptr;
