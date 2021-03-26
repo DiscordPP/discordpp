@@ -33,10 +33,4 @@ A Modularized C++ Library for the Discord API
 
 ## Usage
 
-### Templates <sup>This is way easier</sup>
-* [Echo Bot](https://github.com/DiscordPP/echo-bot)
-   * Contains detailed setup instructions
-   * Branches often track development of new features
-* Feel free to submit your own templates as a PR
-
 See [the Wiki](https://github.com/DiscordPP/discordpp/wiki) for setup and configuration
