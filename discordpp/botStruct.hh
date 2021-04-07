@@ -102,7 +102,7 @@ class BotStruct {
 
     sptr<const std::string> render_body() override {
         auto boundary = render_boundary();
-        auto body = std::make_shared<std::string>("\r\n--");
+        auto body = std::make_shared<std::string>("--");
         *body += *boundary;
         if (get_payload()) {
             *body += "\r\nContent-Disposition: form-data; name=\"payload_json\""
