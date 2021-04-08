@@ -42,6 +42,10 @@ class Bot : public virtual BotStruct {
 
     // API 8 is untested
     unsigned int api = 6;
+    
+    // Bot sharding
+    unsigned int shardID = 0;
+    unsigned int numShards = 1;
 
     Bot() {
         needInit["Bot"] = true;
@@ -197,6 +201,11 @@ class Bot : public virtual BotStruct {
 
                 if (intents != intents::NONE || api >= 8 || sendNoneIntent) {
                     (*identify)["intents"] = intents;
+                }
+                
+                if(numShards > 1){
+                    assert(shardID < numShards);
+                    (*identify)["shard"] = json::array({shardID, numShards});
                 }
 
                 send(2, identify, nullptr);
