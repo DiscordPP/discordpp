@@ -27,8 +27,9 @@ A Modularized C++ Library for the Discord API
 ### Recommended Plugins
 * [Plugin: RateLimit](https://github.com/DiscordPP/plugin-ratelimit) handes rate limiting
    * Without this plugin, Discord++ exits when encountering a rate limit for your safety
-* [Plugin: Overload](https://github.com/DiscordPP/plugin-overload) provides overloads for the websocket and REST `call` and `send` functions to create `std::shared_ptr`s for you and provides some sane defaults when you don't need all their arguments.
+* [Plugin: Overload](https://github.com/DiscordPP/plugin-overload) provides overloads for the websocket  `send` function to create `std::shared_ptr`s for you and provides some sane defaults when you don't need all their arguments.
 * [Plugin: Responder](https://github.com/DiscordPP/plugin-responder) provides a simple interface for detecting commands in the form of a character and a string, e.g. `!help`
+* [Plugin: Endpoints](https://github.com/DiscordPP/plugin-endpoints) provides extensions to the default `call`, `callJson`, and `callFile` methods specific to different endpoints
 * You can find more plugins on the [#discordpp-plugin](https://github.com/topics/discordpp-plugin) tag
 
 ## Usage
