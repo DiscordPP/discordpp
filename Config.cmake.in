@@ -1,7 +1,7 @@
 @PACKAGE_INIT@
 
 include(CMakeFindDependencyMacro)
-find_dependency(nhlomannjson)
+find_dependency(nlohmannjson)
 
 if(NOT TARGET discordpp::discordpp)
 	include("${CMAKE_CURRENT_LIST_DIR}/discordppTargets.cmake")

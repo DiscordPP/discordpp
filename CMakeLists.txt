@@ -17,7 +17,7 @@ target_include_directories(discordpp
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/discordpp>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/discordpp>
 )
-target_link_libraries(discordpp INTERFACE nhlomannjson::nhlomannjson)
+target_link_libraries(discordpp INTERFACE nlohmannjson::nlohmannjson)
 target_compile_features(discordpp INTERFACE cxx_std_14)
 
 install(TARGETS discordpp
