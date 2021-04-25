@@ -110,12 +110,12 @@ class Class : public Parent {
     }
 
 #ifdef Parent
-#define HIDE_FIELD(type, name)                                                 \
+#define HIDE_FIELD(name)                                                       \
   protected:                                                                   \
     using Parent::name;
 
 #define STATIC_FIELD(type, name, value)                                        \
-    HIDE_FIELD(type, name)                                                     \
+    HIDE_FIELD(name)                                                           \
     sptr<const type> render_##name() override {                                \
         static auto name = std::make_shared<const type>(value);                \
         return name;                                                           \

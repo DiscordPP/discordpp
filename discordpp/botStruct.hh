@@ -48,8 +48,8 @@ class BotStruct {
     NEW_RENDERABLE_FIELD(json, payload, USEDBY(body))                          \
     FORWARD_FIELD(std::string, method, )                                       \
     FORWARD_FIELD(std::string, target, )                                       \
-    HIDE_FIELD(std::string, type)                                              \
-    HIDE_FIELD(std::string, body)                                              \
+    HIDE_FIELD(type)                                                           \
+    HIDE_FIELD(body)                                                           \
     FORWARD_FIELD(handleWrite, onWrite, )                                      \
     FORWARD_FIELD(handleRead, onRead, )
 
