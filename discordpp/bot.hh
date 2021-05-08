@@ -51,8 +51,8 @@ class Bot : public virtual BotStruct {
         needInit["Bot"] = true;
 
         handlers.insert({"READY", [this](json data) {
-                             session_id_ =
-                                 data["session_id"].get<std::string>();
+                             session_id_ = data["session_id"].get<std::string>();
+                             ready_ = true;
                          }});
     }
 

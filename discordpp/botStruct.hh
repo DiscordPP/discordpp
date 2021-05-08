@@ -202,7 +202,10 @@ class BotStruct {
     }
 
     virtual void connect() = 0;
-    virtual void disconnect() = 0;
+    virtual void disconnect(){
+        connected_ = false;
+        ready_ = false;
+    };
     virtual void reconnect(const std::string &reason,
                            const bool resume = true) = 0;
 
@@ -218,5 +221,6 @@ class BotStruct {
     std::string token;
     bool connecting_ = false;
     bool connected_ = false;
+    bool ready_ = false;
 };
 } // namespace discordpp
