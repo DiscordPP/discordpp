@@ -40,8 +40,7 @@ class Bot : public virtual BotStruct {
     bool sendNoneIntent = false;
     uint16_t intents = intents::NONE;
 
-    // API 8 is untested
-    unsigned int api = 6;
+    unsigned int api = 9;
     
     // Bot sharding
     unsigned int shardID = 0;
