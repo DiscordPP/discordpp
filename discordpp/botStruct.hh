@@ -222,5 +222,7 @@ class BotStruct {
     bool connecting_ = false;
     bool connected_ = false;
     bool ready_ = false;
+
+    virtual void hasRateLimitPlugin() = 0;
 };
 } // namespace discordpp
