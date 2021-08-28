@@ -109,6 +109,41 @@ class Class : public Parent {
         return _##name ? std::make_shared<const type>(*_##name) : nullptr;     \
     }
 
+#define PFR2(KEY, VAR)                                                         \
+    if (!_##VAR)                                                               \
+        throw std::logic_error(DPP_XSTR(Class) " needs " #VAR);                \
+    out[KEY] = *_##VAR;
+#define PFO2(KEY, VAR)                                                         \
+    if (_##VAR)                                                                \
+        out[KEY] = *_##VAR;
+#define PFR1(VAR) PFR2(#VAR, VAR)
+#define PFO1(VAR) PFO2(#VAR, VAR)
+#define PFR(...) DPP_VFUNC(PFR, __VA_ARGS__)
+#define PFO(...) DPP_VFUNC(PFO, __VA_ARGS__)
+
+#define AUTO_PAYLOAD(PFIELDS)                                                  \
+    HIDE_FIELD(payload)                                                        \
+  protected:                                                                   \
+    sptr<const json> render_payload() override {                               \
+        json out;                                                              \
+        PFIELDS                                                                \
+        return std::make_shared<const json>(std::move(out));                   \
+    }
+
+#define TARGET_CHECK(VAR)                                                      \
+    if (!_##VAR)                                                               \
+        throw std::logic_error(DPP_STR(Class) " needs " #VAR);
+#define TARGET_STRING(VAR) , std::to_string(*_##VAR)
+
+#define AUTO_TARGET(TPath, ...)                                                \
+    HIDE_FIELD(target)                                                         \
+  protected:                                                                   \
+    sptr<const std::string> render_target() override {                         \
+        DPP_FOR_EACH(TARGET_CHECK, __VA_ARGS__)                                \
+        return std::make_shared<const std::string>(                            \
+            fmt::format(TPath DPP_FOR_EACH(TARGET_STRING, __VA_ARGS__)));      \
+    }
+
 #ifdef Parent
 #define HIDE_FIELD(name)                                                       \
   protected:                                                                   \
@@ -136,59 +171,17 @@ class Class : public Parent {
 
     Fields
 
-#ifdef TPath
-#ifdef TFields
-        protected: sptr<const std::string>
-                    render_target() override {
-#define FIELD(VAR)                                                             \
-    if (!_##VAR)                                                               \
-        throw std::logic_error(DPP_STR(Class) " needs " #VAR);
-#define USEFIELDS(...) DPP_FOR_EACH(FIELD, __VA_ARGS__)
-        USEFIELDS(TFields)
-#undef USEFIELDS
-#undef FIELD
-#define FIELD(VAR) , std::to_string(*_##VAR)
-#define USEFIELDS(...) DPP_FOR_EACH(FIELD, __VA_ARGS__)
-        return std::make_shared<const std::string>(
-            fmt::format(TPath USEFIELDS(TFields)));
-#undef USEFIELDS
-#undef FIELD
-    }
-
-#undef TFields
-#endif
-#undef TPath
-#endif
-
-#ifdef PFields
-  protected:
-    sptr<const json> render_payload() override {
-        json out;
-#define PFR2(KEY, VAR)                                                         \
-    if (!_##VAR)                                                               \
-        throw std::logic_error(DPP_XSTR(Class) " needs " #VAR);                \
-    out[KEY] = *_##VAR;
-#define PFO2(KEY, VAR)                                                         \
-    if (_##VAR)                                                                \
-        out[KEY] = *_##VAR;
-#define PFR1(VAR) PFR2(#VAR, VAR)
-#define PFO1(VAR) PFO2(#VAR, VAR)
-#define PFR(...) DPP_VFUNC(PFR, __VA_ARGS__)
-#define PFO(...) DPP_VFUNC(PFO, __VA_ARGS__)
-        PFields
 #undef PFR
 #undef PFO
 #undef PFR1
 #undef PFO1
 #undef PFR2
 #undef PFO2
-            return std::make_shared<const json>(std::move(out));
-    }
+#undef TARGET_CHECK
+#undef TARGET_STRING
 
-#undef PFields
-
-#endif
-
+#undef AUTO_PAYLOAD
+#undef AUTO_TARGET
 #undef SET_NULL
 #undef USEDBY
 #undef NEW_FIELD
