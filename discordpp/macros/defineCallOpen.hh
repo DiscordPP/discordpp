@@ -133,7 +133,7 @@ class Class : public Parent {
 #define TARGET_CHECK(VAR)                                                      \
     if (!_##VAR)                                                               \
         throw std::logic_error(DPP_STR(Class) " needs " #VAR);
-#define TARGET_STRING(VAR) , std::to_string(*_##VAR)
+#define TARGET_STRING(VAR) , to_string(*_##VAR)
 
 #define AUTO_TARGET(TPath, ...)                                                \
     HIDE_FIELD(target)                                                         \

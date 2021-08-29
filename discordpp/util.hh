@@ -48,4 +48,14 @@ inline snowflake get_snowflake(std::string src) {
 inline snowflake get_snowflake(json src) {
     return get_snowflake(src.get<std::string>());
 }
+
+template<typename T>
+inline std::string to_string(const T t){
+    return std::move(std::to_string(t));
+}
+
+template<>
+inline std::string to_string<std::string>(const std::string s){
+    return s;
+}
 } // namespace discordpp
