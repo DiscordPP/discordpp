@@ -123,15 +123,15 @@ class Bot : public virtual BotStruct {
         switch (payload["op"].get<int>()) {
         case 0: // Dispatch:           dispatches an event
             sequence_ = payload["s"].get<int>();
-            if (handlers.find(payload["t"]) == handlers.end()) {
+            if (handlers.find(payload["t"].get<std::string>()) == handlers.end()) {
                 if (debugUnhandled) {
                     std::cerr << "No handlers defined for " << payload["t"]
                               << "\n";
                 }
             } else {
-                for (auto handler = handlers.lower_bound(payload["t"]);
-                     handler != handlers.upper_bound(payload["t"]); handler++) {
-                    handler->second(payload["d"]);
+                for (auto handler = handlers.lower_bound(payload["t"].get<std::string>());
+                     handler != handlers.upper_bound(payload["t"].get<std::string>()); handler++) {
+                    handler->second(payload["d"].get<std::string>());
                 }
             }
             break;
@@ -163,7 +163,7 @@ class Bot : public virtual BotStruct {
         case 10: // Hello:              sent immediately after connecting,
                  // contains heartbeat and server debug information
             heartrate_ = std::make_unique<std::chrono::milliseconds>(
-                payload["d"]["heartbeat_interval"]);
+                payload["d"]["heartbeat_interval"].get<int>());
             needACK_ = 0;
             sendHeartbeat(boost::system::errc::make_error_code(
                 boost::system::errc::success));
