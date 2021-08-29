@@ -49,13 +49,29 @@ inline snowflake get_snowflake(json src) {
     return get_snowflake(src.get<std::string>());
 }
 
-template<typename T>
-inline std::string to_string(const T t){
+template <typename T> inline std::string to_string(const T t) {
     return std::move(std::to_string(t));
 }
 
-template<>
-inline std::string to_string<std::string>(const std::string s){
+template <> inline std::string to_string<std::string>(const std::string s) {
     return s;
 }
 } // namespace discordpp
+
+namespace nlohmann {
+// https://github.com/nlohmann/json/issues/1749#issuecomment-772996219
+template <class T> void to_json(nlohmann::json &j, const std::optional<T> &v) {
+    if (v.has_value())
+        j = *v;
+    else
+        j = nullptr;
+}
+
+template <class T>
+void from_json(const nlohmann::json &j, std::optional<T> &v) {
+    if (j.is_null())
+        v = std::nullopt;
+    else
+        v = j.get<T>();
+}
+} // namespace nlohmann
