@@ -32,9 +32,6 @@ class Bot : public virtual BotStruct {
     int needACK_ = -1;
 
   public:
-    bool debugUnhandled = true;
-    bool showHeartbeats = true;
-
     // This temporarily blocks sending the NONE intent on API 6 until it is
     // inactive
     bool sendNoneIntent = false;

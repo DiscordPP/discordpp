@@ -19,6 +19,8 @@
 namespace discordpp {
 class BotStruct {
   public:
+    bool debugUnhandled = true;
+    bool showHeartbeats = true;
     std::multimap<std::string, handleEvent> handlers;
 
     virtual ~BotStruct(){};
