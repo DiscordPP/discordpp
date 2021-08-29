@@ -131,7 +131,7 @@ class Bot : public virtual BotStruct {
             } else {
                 for (auto handler = handlers.lower_bound(payload["t"].get<std::string>());
                      handler != handlers.upper_bound(payload["t"].get<std::string>()); handler++) {
-                    handler->second(payload["d"].get<std::string>());
+                    handler->second(payload["d"]);
                 }
             }
             break;
