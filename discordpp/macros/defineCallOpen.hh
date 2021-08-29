@@ -148,10 +148,10 @@ class Class : public Parent {
         throw std::logic_error(DPP_XSTR(Class) " needs " #VAR);                \
     }                                                                          \
     QSO2(KEY, VAR)
-#define QSO1(VAR) PFO2(#VAR, VAR)
-#define QSR1(VAR) PFR2(#VAR, VAR)
-#define QSO(...) DPP_VFUNC(PFO, __VA_ARGS__)
-#define QSR(...) DPP_VFUNC(PFR, __VA_ARGS__)
+#define QSO1(VAR) QSO2(#VAR, VAR)
+#define QSR1(VAR) QSR2(#VAR, VAR)
+#define QSO(...) DPP_VFUNC(QSO, __VA_ARGS__)
+#define QSR(...) DPP_VFUNC(QSR, __VA_ARGS__)
 
 #define AUTO_TARGET(TPath, TArgs, QSArgs)                                      \
     HIDE_FIELD(target)                                                         \
