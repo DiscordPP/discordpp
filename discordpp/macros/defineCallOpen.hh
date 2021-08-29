@@ -110,12 +110,14 @@ class Class : public Parent {
     }
 
 #define PFR2(KEY, VAR)                                                         \
-    if (!_##VAR)                                                               \
+    if (!_##VAR) {                                                             \
         throw std::logic_error(DPP_XSTR(Class) " needs " #VAR);                \
+    }                                                                          \
     out[KEY] = *_##VAR;
 #define PFO2(KEY, VAR)                                                         \
-    if (_##VAR)                                                                \
-        out[KEY] = *_##VAR;
+    if (_##VAR) {                                                              \
+        out[KEY] = *_##VAR;                                                    \
+    }
 #define PFR1(VAR) PFR2(#VAR, VAR)
 #define PFO1(VAR) PFO2(#VAR, VAR)
 #define PFR(...) DPP_VFUNC(PFR, __VA_ARGS__)
@@ -131,17 +133,36 @@ class Class : public Parent {
     }
 
 #define TARGET_CHECK(VAR)                                                      \
-    if (!_##VAR)                                                               \
-        throw std::logic_error(DPP_STR(Class) " needs " #VAR);
+    if (!_##VAR) {                                                             \
+        throw std::logic_error(DPP_STR(Class) " needs " #VAR);                 \
+    }
 #define TARGET_STRING(VAR) , to_string(*_##VAR)
 
-#define AUTO_TARGET(TPath, ...)                                                \
+#define QSO2(KEY, VAR)                                                         \
+    if (_##VAR) {                                                              \
+        out += fmt::format("{}" KEY "={}", first ? "?" : "&", *_##VAR);        \
+        first = false;                                                         \
+    }
+#define QSR2(KEY, VAR)                                                         \
+    if (!_##VAR) {                                                             \
+        throw std::logic_error(DPP_XSTR(Class) " needs " #VAR);                \
+    }                                                                          \
+    QSO2(KEY, VAR)
+#define QSO1(VAR) PFO2(#VAR, VAR)
+#define QSR1(VAR) PFR2(#VAR, VAR)
+#define QSO(...) DPP_VFUNC(PFO, __VA_ARGS__)
+#define QSR(...) DPP_VFUNC(PFR, __VA_ARGS__)
+
+#define AUTO_TARGET(TPath, TArgs, QSArgs)                                      \
     HIDE_FIELD(target)                                                         \
   protected:                                                                   \
     sptr<const std::string> render_target() override {                         \
-        DPP_FOR_EACH(TARGET_CHECK, __VA_ARGS__)                                \
-        return std::make_shared<const std::string>(                            \
-            fmt::format(TPath DPP_FOR_EACH(TARGET_STRING, __VA_ARGS__)));      \
+        DPP_FOR_EACH(TARGET_CHECK, TArgs)                                      \
+        std::string out =                                                      \
+            fmt::format(TPath DPP_FOR_EACH(TARGET_STRING, TArgs));             \
+        bool first = true;                                                     \
+        QSArgs;                                                                \
+        return std::make_shared<const std::string>(out);                       \
     }
 
 #ifdef Parent
@@ -177,6 +198,12 @@ class Class : public Parent {
 #undef PFO1
 #undef PFR2
 #undef PFO2
+#undef QSR
+#undef QSO
+#undef QSR1
+#undef QSO1
+#undef QSR2
+#undef QSO2
 #undef TARGET_CHECK
 #undef TARGET_STRING
 

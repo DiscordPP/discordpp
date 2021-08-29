@@ -47,4 +47,6 @@
 #define DPP_XSTR(s) DPP_STR(s)
 #define DPP_STR(s) #s
 
+#define ARR(...) __VA_ARGS__
+
 //#define SET_RENDERED_NULL(X) _rendered_##X = nullptr;
