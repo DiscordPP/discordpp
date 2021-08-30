@@ -13,6 +13,7 @@
 #include <nlohmann/json.hpp>
 
 #include "alias.hh"
+#include "enum.hh"
 #include "log.hh"
 #include "util.hh"
 
@@ -80,7 +81,7 @@ class BotStruct {
     NEW_BASIC_RENDERABLE_FIELD(std::string, filetype, USEDBY(body))            \
     NEW_FIELD(std::string, file, USEDBY(body, boundary))                       \
     FORWARD_FIELD(json, payload, USEDBY(boundary))                             \
-    FORWARD_FIELD(std::string, method, )                                  \
+    FORWARD_FIELD(std::string, method, )                                       \
     FORWARD_FIELD(std::string, target, )                                       \
     FORWARD_FIELD(handleWrite, onWrite, )                                      \
     FORWARD_FIELD(handleRead, onRead, )
@@ -205,7 +206,7 @@ class BotStruct {
     }
 
     virtual void connect() = 0;
-    virtual void disconnect(){
+    virtual void disconnect() {
         connected_ = false;
         ready_ = false;
     };
