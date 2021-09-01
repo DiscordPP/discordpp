@@ -23,7 +23,7 @@ enum ChannelType : int {
     GUILD_STAGE_VOICE = 13
 };
 
-enum InteractionCallbackType: int {
+enum InteractionCallbackType : int {
     PONG = 1,
     CHANNEL_MESSAGE_WITH_SOURCE = 4,
     DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE = 5,
@@ -65,4 +65,6 @@ enum MessageType : int {
     REPLY = 19,
     APPLICATION_COMMAND = 20
 };
+
+enum WidgetStyleOptions { shield, banner1, banner2, banner3, banner4 };
 } // namespace discordpp
