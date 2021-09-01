@@ -15,6 +15,7 @@
 #include "alias.hh"
 #include "enum.hh"
 #include "log.hh"
+#include "snowflake.hh"
 #include "util.hh"
 
 namespace discordpp {

@@ -12,8 +12,6 @@
 namespace discordpp {
 using json = nlohmann::json;
 
-using snowflake = uint64_t;
-
 template <typename T> using sptr = std::shared_ptr<T>;
 
 using handleEvent = std::function<void(const json msg)>;

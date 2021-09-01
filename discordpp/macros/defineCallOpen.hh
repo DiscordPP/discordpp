@@ -108,7 +108,7 @@ class Class : public Parent {
 
 #define PFR2(KEY, VAR)                                                         \
     if (!_##VAR) {                                                             \
-        throw std::logic_error(DPP_XSTR(Class) " needs " #VAR);                 \
+        throw std::logic_error(DPP_XSTR(Class) " needs " #VAR);                \
     }                                                                          \
     out[KEY] = *_##VAR;
 #define PFO2(KEY, VAR)                                                         \
@@ -131,7 +131,7 @@ class Class : public Parent {
 
 #define REQUIRE_VAR(VAR)                                                       \
     if (!_##VAR) {                                                             \
-        throw std::logic_error(DPP_XSTR(Class) " needs " #VAR);                 \
+        throw std::logic_error(DPP_XSTR(Class) " needs " #VAR);                \
     }
 #define TARGET_STRING(VAR) , to_string(*_##VAR)
 
