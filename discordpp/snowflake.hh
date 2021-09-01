@@ -33,16 +33,25 @@ inline std::string to_string<std::string>(const std::string &s) {
 }
 
 struct Snowflake {
+    Snowflake() : _value(0) {}
     Snowflake(uint64_t value) : _value(value) {}
-
     Snowflake(std::string value) : _value(get_snowflake(value)) {}
 
     operator uint64_t &() {
         return _value;
     }
 
+    operator uint64_t () const {
+        return _value;
+    }
+
     operator std::string() const {
         return to_string(_value);
+    }
+
+    Snowflake &operator=(uint64_t val) {
+        _value = val;
+        return *this;
     }
 
     Snowflake &operator=(const std::string &str) {
