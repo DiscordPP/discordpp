@@ -32,38 +32,29 @@ class BotStruct {
 #define Bot BotStruct
 #define Class Call
 #define function call
-#define Fields                                                                 \
-    NEW_BASIC_RENDERABLE_FIELD(std::string, method, )                          \
-    NEW_BASIC_RENDERABLE_FIELD(std::string, target, )                          \
-    NEW_BASIC_RENDERABLE_FIELD(std::string, type, )                            \
-    NEW_BASIC_RENDERABLE_FIELD(std::string, body, )                            \
-    NEW_BASIC_RENDERABLE_FIELD(handleWrite, onWrite, )                         \
-    NEW_BASIC_RENDERABLE_FIELD(handleRead, onRead, )
-
 #include "macros/defineCallOpen.hh"
-    // This line intentionally left blank
+    NEW_BASIC_RENDERABLE_FIELD(std::string, method, )
+    NEW_BASIC_RENDERABLE_FIELD(std::string, target, )
+    NEW_BASIC_RENDERABLE_FIELD(std::string, type, )
+    NEW_BASIC_RENDERABLE_FIELD(std::string, body, )
+    NEW_BASIC_RENDERABLE_FIELD(handleWrite, onWrite, )
+    NEW_BASIC_RENDERABLE_FIELD(handleRead, onRead, )
 #include "macros/defineCallClose.hh"
 
 #define Bot BotStruct
 #define Parent Call
 #define Class JsonCall
 #define function callJson
-#define Fields                                                                 \
-    NEW_RENDERABLE_FIELD(json, payload, USEDBY(body))                          \
-    FORWARD_FIELD(std::string, method, )                                       \
-    FORWARD_FIELD(std::string, target, )                                       \
-    HIDE_FIELD(type)                                                           \
-    HIDE_FIELD(body)                                                           \
-    FORWARD_FIELD(handleWrite, onWrite, )                                      \
+#include "macros/defineCallOpen.hh"
+    NEW_RENDERABLE_FIELD(json, payload, USEDBY(body))
+    FORWARD_FIELD(std::string, method, )
+    FORWARD_FIELD(std::string, target, )
+    STATIC_FIELD(std::string, type, "application/json")
+    HIDE_FIELD(body)
+    FORWARD_FIELD(handleWrite, onWrite, )
     FORWARD_FIELD(handleRead, onRead, )
 
-#include "macros/defineCallOpen.hh"
   protected:
-    sptr<const std::string> render_type() override {
-        static auto type =
-            std::make_shared<const std::string>("application/json");
-        return type;
-    }
     virtual sptr<const json> render_payload() {
         return std::make_shared<const json>(*_payload);
     }
@@ -76,17 +67,16 @@ class BotStruct {
 #define Parent JsonCall
 #define Class FileCall
 #define function callFile
-#define Fields                                                                 \
-    NEW_BASIC_RENDERABLE_FIELD(std::string, filename, USEDBY(body))            \
-    NEW_BASIC_RENDERABLE_FIELD(std::string, filetype, USEDBY(body))            \
-    NEW_FIELD(std::string, file, USEDBY(body, boundary))                       \
-    FORWARD_FIELD(json, payload, USEDBY(boundary))                             \
-    FORWARD_FIELD(std::string, method, )                                       \
-    FORWARD_FIELD(std::string, target, )                                       \
-    FORWARD_FIELD(handleWrite, onWrite, )                                      \
+#include "macros/defineCallOpen.hh"
+    NEW_BASIC_RENDERABLE_FIELD(std::string, filename, USEDBY(body))
+    NEW_BASIC_RENDERABLE_FIELD(std::string, filetype, USEDBY(body))
+    NEW_FIELD(std::string, file, USEDBY(body, boundary))
+    FORWARD_FIELD(json, payload, USEDBY(boundary))
+    FORWARD_FIELD(std::string, method, )
+    FORWARD_FIELD(std::string, target, )
+    FORWARD_FIELD(handleWrite, onWrite, )
     FORWARD_FIELD(handleRead, onRead, )
 
-#include "macros/defineCallOpen.hh"
   protected:
     sptr<const std::string> render_type() override {
         return std::make_shared<const std::string>(

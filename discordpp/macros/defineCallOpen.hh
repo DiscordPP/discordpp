@@ -182,7 +182,3 @@ class Class : public Parent {
         return name(std::make_shared<type>(name##In));                         \
     }
 #endif
-
-#ifdef Fields
-    Fields
-#endif
