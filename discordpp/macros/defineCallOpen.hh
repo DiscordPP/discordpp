@@ -108,7 +108,7 @@ class Class : public Parent {
 
 #define PFR2(KEY, VAR)                                                         \
     if (!_##VAR) {                                                             \
-        throw std::logic_error(DPP_XSTR(Class) " needs " #VAR);                \
+        throw std::logic_error(DPP_XSTR(Class) " needs " #VAR);                 \
     }                                                                          \
     out[KEY] = *_##VAR;
 #define PFO2(KEY, VAR)                                                         \
@@ -129,9 +129,9 @@ class Class : public Parent {
         return std::make_shared<const json>(std::move(out));                   \
     }
 
-#define TARGET_CHECK(VAR)                                                      \
+#define REQUIRE_VAR(VAR)                                                       \
     if (!_##VAR) {                                                             \
-        throw std::logic_error(DPP_STR(Class) " needs " #VAR);                 \
+        throw std::logic_error(DPP_XSTR(Class) " needs " #VAR);                 \
     }
 #define TARGET_STRING(VAR) , to_string(*_##VAR)
 
@@ -141,9 +141,7 @@ class Class : public Parent {
         first = false;                                                         \
     }
 #define QSR2(KEY, VAR)                                                         \
-    if (!_##VAR) {                                                             \
-        throw std::logic_error(DPP_XSTR(Class) " needs " #VAR);                \
-    }                                                                          \
+    REQUIRE_VAR(VAR)                                                           \
     QSO2(KEY, VAR)
 #define QSO1(VAR) QSO2(#VAR, VAR)
 #define QSR1(VAR) QSR2(#VAR, VAR)
@@ -154,7 +152,7 @@ class Class : public Parent {
     HIDE_FIELD(target)                                                         \
   protected:                                                                   \
     sptr<const std::string> render_target() override {                         \
-        DPP_FOR_EACH(TARGET_CHECK, TArgs)                                      \
+        DPP_FOR_EACH(REQUIRE_VAR, TArgs)                                       \
         std::string out =                                                      \
             fmt::format(TPath DPP_FOR_EACH(TARGET_STRING, TArgs));             \
         bool first = true;                                                     \
