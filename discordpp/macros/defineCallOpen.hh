@@ -2,6 +2,7 @@
 // Created by Aidan on 3/10/2021.
 //
 
+#include <memory>
 #include "../macros.hh"
 
 #ifdef DEFINE_CALL_OPEN

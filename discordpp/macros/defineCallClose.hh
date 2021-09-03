@@ -43,7 +43,6 @@ DPP_FOR_EACH(CALLFUNC, function);
 #undef FORWARD_FIELD
 
 #undef BASECALL
-#undef Bot
 #undef Parent
 #undef Class
 #undef function

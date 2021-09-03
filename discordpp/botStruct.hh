@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <utility>
+#include <map>
 
 #include <boost/asio.hpp>
 
@@ -29,8 +30,9 @@ class BotStruct {
 
     class RenderedCall;
 
+    #define Bot BotStruct
+
 #define BASECALL
-#define Bot BotStruct
 #define Class Call
 #define function call
 #include "macros/defineCallOpen.hh"
@@ -42,7 +44,6 @@ class BotStruct {
     NEW_BASIC_RENDERABLE_FIELD(handleRead, onRead, )
 #include "macros/defineCallClose.hh"
 
-#define Bot BotStruct
 #define Parent Call
 #define Class JsonCall
 #define function callJson
@@ -64,7 +65,6 @@ class BotStruct {
     }
 #include "macros/defineCallClose.hh"
 
-#define Bot BotStruct
 #define Parent JsonCall
 #define Class FileCall
 #define function callFile
@@ -127,6 +127,8 @@ class BotStruct {
         clear_body();
     }
 #include "macros/defineCallClose.hh"
+
+#undef Bot
 
 #define FIELDS                                                                 \
     FIELD(std::string, method)                                                 \
