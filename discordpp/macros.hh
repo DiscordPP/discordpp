@@ -53,3 +53,9 @@
 #define ARR(...) __VA_ARGS__
 
 //#define SET_RENDERED_NULL(X) _rendered_##X = nullptr;
+
+#define BOT_DEF_OPEN(plugin) plugin <
+#define BOT_DEF_CLOSE(plugin) >
+#define BOT_DEF(...)                                                           \
+    DPP_FOR_EACH(BOT_DEF_OPEN, __VA_ARGS__)                                    \
+    discordpp::Bot DPP_FOR_EACH(BOT_DEF_CLOSE, __VA_ARGS__)

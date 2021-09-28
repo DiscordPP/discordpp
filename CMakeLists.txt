@@ -5,6 +5,9 @@ set(CMAKE_CXX_STANDARD 14)
 
 ###################
 
+set(ALL_DISCORDPP_LIBRARIES "discordpp" PARENT_SCOPE)
+set(ALL_DISCORDPP_PLUGINS "" PARENT_SCOPE)
+
 add_subdirectory(lib/nlohmannjson)
 
 include(FetchContent)
