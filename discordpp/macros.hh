@@ -38,11 +38,14 @@
 #define DPP_FE_3(WHAT, X, ...) WHAT(X)DPP_FE_2(WHAT, __VA_ARGS__)
 #define DPP_FE_4(WHAT, X, ...) WHAT(X)DPP_FE_3(WHAT, __VA_ARGS__)
 #define DPP_FE_5(WHAT, X, ...) WHAT(X)DPP_FE_4(WHAT, __VA_ARGS__)
+#define DPP_FE_6(WHAT, X, ...) WHAT(X)DPP_FE_5(WHAT, __VA_ARGS__)
+#define DPP_FE_7(WHAT, X, ...) WHAT(X)DPP_FE_6(WHAT, __VA_ARGS__)
+#define DPP_FE_8(WHAT, X, ...) WHAT(X)DPP_FE_7(WHAT, __VA_ARGS__)
 //... repeat as needed
 
-#define DPP_GET_MACRO(_0,_1,_2,_3,_4,_5,NAME,...) NAME
+#define DPP_GET_MACRO(_0,_1,_2,_3,_4,_5,_6,_7,_8,NAME,...) NAME
 #define DPP_FOR_EACH(action,...) \
-  DPP_GET_MACRO(_0,__VA_ARGS__,DPP_FE_5,DPP_FE_4,DPP_FE_3,DPP_FE_2,DPP_FE_1,DPP_FE_0)(action,__VA_ARGS__)
+  DPP_GET_MACRO(_0,__VA_ARGS__,DPP_FE_8,DPP_FE_7,DPP_FE_6,DPP_FE_5,DPP_FE_4,DPP_FE_3,DPP_FE_2,DPP_FE_1,DPP_FE_0)(action,__VA_ARGS__)
 
 #define DPP_XSTR(s) DPP_STR(s)
 #define DPP_STR(s) #s
