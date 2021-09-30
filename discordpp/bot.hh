@@ -17,7 +17,7 @@
 namespace discordpp {
 
 class Bot : public virtual BotStruct {
-    std::unique_ptr<boost::asio::steady_timer> reconnect_;
+    std::unique_ptr<asio::steady_timer> reconnect_;
     std::function<int()> reconnect_millis =
         [distribution =
              std::make_shared<std::uniform_int_distribution<int>>(0, 5000),
@@ -25,7 +25,7 @@ class Bot : public virtual BotStruct {
              std::chrono::system_clock::now().time_since_epoch().count())]() {
             return (*distribution)(*generator);
         };
-    std::unique_ptr<boost::asio::steady_timer> pacemaker_;
+    std::unique_ptr<asio::steady_timer> pacemaker_;
     std::unique_ptr<std::chrono::milliseconds> heartrate_;
     std::string session_id_ = "";
     int sequence_ = -1;
@@ -38,7 +38,7 @@ class Bot : public virtual BotStruct {
     uint16_t intents = intents::NONE;
 
     unsigned int api = 9;
-    
+
     // Bot sharding
     unsigned int shardID = 0;
     unsigned int numShards = 1;
@@ -47,13 +47,14 @@ class Bot : public virtual BotStruct {
         needInit["Bot"] = true;
 
         handlers.insert({"READY", [this](json data) {
-                             session_id_ = data["session_id"].get<std::string>();
+                             session_id_ =
+                                 data["session_id"].get<std::string>();
                              ready_ = true;
                          }});
     }
 
     virtual void initBot(unsigned int apiVersionIn, const std::string &tokenIn,
-                         std::shared_ptr<boost::asio::io_context> aiocIn) {
+                         std::shared_ptr<asio::io_context> aiocIn) {
         apiVersion = apiVersionIn;
         token = tokenIn;
         aioc = aiocIn;
@@ -76,8 +77,8 @@ class Bot : public virtual BotStruct {
     }
 
   protected:
-    void sendHeartbeat(const boost::system::error_code e) {
-        if (!connected_ || e.failed()) {
+    void sendHeartbeat(const error_code e) {
+        if (!connected_ || e) {
             return;
         }
         if (needACK_ > 1) {
@@ -101,10 +102,10 @@ class Bot : public virtual BotStruct {
         if (showHeartbeats) {
             std::cout << "Sending heartbeat..." << std::endl;
         }
-        pacemaker_ = std::make_unique<boost::asio::steady_timer>(
+        pacemaker_ = std::make_unique<asio::steady_timer>(
             *aioc, std::chrono::steady_clock::now() + *heartrate_);
         pacemaker_->async_wait(
-            [this](const boost::system::error_code ec) { sendHeartbeat(ec); });
+            [this](const error_code ec) { sendHeartbeat(ec); });
         if (sequence_ >= 0) {
             send(1, std::make_shared<json>(sequence_), nullptr);
         } else {
@@ -120,14 +121,18 @@ class Bot : public virtual BotStruct {
         switch (payload["op"].get<int>()) {
         case 0: // Dispatch:           dispatches an event
             sequence_ = payload["s"].get<int>();
-            if (handlers.find(payload["t"].get<std::string>()) == handlers.end()) {
+            if (handlers.find(payload["t"].get<std::string>()) ==
+                handlers.end()) {
                 if (debugUnhandled) {
                     std::cerr << "No handlers defined for " << payload["t"]
                               << "\n";
                 }
             } else {
-                for (auto handler = handlers.lower_bound(payload["t"].get<std::string>());
-                     handler != handlers.upper_bound(payload["t"].get<std::string>()); handler++) {
+                for (auto handler =
+                         handlers.lower_bound(payload["t"].get<std::string>());
+                     handler !=
+                     handlers.upper_bound(payload["t"].get<std::string>());
+                     handler++) {
                     handler->second(payload["d"]);
                 }
             }
@@ -150,10 +155,10 @@ class Bot : public virtual BotStruct {
             log::log(log::warning, [](std::ostream *log) {
                 *log << "Discord Servers notified of an invalid session ID.\n";
             });
-            reconnect_ = std::make_unique<boost::asio::steady_timer>(
+            reconnect_ = std::make_unique<asio::steady_timer>(
                 *aioc, std::chrono::steady_clock::now() +
                            std::chrono::milliseconds(reconnect_millis()));
-            reconnect_->async_wait([this](const boost::system::error_code) {
+            reconnect_->async_wait([this](const error_code) {
                 reconnect("The session is invalid", false);
             });
             break;
@@ -162,8 +167,14 @@ class Bot : public virtual BotStruct {
             heartrate_ = std::make_unique<std::chrono::milliseconds>(
                 payload["d"]["heartbeat_interval"].get<int>());
             needACK_ = 0;
-            sendHeartbeat(boost::system::errc::make_error_code(
-                boost::system::errc::success));
+            sendHeartbeat(
+#ifdef ASIO_STANDALONE
+                {}
+#else
+                boost::system::errc::make_error_code(
+                    boost::system::errc::success)
+#endif
+            );
             if (sequence_ >= 0) {
                 send(6,
                      std::make_shared<json>(json({
@@ -198,8 +209,8 @@ class Bot : public virtual BotStruct {
                 if (intents != intents::NONE || api >= 8 || sendNoneIntent) {
                     (*identify)["intents"] = intents;
                 }
-                
-                if(numShards > 1){
+
+                if (numShards > 1) {
                     assert(shardID < numShards);
                     (*identify)["shard"] = json::array({shardID, numShards});
                 }

@@ -5,10 +5,15 @@
 #pragma once
 
 #include <iostream>
-#include <utility>
 #include <map>
+#include <utility>
 
+#ifdef ASIO_STANDALONE
+#include <asio.hpp>
+#else
 #include <boost/asio.hpp>
+namespace asio = boost::asio;
+#endif
 
 #define JSON_USE_IMPLICIT_CONVERSIONS 0
 #include <nlohmann/json.hpp>
@@ -20,6 +25,12 @@
 #include "util.hh"
 
 namespace discordpp {
+#ifdef ASIO_STANDALONE
+using error_code = std::error_code;
+#else
+using error_code = boost::system::error_code;
+#endif
+
 class BotStruct {
   public:
     bool debugUnhandled = true;
@@ -30,7 +41,7 @@ class BotStruct {
 
     class RenderedCall;
 
-    #define Bot BotStruct
+#define Bot BotStruct
 
 #define BASECALL
 #define Class Call
@@ -190,9 +201,9 @@ class BotStruct {
         log::log(log::error, [](std::ostream *log) {
             *log << "Starting run loop" << '\n';
         });
-        work = std::make_unique<boost::asio::executor_work_guard<
-            boost::asio::io_context::executor_type>>(
-            boost::asio::make_work_guard(*aioc));
+        work = std::make_unique<asio::executor_work_guard<
+            asio::io_context::executor_type>>(
+            asio::make_work_guard(*aioc));
         aioc->run();
         log::log(log::error,
                  [](std::ostream *log) { *log << "Ending run loop" << '\n'; });
@@ -211,10 +222,9 @@ class BotStruct {
 
     std::map<std::string, bool> needInit;
     unsigned int apiVersion = 6;
-    std::unique_ptr<boost::asio::executor_work_guard<
-        boost::asio::io_context::executor_type>>
+    std::unique_ptr<asio::executor_work_guard<asio::io_context::executor_type>>
         work;
-    sptr<boost::asio::io_context> aioc;
+    sptr<asio::io_context> aioc;
     std::string token;
     bool connecting_ = false;
     bool connected_ = false;

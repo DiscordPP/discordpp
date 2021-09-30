@@ -18,6 +18,14 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(fmt)
 
+if (NOT ${DISCORDPP_USE_BOOST})
+    add_library(asio INTERFACE)
+    target_compile_definitions(asio INTERFACE ASIO_STANDALONE)
+    target_include_directories(asio INTERFACE lib/asio/include)
+    #target_link_libraries(asio INTERFACE thread)
+    set(TARGET_ASIO asio)
+endif ()
+
 add_library(${PROJECT_NAME} INTERFACE)
 target_include_directories(${PROJECT_NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(${PROJECT_NAME} INTERFACE nlohmann_json::nlohmann_json fmt::fmt)
+target_link_libraries(${PROJECT_NAME} INTERFACE nlohmann_json::nlohmann_json fmt::fmt ${TARGET_ASIO})
