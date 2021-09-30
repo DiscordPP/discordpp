@@ -19,10 +19,12 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(fmt)
 
 if (NOT ${DISCORDPP_USE_BOOST})
+    find_package(Threads REQUIRED)
+
     add_library(asio INTERFACE)
     target_compile_definitions(asio INTERFACE ASIO_STANDALONE)
-    target_include_directories(asio INTERFACE lib/asio/include)
-    #target_link_libraries(asio INTERFACE thread)
+    target_include_directories(asio INTERFACE lib/asio/asio/include)
+    target_link_libraries(asio INTERFACE Threads::Threads)
     set(TARGET_ASIO asio)
 endif ()
 
