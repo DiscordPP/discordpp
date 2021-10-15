@@ -5,6 +5,7 @@
 #pragma once
 
 #include "alias.hh"
+#include <random>
 
 namespace discordpp {
 namespace util {
@@ -44,7 +45,7 @@ inline std::string generate_boundary(const std::string &payload,
 
 namespace nlohmann {
 // https://github.com/nlohmann/json/issues/1749#issuecomment-772996219
-template <class T>
+template <typename T>
 struct adl_serializer<std::optional<T>> {
     static void to_json(nlohmann::json &j, const std::optional<T> &v) {
         if(v.has_value()){
