@@ -7,7 +7,6 @@
 
 #include <nlohmann/json.hpp>
 
-
 namespace discordpp {
 using json = nlohmann::json;
 using snowflake = uint64_t;
@@ -22,13 +21,11 @@ inline snowflake get_snowflake(json src) {
     return get_snowflake(src.get<std::string>());
 }
 
-template<typename T>
-inline std::string to_string(const T &t) {
+template <typename T> inline std::string to_string(const T &t) {
     return std::move(std::to_string(t));
 }
 
-template<>
-inline std::string to_string<std::string>(const std::string &s) {
+template <> inline std::string to_string<std::string>(const std::string &s) {
     return s;
 }
 
@@ -36,18 +33,13 @@ struct Snowflake {
     Snowflake() : _value(0) {}
     Snowflake(uint64_t value) : _value(value) {}
     Snowflake(std::string value) : _value(get_snowflake(value)) {}
+    Snowflake(const Snowflake&) = default;
 
-    operator uint64_t &() {
-        return _value;
-    }
+    operator uint64_t &() { return _value; }
 
-    operator uint64_t () const {
-        return _value;
-    }
+    operator uint64_t() const { return _value; }
 
-    operator std::string() const {
-        return to_string(_value);
-    }
+    operator std::string() const { return to_string(_value); }
 
     Snowflake &operator=(uint64_t val) {
         _value = val;
@@ -59,19 +51,21 @@ struct Snowflake {
         return *this;
     }
 
+    Snowflake &operator=(const Snowflake &s) {
+        _value = s._value;
+        return *this;
+    }
+
+    friend void to_json(nlohmann::json &j,
+                        const Snowflake &s) {
+        j = s._value;
+    }
+    friend void from_json(const nlohmann::json &j,
+                          Snowflake &s) {
+        s._value = j.get<uint64_t>();
+    }
+
   protected:
     uint64_t _value;
 };
 } // namespace discordpp
-
-namespace nlohmann {
-template <>
-struct adl_serializer<discordpp::Snowflake> {
-    static void to_json(json &j, const discordpp::Snowflake &sf) {
-        j = static_cast<std::string>(sf);
-    }
-    static discordpp::Snowflake from_json(const json& j) {
-        return {j.get<std::string>()};
-    }
-};
-} // namespace nlohmann
