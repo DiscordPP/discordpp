@@ -6,69 +6,57 @@
 
 namespace discordpp {
 
-enum ApplicationCommandType { CHAT_INPUT = 1, USER = 2, MESSAGE = 3 };
-
-// https://discord.com/developers/docs/resources/channel#channel-object-channel-types
-enum ChannelType : int {
-    GUILD_TEXT = 0,
-    DM = 1,
-    GUILD_VOICE = 2,
-    GROUP_DM = 3,
-    GUILD_CATEGORY = 4,
-    GUILD_NEWS = 5,
-    GUILD_STORE = 6,
-    GUILD_NEWS_THREAD = 10,
-    GUILD_PUBLIC_THREAD = 11,
-    GUILD_PRIVATE_THREAD = 12,
-    GUILD_STAGE_VOICE = 13
+enum class ActivityFlags : int {
+    INSTANCE = 1 << 0,
+    JOIN = 1 << 1,
+    SPECTATE = 1 << 2,
+    JOIN_REQUEST = 1 << 3,
+    SYNC = 1 << 4,
+    PLAY = 1 << 5
 };
+NLOHMANN_DEFINE_SCOPED_ENUM(ApplicationCommandOptionType)
 
-enum InteractionCallbackType : int {
-    PONG = 1,
-    CHANNEL_MESSAGE_WITH_SOURCE = 4,
-    DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE = 5,
-    DEFERRED_UPDATE_MESSAGE = 6,
-    UPDATE_MESSAGE = 7
+enum class AllowedMentionType { roles, users, everyone };
+NLOHMANN_JSON_SERIALIZE_ENUM(AllowedMentionType,
+                             {{AllowedMentionType::roles, "roles"},
+                              {AllowedMentionType::users, "users"},
+                              {AllowedMentionType::everyone, "everyone"}})
+
+enum class ApplicationCommandType : int {
+    CHAT_INPUT = 1,
+    USER = 2,
+    MESSAGE = 3
 };
+NLOHMANN_DEFINE_SCOPED_ENUM(ApplicationCommandType)
 
-enum MessageActivityType : int {
-    JOIN = 1,
-    SPECTATE = 2,
-    LISTEN = 3,
-    JOIN_REQUEST = 5
+enum class ApplicationCommandOptionType : int {
+    SUB_COMMAND = 1,
+    SUB_COMMAND_GROUP = 2,
+    STRING = 3,
+    INTEGER = 4,
+    BOOLEAN = 5,
+    USER = 6,
+    CHANNEL = 7,
+    ROLE = 8,
+    MENTIONABLE = 9,
+    NUMBER = 10
 };
+NLOHMANN_DEFINE_SCOPED_ENUM(ApplicationCommandOptionType)
 
-enum MessageFlag : int {
-    CROSSPOSTED = 1 << 0,
-    IS_CROSSPOST = 1 << 1,
-    SUPPRESS_EMBEDS = 1 << 2,
-    SOURCE_MESSAGE_DELETED = 1 << 3,
-    URGENT = 1 << 4
+enum class ApplicationCommandPermissionType : int { ROLE = 1, USER = 2 };
+NLOHMANN_DEFINE_SCOPED_ENUM(ApplicationCommandPermissionType)
+
+enum class ApplicationFlags : int {
+    GATEWAY_PRESENCE = 1 << 12,
+    GATEWAY_PRESENCE_LIMITED = 1 << 13,
+    GATEWAY_GUILD_MEMBERS = 1 << 14,
+    GATEWAY_GUILD_MEMBERS_LIMITED = 1 << 15,
+    VERIFICATION_PENDING_GUILD_LIMIT = 1 << 16,
+    EMBEDDED = 1 << 17
 };
+NLOHMANN_DEFINE_SCOPED_ENUM(ApplicationFlags)
 
-enum MessageType : int {
-    DEFAULT = 0,
-    RECIPIENT_ADD = 1,
-    RECIPIENT_REMOVE = 2,
-    CALL = 3,
-    CHANNEL_NAME_CHANGE = 4,
-    CHANNEL_ICON_CHANGE = 5,
-    CHANNEL_PINNED_MESSAGE = 6,
-    GUILD_MEMBER_JOIN = 7,
-    USER_PREMIUM_GUILD_SUBSCRIPTION = 8,
-    USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_1 = 9,
-    USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_2 = 10,
-    USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3 = 11,
-    CHANNEL_FOLLOW_ADD = 12,
-    GUILD_DISCOVERY_DISQUALIFIED = 14,
-    GUILD_DISCOVERY_REQUALIFIED = 15,
-    REPLY = 19,
-    APPLICATION_COMMAND = 20
-};
-
-enum WidgetStyleOptions { shield, banner1, banner2, banner3, banner4 };
-
-enum AuditLogEvent {
+enum class AuditLogEvent : int {
     GUILD_UPDATE = 1,
     CHANNEL_CREATE = 10,
     CHANNEL_UPDATE = 11,
@@ -114,4 +102,202 @@ enum AuditLogEvent {
     THREAD_UPDATE = 111,
     THREAD_DELETE = 112,
 };
+NLOHMANN_DEFINE_SCOPED_ENUM(AuditLogEvent)
+
+enum ButtonStyle : int {
+    PRIMARY = 1,
+    SECONDARY = 2,
+    SUCCESS = 3,
+    DANGER = 4,
+    LINK = 5
+};
+NLOHMANN_DEFINE_SCOPED_ENUM(ButtonStyle)
+
+// https://discord.com/developers/docs/resources/channel#channel-object-channel-types
+enum class ChannelType : int {
+    GUILD_TEXT = 0,
+    DM = 1,
+    GUILD_VOICE = 2,
+    GROUP_DM = 3,
+    GUILD_CATEGORY = 4,
+    GUILD_NEWS = 5,
+    GUILD_STORE = 6,
+    GUILD_NEWS_THREAD = 10,
+    GUILD_PUBLIC_THREAD = 11,
+    GUILD_PRIVATE_THREAD = 12,
+    GUILD_STAGE_VOICE = 13
+};
+NLOHMANN_DEFINE_SCOPED_ENUM(ChannelType)
+
+enum class ComponentType : int { ACTIONROW = 1, BUTTON = 2, SELECTMENU = 3 };
+NLOHMANN_DEFINE_SCOPED_ENUM(ComponentType)
+
+enum class DefaultMessageNotificationLevel : int {
+    ALL_MESSAGES = 0,
+    ONLY_MENTIONS = 1
+};
+NLOHMANN_DEFINE_SCOPED_ENUM(DefaultMessageNotificationLevel)
+
+enum class EmbedType { rich, image, video, gifv, article, link };
+NLOHMANN_JSON_SERIALIZE_ENUM(EmbedType, {{EmbedType::rich, "rich"},
+                                         {EmbedType::image, "image"},
+                                         {EmbedType::video, "video"},
+                                         {EmbedType::gifv, "gifv"},
+                                         {EmbedType::article, "article"},
+                                         {EmbedType::link, "link"}})
+
+enum class ExplicitContentFilterLevel : int {
+    DISABLED = 0,
+    MEMBERS_WITHOUT_ROLES = 1,
+    ALL_MEMBERS = 2
+};
+NLOHMANN_DEFINE_SCOPED_ENUM(ExplicitContentFilterLevel)
+
+enum class GuildFeature {
+    ANIMATED_ICON,
+    BANNER,
+    COMMERCE,
+    COMMUNITY,
+    DISCOVERABLE,
+    FEATURABLE,
+    INVITE_SPLASH,
+    MEMBER_VERIFICATION_GATE_ENABLED,
+    MONETIZATION_ENABLED,
+    MORE_STICKERS,
+    NEWS,
+    PARTNERED,
+    PREVIEW_ENABLED,
+    PRIVATE_THREADS,
+    ROLE_ICONS,
+    SEVEN_DAY_THREAD_ARCHIVE,
+    THREE_DAY_THREAD_ARCHIVE,
+    TICKETED_EVENTS_ENABLED,
+    VANITY_URL,
+    VERIFIED,
+    VIP_REGIONS,
+    WELCOME_SCREEN_ENABLED
+};
+NLOHMANN_JSON_SERIALIZE_ENUM(
+    GuildFeature,
+    {{GuildFeature::ANIMATED_ICON, "ANIMATED_ICON"},
+     {GuildFeature::BANNER, "BANNER"},
+     {GuildFeature::COMMERCE, "COMMERCE"},
+     {GuildFeature::COMMUNITY, "COMMUNITY"},
+     {GuildFeature::DISCOVERABLE, "DISCOVERABLE"},
+     {GuildFeature::FEATURABLE, "FEATURABLE"},
+     {GuildFeature::INVITE_SPLASH, "INVITE_SPLASH"},
+     {GuildFeature::MEMBER_VERIFICATION_GATE_ENABLED,
+      "MEMBER_VERIFICATION_GATE_ENABLED"},
+     {GuildFeature::MONETIZATION_ENABLED, "MONETIZATION_ENABLED"},
+     {GuildFeature::MORE_STICKERS, "MORE_STICKERS"},
+     {GuildFeature::NEWS, "NEWS"},
+     {GuildFeature::PARTNERED, "PARTNERED"},
+     {GuildFeature::PREVIEW_ENABLED, "PREVIEW_ENABLED"},
+     {GuildFeature::PRIVATE_THREADS, "PRIVATE_THREADS"},
+     {GuildFeature::ROLE_ICONS, "ROLE_ICONS"},
+     {GuildFeature::SEVEN_DAY_THREAD_ARCHIVE, "SEVEN_DAY_THREAD_ARCHIVE"},
+     {GuildFeature::THREE_DAY_THREAD_ARCHIVE, "THREE_DAY_THREAD_ARCHIVE"},
+     {GuildFeature::TICKETED_EVENTS_ENABLED, "TICKETED_EVENTS_ENABLED"},
+     {GuildFeature::VANITY_URL, "VANITY_URL"},
+     {GuildFeature::VERIFIED, "VERIFIED"},
+     {GuildFeature::VIP_REGIONS, "VIP_REGIONS"},
+     {GuildFeature::WELCOME_SCREEN_ENABLED, "WELCOME_SCREEN_ENABLED"}})
+
+enum class GuildNSFWLevel : int {
+    DEFAULT = 0,
+    EXPLICIT = 1,
+    SAFE = 2,
+    AGE_RESTRICTED = 3
+};
+NLOHMANN_DEFINE_SCOPED_ENUM(GuildNSFWLevel)
+
+enum class InteractionCallbackType : int {
+    PONG = 1,
+    CHANNEL_MESSAGE_WITH_SOURCE = 4,
+    DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE = 5,
+    DEFERRED_UPDATE_MESSAGE = 6,
+    UPDATE_MESSAGE = 7
+};
+NLOHMANN_DEFINE_SCOPED_ENUM(InteractionCallbackType)
+
+enum class InteractionCallbackDataFlags : int { EPHEMERAL = 1 << 6 };
+NLOHMANN_DEFINE_SCOPED_ENUM(InteractionCallbackDataFlags)
+
+enum class InteractionType : int {
+    PING = 1,
+    APPLICATION_COMMAND = 2,
+    MESSAGE_COMPONENT = 3
+};
+NLOHMANN_DEFINE_SCOPED_ENUM(InteractionType)
+
+enum class MessageActivityType : int {
+    JOIN = 1,
+    SPECTATE = 2,
+    LISTEN = 3,
+    JOIN_REQUEST = 5
+};
+NLOHMANN_DEFINE_SCOPED_ENUM(MessageActivityType)
+
+enum class MessageFlags : int {
+    CROSSPOSTED = 1 << 0,
+    IS_CROSSPOST = 1 << 1,
+    SUPPRESS_EMBEDS = 1 << 2,
+    SOURCE_MESSAGE_DELETED = 1 << 3,
+    URGENT = 1 << 4,
+    HAS_THREAD = 1 << 5,
+    EPHEMERAL = 1 << 6,
+    LOADING = 1 << 7
+};
+NLOHMANN_DEFINE_SCOPED_ENUM(MessageFlags)
+
+enum class MessageType : int {
+    DEFAULT = 0,
+    RECIPIENT_ADD = 1,
+    RECIPIENT_REMOVE = 2,
+    CALL = 3,
+    CHANNEL_NAME_CHANGE = 4,
+    CHANNEL_ICON_CHANGE = 5,
+    CHANNEL_PINNED_MESSAGE = 6,
+    GUILD_MEMBER_JOIN = 7,
+    USER_PREMIUM_GUILD_SUBSCRIPTION = 8,
+    USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_1 = 9,
+    USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_2 = 10,
+    USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3 = 11,
+    CHANNEL_FOLLOW_ADD = 12,
+    GUILD_DISCOVERY_DISQUALIFIED = 14,
+    GUILD_DISCOVERY_REQUALIFIED = 15,
+    REPLY = 19,
+    APPLICATION_COMMAND = 20
+};
+NLOHMANN_DEFINE_SCOPED_ENUM(MessageType)
+
+enum class MFALevel : int { NONE = 0, ELEVATED = 1 };
+NLOHMANN_DEFINE_SCOPED_ENUM(MFALevel)
+
+enum class PremiumTier : int { NONE = 0, TIER_1 = 1, TIER_2 = 2, TIER_3 = 3 };
+NLOHMANN_DEFINE_SCOPED_ENUM(PremiumTier)
+
+enum class SystemChannelFlags : int {
+    SUPPRESS_JOIN_NOTIFICATIONS = 1 << 0,
+    SUPPRESS_PREMIUM_SUBSCRIPTIONS = 1 << 1,
+    SUPPRESS_GUILD_REMINDER_NOTIFICATIONS = 1 << 2
+};
+NLOHMANN_DEFINE_SCOPED_ENUM(SystemChannelFlags)
+
+enum class VerificationLevel : int {
+    NONE = 0,
+    LOW = 1,
+    MEDIUM = 2,
+    HIGH = 3,
+    VERY_HIGH = 4
+};
+NLOHMANN_DEFINE_SCOPED_ENUM(VerificationLevel)
+
+enum class WidgetStyleOptions { shield, banner1, banner2, banner3, banner4 };
+NLOHMANN_JSON_SERIALIZE_ENUM(WidgetStyleOptions,
+                             {{WidgetStyleOptions::shield, "shield"},
+                              {WidgetStyleOptions::banner1, "banner1"},
+                              {WidgetStyleOptions::banner2, "banner2"},
+                              {WidgetStyleOptions::banner3, "banner3"},
+                              {WidgetStyleOptions::banner4, "banner4"}})
 } // namespace discordpp
