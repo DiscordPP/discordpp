@@ -9,17 +9,6 @@
 
 namespace discordpp {
 using json = nlohmann::json;
-using snowflake = uint64_t;
-
-inline snowflake get_snowflake(std::string src) {
-    snowflake out;
-    std::istringstream(src) >> out;
-    return out;
-}
-
-inline snowflake get_snowflake(json src) {
-    return get_snowflake(src.get<std::string>());
-}
 
 template <typename T> inline std::string to_string(const T &t) {
     return std::move(std::to_string(t));
@@ -32,8 +21,8 @@ template <> inline std::string to_string<std::string>(const std::string &s) {
 struct Snowflake {
     Snowflake() : _value(0) {}
     Snowflake(uint64_t value) : _value(value) {}
-    Snowflake(std::string value) : _value(get_snowflake(value)) {}
-    Snowflake(const Snowflake&) = default;
+    Snowflake(std::string value) : _value(std::stoull(value)) {}
+    Snowflake(const Snowflake &) = default;
 
     operator uint64_t &() { return _value; }
 
@@ -47,7 +36,7 @@ struct Snowflake {
     }
 
     Snowflake &operator=(const std::string &str) {
-        _value = get_snowflake(str);
+        _value = std::stoull(str);
         return *this;
     }
 
@@ -56,13 +45,12 @@ struct Snowflake {
         return *this;
     }
 
-    friend void to_json(nlohmann::json &j,
-                        const Snowflake &s) {
-        j = s._value;
-    }
-    friend void from_json(const nlohmann::json &j,
-                          Snowflake &s) {
-        s._value = j.get<uint64_t>();
+    bool operator==(const Snowflake &rhs) const { return _value == rhs._value; }
+    bool operator!=(const Snowflake &rhs) const { return !(rhs == *this); }
+
+    friend void to_json(nlohmann::json &j, const Snowflake &s) { j = s._value; }
+    friend void from_json(const nlohmann::json &j, Snowflake &s) {
+        s._value = std::stoull(j.get<std::string>());
     }
 
   protected:
