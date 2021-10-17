@@ -45,9 +45,6 @@ struct Snowflake {
         return *this;
     }
 
-    bool operator==(const Snowflake &rhs) const { return _value == rhs._value; }
-    bool operator!=(const Snowflake &rhs) const { return !(rhs == *this); }
-
     friend void to_json(nlohmann::json &j, const Snowflake &s) { j = s._value; }
     friend void from_json(const nlohmann::json &j, Snowflake &s) {
         s._value = std::stoull(j.get<std::string>());
