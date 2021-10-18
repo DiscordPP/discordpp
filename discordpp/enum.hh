@@ -14,7 +14,6 @@ enum class ActivityFlags : int {
     SYNC = 1 << 4,
     PLAY = 1 << 5
 };
-NLOHMANN_DEFINE_SCOPED_ENUM(ApplicationCommandOptionType)
 
 enum class AllowedMentionType { roles, users, everyone };
 NLOHMANN_JSON_SERIALIZE_ENUM(AllowedMentionType,
@@ -27,7 +26,6 @@ enum class ApplicationCommandType : int {
     USER = 2,
     MESSAGE = 3
 };
-NLOHMANN_DEFINE_SCOPED_ENUM(ApplicationCommandType)
 
 enum class ApplicationCommandOptionType : int {
     SUB_COMMAND = 1,
@@ -41,10 +39,8 @@ enum class ApplicationCommandOptionType : int {
     MENTIONABLE = 9,
     NUMBER = 10
 };
-NLOHMANN_DEFINE_SCOPED_ENUM(ApplicationCommandOptionType)
 
 enum class ApplicationCommandPermissionType : int { ROLE = 1, USER = 2 };
-NLOHMANN_DEFINE_SCOPED_ENUM(ApplicationCommandPermissionType)
 
 enum class ApplicationFlags : int {
     GATEWAY_PRESENCE = 1 << 12,
@@ -54,7 +50,6 @@ enum class ApplicationFlags : int {
     VERIFICATION_PENDING_GUILD_LIMIT = 1 << 16,
     EMBEDDED = 1 << 17
 };
-NLOHMANN_DEFINE_SCOPED_ENUM(ApplicationFlags)
 
 enum class AuditLogEvent : int {
     GUILD_UPDATE = 1,
@@ -102,7 +97,6 @@ enum class AuditLogEvent : int {
     THREAD_UPDATE = 111,
     THREAD_DELETE = 112,
 };
-NLOHMANN_DEFINE_SCOPED_ENUM(AuditLogEvent)
 
 enum ButtonStyle : int {
     PRIMARY = 1,
@@ -111,7 +105,6 @@ enum ButtonStyle : int {
     DANGER = 4,
     LINK = 5
 };
-NLOHMANN_DEFINE_SCOPED_ENUM(ButtonStyle)
 
 // https://discord.com/developers/docs/resources/channel#channel-object-channel-types
 enum class ChannelType : int {
@@ -127,16 +120,13 @@ enum class ChannelType : int {
     GUILD_PRIVATE_THREAD = 12,
     GUILD_STAGE_VOICE = 13
 };
-NLOHMANN_DEFINE_SCOPED_ENUM(ChannelType)
 
 enum class ComponentType : int { ACTIONROW = 1, BUTTON = 2, SELECTMENU = 3 };
-NLOHMANN_DEFINE_SCOPED_ENUM(ComponentType)
 
 enum class DefaultMessageNotificationLevel : int {
     ALL_MESSAGES = 0,
     ONLY_MENTIONS = 1
 };
-NLOHMANN_DEFINE_SCOPED_ENUM(DefaultMessageNotificationLevel)
 
 enum class EmbedType { rich, image, video, gifv, article, link };
 NLOHMANN_JSON_SERIALIZE_ENUM(EmbedType, {{EmbedType::rich, "rich"},
@@ -151,7 +141,6 @@ enum class ExplicitContentFilterLevel : int {
     MEMBERS_WITHOUT_ROLES = 1,
     ALL_MEMBERS = 2
 };
-NLOHMANN_DEFINE_SCOPED_ENUM(ExplicitContentFilterLevel)
 
 enum class GuildFeature {
     ANIMATED_ICON,
@@ -209,7 +198,8 @@ enum class GuildNSFWLevel : int {
     SAFE = 2,
     AGE_RESTRICTED = 3
 };
-NLOHMANN_DEFINE_SCOPED_ENUM(GuildNSFWLevel)
+
+enum class IntegrationExpireBehavior : int { RemoveRole = 0, Kick = 1 };
 
 enum class InteractionCallbackType : int {
     PONG = 1,
@@ -218,17 +208,14 @@ enum class InteractionCallbackType : int {
     DEFERRED_UPDATE_MESSAGE = 6,
     UPDATE_MESSAGE = 7
 };
-NLOHMANN_DEFINE_SCOPED_ENUM(InteractionCallbackType)
 
 enum class InteractionCallbackDataFlags : int { EPHEMERAL = 1 << 6 };
-NLOHMANN_DEFINE_SCOPED_ENUM(InteractionCallbackDataFlags)
 
 enum class InteractionType : int {
     PING = 1,
     APPLICATION_COMMAND = 2,
     MESSAGE_COMPONENT = 3
 };
-NLOHMANN_DEFINE_SCOPED_ENUM(InteractionType)
 
 enum class MessageActivityType : int {
     JOIN = 1,
@@ -236,7 +223,6 @@ enum class MessageActivityType : int {
     LISTEN = 3,
     JOIN_REQUEST = 5
 };
-NLOHMANN_DEFINE_SCOPED_ENUM(MessageActivityType)
 
 enum class MessageFlags : int {
     CROSSPOSTED = 1 << 0,
@@ -248,7 +234,6 @@ enum class MessageFlags : int {
     EPHEMERAL = 1 << 6,
     LOADING = 1 << 7
 };
-NLOHMANN_DEFINE_SCOPED_ENUM(MessageFlags)
 
 enum class MessageType : int {
     DEFAULT = 0,
@@ -269,20 +254,16 @@ enum class MessageType : int {
     REPLY = 19,
     APPLICATION_COMMAND = 20
 };
-NLOHMANN_DEFINE_SCOPED_ENUM(MessageType)
 
 enum class MFALevel : int { NONE = 0, ELEVATED = 1 };
-NLOHMANN_DEFINE_SCOPED_ENUM(MFALevel)
 
 enum class PremiumTier : int { NONE = 0, TIER_1 = 1, TIER_2 = 2, TIER_3 = 3 };
-NLOHMANN_DEFINE_SCOPED_ENUM(PremiumTier)
 
 enum class SystemChannelFlags : int {
     SUPPRESS_JOIN_NOTIFICATIONS = 1 << 0,
     SUPPRESS_PREMIUM_SUBSCRIPTIONS = 1 << 1,
     SUPPRESS_GUILD_REMINDER_NOTIFICATIONS = 1 << 2
 };
-NLOHMANN_DEFINE_SCOPED_ENUM(SystemChannelFlags)
 
 enum class VerificationLevel : int {
     NONE = 0,
@@ -291,7 +272,6 @@ enum class VerificationLevel : int {
     HIGH = 3,
     VERY_HIGH = 4
 };
-NLOHMANN_DEFINE_SCOPED_ENUM(VerificationLevel)
 
 enum class WidgetStyleOptions { shield, banner1, banner2, banner3, banner4 };
 NLOHMANN_JSON_SERIALIZE_ENUM(WidgetStyleOptions,
@@ -300,4 +280,5 @@ NLOHMANN_JSON_SERIALIZE_ENUM(WidgetStyleOptions,
                               {WidgetStyleOptions::banner2, "banner2"},
                               {WidgetStyleOptions::banner3, "banner3"},
                               {WidgetStyleOptions::banner4, "banner4"}})
+
 } // namespace discordpp
