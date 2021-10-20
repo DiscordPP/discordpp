@@ -1,4 +1,4 @@
-# Discord++ <sup>(it's cool)</sup>
+# Discord++
 
 A Modularized C++ Library for the Discord API
 
