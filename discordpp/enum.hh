@@ -128,6 +128,12 @@ enum class DefaultMessageNotificationLevel : int {
     ONLY_MENTIONS = 1
 };
 
+enum class DeviceType { AUDIO_INPUT, AUDIO_OUTPUT, VIDEO_INPUT };
+NLOHMANN_JSON_SERIALIZE_ENUM(DeviceType,
+                             {{DeviceType::AUDIO_INPUT, "audioinput"},
+                              {DeviceType::AUDIO_OUTPUT, "audiooutput"},
+                              {DeviceType::VIDEO_INPUT, "videoinput"}})
+
 enum class EmbedType { rich, image, video, gifv, article, link };
 NLOHMANN_JSON_SERIALIZE_ENUM(EmbedType, {{EmbedType::rich, "rich"},
                                          {EmbedType::image, "image"},
@@ -216,6 +222,8 @@ enum class InteractionType : int {
     APPLICATION_COMMAND = 2,
     MESSAGE_COMPONENT = 3
 };
+
+enum class InviteTargetType : int { STREAM = 1, EMBEDDED_APPLICATION = 2 };
 
 enum class MessageActivityType : int {
     JOIN = 1,
