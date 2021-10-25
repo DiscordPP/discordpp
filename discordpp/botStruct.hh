@@ -221,7 +221,7 @@ class BotStruct {
     virtual void receivePayload(json payload) = 0;
 
     std::map<std::string, bool> needInit;
-    unsigned int apiVersion = 6;
+    unsigned int apiVersion = -1;
     std::unique_ptr<asio::executor_work_guard<asio::io_context::executor_type>>
         work;
     sptr<asio::io_context> aioc;
