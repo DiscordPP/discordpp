@@ -230,6 +230,14 @@ class BotStruct {
     bool connected_ = false;
     bool ready_ = false;
 
+    std::string encoding_ = "json";
+    virtual json parsePayload(const std::string& payload){
+        return json::parse(payload);
+    };
+    virtual std::string buildPayload(const json& payload){
+        return payload.dump();
+    };
+
     virtual void hasRateLimitPlugin() = 0;
 };
 } // namespace discordpp
