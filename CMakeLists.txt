@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.6)
 project(discordpp)
 
-set(CMAKE_CXX_STANDARD 14)
+if (CMAKE_CXX_STANDARD LESS 14)
+    error(${PROJECT_NAME} requires at least C++14)
+endif ()
 
 ###################
 
