@@ -7,6 +7,8 @@ endif ()
 
 ###################
 
+option(DISCORDPP_USE_BOOST "set ON to use Boost.Asio instead of standalone Asio" OFF)
+
 set(ALL_DISCORDPP_LIBRARIES "discordpp" PARENT_SCOPE)
 set(ALL_DISCORDPP_PLUGINS "" PARENT_SCOPE)
 
