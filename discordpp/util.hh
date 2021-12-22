@@ -6,6 +6,7 @@
 
 #include "alias.hh"
 #include <random>
+#include <optional>
 
 namespace discordpp {
 namespace util {
