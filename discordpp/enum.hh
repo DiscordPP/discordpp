@@ -205,6 +205,20 @@ enum class GuildNSFWLevel : int {
     AGE_RESTRICTED = 3
 };
 
+enum class GuildScheduledEventEntityType : int {
+    STAGE_INSTANCE = 1,
+    VOICE = 2,
+    EXTERNAL = 3
+};
+
+enum class GuildScheduledEventPrivacyLevel : int { GUILD_ONLY = 2 };
+
+enum class GuildScheduledEventStatus : int {
+    STAGE_INSTANCE = 1,
+    VOICE = 2,
+    EXTERNAL = 3
+};
+
 enum class IntegrationExpireBehavior : int { RemoveRole = 0, Kick = 1 };
 
 enum class InteractionCallbackType : int {
