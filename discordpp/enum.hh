@@ -37,7 +37,8 @@ enum class ApplicationCommandOptionType : int {
     CHANNEL = 7,
     ROLE = 8,
     MENTIONABLE = 9,
-    NUMBER = 10
+    NUMBER = 10,
+    ATTACHMENT = 11
 };
 
 enum class ApplicationCommandPermissionType : int { ROLE = 1, USER = 2 };
@@ -321,7 +322,8 @@ enum class PermissionFlags : long long {
     CREATE_PRIVATE_THREADS = 1ll << 36,
     USE_EXTERNAL_STICKERS = 1ll << 37,
     SEND_MESSAGES_IN_THREADS = 1ll << 38,
-    START_EMBEDDED_ACTIVITIES = 1ll << 39
+    USE_EMBEDDED_ACTIVITIES = 1ll << 39,
+    MODERATE_MEMBERS  = 1ll << 40
 };
 
 enum class SystemChannelFlags : int {
