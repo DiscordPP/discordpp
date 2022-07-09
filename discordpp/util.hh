@@ -77,27 +77,31 @@ struct variant_switch<0>
 };
 }
 
-namespace nlohmann
-{
-template <typename ...Args>
-struct adl_serializer<std::variant<Args...>>
-{
-    static void to_json(json& j, std::variant<Args...> const& v)
-    {
-        std::visit([&](auto&& value) {
-            j["index"] = v.index();
-            j["value"] = std::forward<decltype(value)>(value);
-        }, v);
+namespace nlohmann {
+// From https://www.kdab.com/jsonify-with-nlohmann-json/
+// Try to set the value of type T into the variant data. If it fails, do nothing
+    template <typename T, typename... Ts>
+    void variant_from_json(const nlohmann::json &j, std::variant<Ts...> &data) {
+        try {
+            data = j.get<T>();
+        } catch (...) {
+        }
     }
 
-    static void from_json(json const& j, std::variant<Args...>& v)
+    template <typename... Ts>
+    struct adl_serializer<std::variant<Ts...>>
     {
-        auto const index = j.at("index").get<int>();
-        ::detail::variant_switch<sizeof...(Args) - 1>{}(index, j.at("value"), v);
-    }
-};
+        static void to_json(nlohmann::json &j, const std::variant<Ts...> &data) {
+            // Will call j = v automatically for the right type
+            std::visit([&j](const auto &v) { j = v; }, data);
+        }
+
+        static void from_json(const nlohmann::json &j, std::variant<Ts...> &data) {
+            // Call variant_from_json for all types, only one will succeed
+            (variant_from_json<Ts>(j, data), ...);
+        }
+    };
 }
-// End https://github.com/nlohmann/json/issues/1261#issuecomment-426209912
 
 namespace nlohmann {
 // https://github.com/nlohmann/json/issues/1749#issuecomment-772996219
