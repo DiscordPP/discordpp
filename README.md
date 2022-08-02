@@ -36,8 +36,8 @@ A Modularized C++ Library for the Discord API
   to create `std::shared_ptr`s for you and provides some sane defaults when you don't need all their arguments.
 * [Plugin: Responder](https://github.com/DiscordPP/plugin-responder) provides a simple interface for detecting commands
   in the form of a character and a string, e.g. `!help`
-* [Plugin: Endpoints](https://github.com/DiscordPP/plugin-endpoints) provides extensions to the default `call`
-  , `callJson`, and `callFile` methods specific to different endpoints
+* [Plugin: Native](https://github.com/DiscordPP/plugin-netive) provides extensions to the default `call`
+  , `callJson`, and `callFile` methods specific to different endpoints as well as native C++ objects for Discord's JSON structures
 * You can find more plugins on the [#discordpp-plugin](https://github.com/topics/discordpp-plugin) tag
 
 ## Usage
