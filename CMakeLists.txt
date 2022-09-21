@@ -12,6 +12,7 @@ option(DISCORDPP_USE_BOOST "set ON to use Boost.Asio instead of standalone Asio"
 set(ALL_DISCORDPP_LIBRARIES "discordpp" PARENT_SCOPE)
 set(ALL_DISCORDPP_PLUGINS "" PARENT_SCOPE)
 set(ALL_DISCORDPP_INCLUDES "#include <discordpp/bot.hh>\n" PARENT_SCOPE)
+set(JSON_MultipleHeaders OFF)
 
 add_subdirectory(lib/nlohmannjson)
 
@@ -35,7 +36,9 @@ endif ()
 
 add_library(${PROJECT_NAME} INTERFACE)
 target_include_directories(${PROJECT_NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(${PROJECT_NAME} INTERFACE nlohmann_json::nlohmann_json fmt::fmt ${TARGET_ASIO})
+target_link_libraries(${PROJECT_NAME} INTERFACE
+        nlohmann_json::nlohmann_json
+        fmt::fmt ${TARGET_ASIO})
 
 function(CREATE_DISCORDPP_INCLUDE)
     set(DISCORDPP_INCLUDE_GENERATED ${CMAKE_BINARY_DIR}/include PARENT_SCOPE)
