@@ -72,8 +72,8 @@ class Bot : public virtual BotStruct {
         }
         pacemaker_->cancel();
         needACK_ = -1;
+        reconnecting_ = true;
         disconnect();
-        connect();
     }
 
   protected:
