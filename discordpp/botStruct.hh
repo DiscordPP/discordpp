@@ -228,6 +228,7 @@ class BotStruct {
     std::string token;
     bool connecting_ = false;
     bool connected_ = false;
+    bool reconnecting_ = false;
     bool ready_ = false;
 
     std::string encoding_ = "json";
