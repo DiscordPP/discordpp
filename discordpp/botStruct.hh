@@ -231,6 +231,7 @@ class BotStruct {
     bool reconnecting_ = false;
     bool ready_ = false;
 
+    std::string user_agent_ = "DiscordBot (https://github.com/DiscordPP, 1)";
     std::string encoding_ = "json";
     virtual json parsePayload(const std::string& payload){
         return json::parse(payload);
