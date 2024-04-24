@@ -6,7 +6,7 @@ A Modularized C++ Library for the Discord API
 
 ## Links
 
-* [Discord Server](https://discord.gg/VHAyrvspCx)
+* [Discord Server](https://discord.gg/4stCdkDHw6)
 * [Echo: Example / Template Bot](https://github.com/DiscordPP/echo-bot)
 
 ## Dependencies
